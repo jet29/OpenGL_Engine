@@ -1,0 +1,48 @@
+# Prerequisites
+/OpenGL_Engine/*.d
+
+# Compiled Object files
+/OpenGL_Engine/*.slo
+/OpenGL_Engine/*.lo
+/OpenGL_Engine/*.o
+/OpenGL_Engine/*.obj
+
+# Precompiled Headers
+/OpenGL_Engine/*.gch
+/OpenGL_Engine/*.pch
+
+# Compiled Dynamic libraries
+/OpenGL_Engine/*.so
+/OpenGL_Engine/*.dylib
+/OpenGL_Engine/*.dll
+
+# Fortran module files
+/OpenGL_Engine/*.mod
+/OpenGL_Engine/*.smod
+
+# Compiled Static libraries
+/OpenGL_Engine/*.lai
+/OpenGL_Engine/*.la
+/OpenGL_Engine/*.a
+/OpenGL_Engine/*.lib
+
+# Executables
+/OpenGL_Engine/*.exe
+/OpenGL_Engine/*.out
+/OpenGL_Engine/*.app
+
+# visual studio metafiles
+/OpenGL_Engine/.vs
+/.vs
+
+# x64 files
+/OpenGL_Engine/x64
+
+# OpenGL Resources
+/External_Resources
+
+# solution files
+/OpenGL_Engine/OpenGL_Engine.sln
+/OpenGL_Engine/OpenGL_Engine.vcxproj
+/OpenGL_Engine/OpenGL_Engine.vcxproj.filters
+/OpenGL_Engine/OpenGL_Engine.vcxproj.user
