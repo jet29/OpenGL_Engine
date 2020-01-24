@@ -39,7 +39,7 @@
 /OpenGL_Engine/x64
 
 # OpenGL Resources
-/External_Resources
+#/External_Resources
 
 # solution files
 #/OpenGL_Engine/OpenGL_Engine.sln
