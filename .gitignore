@@ -42,7 +42,7 @@
 /External_Resources
 
 # solution files
-/OpenGL_Engine/OpenGL_Engine.sln
-/OpenGL_Engine/OpenGL_Engine.vcxproj
-/OpenGL_Engine/OpenGL_Engine.vcxproj.filters
-/OpenGL_Engine/OpenGL_Engine.vcxproj.user
+#/OpenGL_Engine/OpenGL_Engine.sln
+#/OpenGL_Engine/OpenGL_Engine.vcxproj
+#/OpenGL_Engine/OpenGL_Engine.vcxproj.filters
+#/OpenGL_Engine/OpenGL_Engine.vcxproj.user
