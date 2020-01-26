@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 // Shader Class
 #include "Shader.h"
-#include "userInterface/userInterface.h"
+#include "user_interface/userInterface.h"
 //#include ""
 
 //typedef sceneStruct icarusScene;
