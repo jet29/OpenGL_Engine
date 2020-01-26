@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include <GLFW/glfw3.h>
 #include <string>
+#include "../icarus3D.h"
 //#include <stb_image.h>
 
 class UI {
@@ -19,11 +20,10 @@ public:
 	static float f_threshold;
 	static int   i_threshold;
 private:
-	GLuint histogram;
+	icarus3D* instance;
 public:
 	UI();
-	bool init(GLFWwindow* window);
+	bool init(GLFWwindow* window, icarus3D* instance);
 	void draw();
 	void terminate();
-	void setHistogram(GLuint histogram);
 };

@@ -152,6 +152,7 @@
     <ClCompile Include="icarus3D\IMGUI\imgui_impl_glfw.cpp" />
     <ClCompile Include="icarus3D\IMGUI\imgui_impl_opengl3.cpp" />
     <ClCompile Include="icarus3D\IMGUI\imgui_widgets.cpp" />
+    <ClCompile Include="icarus3D\model\Model.cpp" />
     <ClCompile Include="icarus3D\Shader.cpp" />
     <ClCompile Include="icarus3D\user_interface\userInterface.cpp" />
     <ClCompile Include="main.cpp" />
@@ -170,6 +171,7 @@
     <ClInclude Include="icarus3D\IMGUI\imstb_rectpack.h" />
     <ClInclude Include="icarus3D\IMGUI\imstb_textedit.h" />
     <ClInclude Include="icarus3D\IMGUI\imstb_truetype.h" />
+    <ClInclude Include="icarus3D\model\Model.h" />
     <ClInclude Include="icarus3D\Shader.h" />
     <ClInclude Include="icarus3D\stb_image\stb_image.h" />
     <ClInclude Include="icarus3D\user_interface\userInterface.h" />

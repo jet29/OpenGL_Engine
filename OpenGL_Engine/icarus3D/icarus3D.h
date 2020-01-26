@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <glad/glad.h>
 // GLFW
@@ -7,6 +8,8 @@
 // Shader Class
 #include "Shader.h"
 #include "user_interface/userInterface.h"
+#include "model/Model.h"
+#include <vector>
 //#include ""
 
 //typedef sceneStruct icarusScene;
@@ -17,8 +20,10 @@ typedef unsigned int ICuint;
 class icarus3D {
 	// Public variables
 	public:
+	std::vector<Model> models;
 	// Private variables
 	private:
+	// Models array
 	// Window context
 	ICwindow* window;
 	// Window current width
@@ -32,6 +37,7 @@ class icarus3D {
 	icarus3D();
 	void init();
 	static unsigned int loadTexture(const char* path, int& texWidth, int& texHeight, int& numOfChannels);
+	bool addModel(std::vector<Model>& scene);
 	// Private functions
 	private:
 	void resize(ICwindow* window, int width, int height);

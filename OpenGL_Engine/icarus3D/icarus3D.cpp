@@ -67,7 +67,7 @@ void icarus3D::init() {
 	// Initialize OpenGL context
 	initGL();
 	// Initialize user interface context
-	ui.init(window);
+	ui.init(window, this);
 	// Begin render loop
 	render();
 }
@@ -132,6 +132,7 @@ void icarus3D::resize(ICwindow* window, int width, int height){
 
 void icarus3D::render() {
 	// Game loop
+
 	while (!glfwWindowShouldClose(window))
 	{
 		// Render
@@ -149,4 +150,11 @@ void icarus3D::render() {
 	ui.terminate();
 	// Terminate GLFW, clearing any resources allocated by GLFW.
 	glfwTerminate();
+}
+
+bool icarus3D::addModel(std::vector<Model>& scene) {
+	Model newModel;
+	newModel.loadOBJ("assets/models/caja.obj");
+	scene.push_back(newModel);
+	return true;
 }
