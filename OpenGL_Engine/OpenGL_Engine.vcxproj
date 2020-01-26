@@ -99,7 +99,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../External_Resources/GLAD/include;$(SolutionDir)/../External_Resources/GLFW/include;$(SolutionDir)/../External_Resources/GLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../External_Resources/IMGUI/;$(SolutionDir)/../External_Resources/GLAD/include;$(SolutionDir)/../External_Resources/GLFW/include;$(SolutionDir)/../External_Resources/GLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,17 +144,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\glad.c" />
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="icarus3D\icarus3D.cpp" />
+    <ClCompile Include="icarus3D\glad.c" />
+    <ClCompile Include="icarus3D\Shader.cpp" />
+    <ClCompile Include="icarus3D\userInterface\userInterface.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Shader.h" />
-    <ClInclude Include="src\stb_image.h" />
+    <None Include="icarus3D\shaders\basic.frag" />
+    <None Include="icarus3D\shaders\basic.vert" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\shaders\basic.frag" />
-    <None Include="src\shaders\basic.vert" />
+    <ClInclude Include="icarus3D\icarus3D.h" />
+    <ClInclude Include="icarus3D\Shader.h" />
+    <ClInclude Include="icarus3D\stb_image.h" />
+    <ClInclude Include="icarus3D\userInterface\userInterface.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

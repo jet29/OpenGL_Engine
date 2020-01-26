@@ -15,26 +15,38 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
+    <ClCompile Include="icarus3D\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\glad.c">
+    <ClCompile Include="icarus3D\icarus3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Shader.cpp">
+    <ClCompile Include="icarus3D\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="icarus3D\userInterface\userInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <None Include="icarus3D\shaders\basic.frag" />
+    <None Include="icarus3D\shaders\basic.vert" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\shaders\basic.frag" />
-    <None Include="src\shaders\basic.vert" />
+    <ClInclude Include="icarus3D\icarus3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="icarus3D\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="icarus3D\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="icarus3D\userInterface\userInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
