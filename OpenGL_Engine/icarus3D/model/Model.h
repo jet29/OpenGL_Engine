@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include "../Shader.h"
 
 using std::vector;
 using namespace glm;
@@ -20,14 +21,21 @@ class Model {
 		vector<vec3> vCoord;
 		vector<vec3> nCoord;
 		vector<vec2> tCoord;
+		vector<int> fCoord;
 		string name;
-		unsigned int VAO, VBO;
+		Shader* shader;
+		unsigned int VAO, VBO, EBO;
+		vec3 position = vec3(0,0,0);
+		vec3 rotation = vec3(0,0,0);
+		vec3 scale = vec3(1,1,1);
 	// Private variables
 	private:
 	// Public functions
 	public:
 		Model();
 		bool loadOBJ(const char* path);
+		bool buildGeometry();
+		void setShader(const char* vertexPath, const char* fragmentPath);
 	// Private functions
 	private:
 		int getToken(string token);

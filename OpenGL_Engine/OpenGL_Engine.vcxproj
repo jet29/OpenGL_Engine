@@ -144,6 +144,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="icarus3D\camera\Camera.cpp" />
     <ClCompile Include="icarus3D\glad\glad.c" />
     <ClCompile Include="icarus3D\icarus3D.cpp" />
     <ClCompile Include="icarus3D\IMGUI\imgui.cpp" />
@@ -162,6 +163,7 @@
     <None Include="icarus3D\shaders\basic.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="icarus3D\camera\Camera.h" />
     <ClInclude Include="icarus3D\icarus3D.h" />
     <ClInclude Include="icarus3D\IMGUI\imconfig.h" />
     <ClInclude Include="icarus3D\IMGUI\imgui.h" />

@@ -1,4 +1,5 @@
 #include "UserInterface.h"
+#include "../icarus3D.h"
 
 int   UI::listbox_item_current = 0;
 int   UI::listbox_sobel_gradient = 0;
@@ -14,17 +15,22 @@ bool  UI::hardwareAcceleration = 0;
 float UI::f_threshold = 0.5f;
 int   UI::i_threshold = 122;
 
+
+icarus3D* instance;
+
 UI::UI() {
 }
 
-bool UI::init(GLFWwindow* window, icarus3D* instance) {
+bool UI::init(GLFWwindow* window) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	if (!ImGui_ImplGlfw_InitForOpenGL(window, true) || !ImGui_ImplOpenGL3_Init("#version 330 core"))
 		return false;
 	ImGui::StyleColorsDark();
-	this->instance = instance;
+
+	//set icarus instance;
+	instance = new icarus3D();
 
 	return true;
 }
@@ -39,7 +45,9 @@ void UI::draw() {
 	// Techniques list
 	ImGui::Begin("Scene creation");
 	if (ImGui::Button("Add model", ImVec2(0, 0))) {
-		instance.addModel(instance.models);
+
+		
+		instance->addModel(instance->models);
 	}
 
 	ImGui::End();

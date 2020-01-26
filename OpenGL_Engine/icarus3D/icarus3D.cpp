@@ -67,9 +67,15 @@ void icarus3D::init() {
 	// Initialize OpenGL context
 	initGL();
 	// Initialize user interface context
-	ui.init(window, this);
+	ui.init(window);
 	// Begin render loop
+
 	render();
+
+	// Terminate interface instance
+	ui.terminate();
+	// Terminate GLFW, clearing any resources allocated by GLFW.
+	glfwTerminate();
 }
 
 // Private Functions
@@ -130,31 +136,117 @@ void icarus3D::resize(ICwindow* window, int width, int height){
 	glViewport(0, 0, windowWidth, windowHeight);
 }
 
+void icarus3D::renderScene(std::vector<Model>& scene) {
+
+	cout << scene.size() << endl;
+
+	for (int i = 0; i < scene.size(); i++) {
+
+		cout << "arre loco" << endl;
+
+		scene[i].shader->use();
+
+		glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 100.0f);
+
+		glm::mat4 modelMatrix = glm::mat4(1.0f);
+		glm::vec3 modelPosition = scene[i].position;;
+		modelMatrix = glm::translate(modelMatrix, modelPosition);
+
+		glm::mat4 viewMatrix = camera.getWorldToViewMatrix();
+
+
+		//glm::mat4 MVP = glm::matrixCompMult(projectionMatrix,viewMatrix);
+		//MVP = glm::matrixCompMult(MVP, modelMatrix);
+
+		scene[i].shader->setMat4("model", modelMatrix);
+		scene[i].shader->setMat4("view", viewMatrix);
+		scene[i].shader->setMat4("projection", projectionMatrix);
+
+		// Binds the vertex array to be drawn
+		glBindVertexArray(scene[i].VAO);
+		// Renders the triangle gemotry
+		//glDrawElements(GL_TRIANGLES, scene[i].fCoord.size() , GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, scene[i].vCoord.size());
+
+		glBindVertexArray(0);
+	}
+}
+
 void icarus3D::render() {
 	// Game loop
 
 	while (!glfwWindowShouldClose(window))
 	{
+		processKeyboardInput(window);
+
 		// Render
 		// Clear the colorbuffer
 		glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// Draw interface
 		ui.draw();
+
+		renderScene(models);
+
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 	}
-	// Terminate interface instance
-	ui.terminate();
-	// Terminate GLFW, clearing any resources allocated by GLFW.
-	glfwTerminate();
+	
 }
 
 bool icarus3D::addModel(std::vector<Model>& scene) {
 	Model newModel;
 	newModel.loadOBJ("assets/models/caja.obj");
+	newModel.buildGeometry();
+
+	newModel.setShader("icarus3D/shaders/basic.vert", "icarus3D/shaders/basic.frag");
+
+	cout << "nombre del modelo: " << newModel.name << endl;
+
 	scene.push_back(newModel);
+
+
 	return true;
+}
+
+void icarus3D::processKeyboardInput(GLFWwindow* window)
+{
+	// Checks if the escape key is pressed
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		// Tells glfw to close the window as soon as possible
+		glfwSetWindowShouldClose(window, true);
+
+	lastTime = currentTime;
+	currentTime = glfwGetTime();
+
+	float deltaTime = currentTime - lastTime;
+
+	// Move Forward
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		camera.moveForward(deltaTime);
+	}
+	// Move Backward
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		camera.moveBackward(deltaTime);
+	}
+	// Move right
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		camera.moveRight(deltaTime);
+	}
+	// Move left
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		camera.moveLeft(deltaTime);
+	}
+
+	// Move Up
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+		camera.moveUp(deltaTime);
+	}
+	// Move Down
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+		camera.moveDown(deltaTime);
+	}
+
 }

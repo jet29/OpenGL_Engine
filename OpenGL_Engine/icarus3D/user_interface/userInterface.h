@@ -1,9 +1,10 @@
 #pragma once
 #include <imgui.hpp>
-#include "glm/glm.hpp"
-#include <GLFW/glfw3.h>
+//#include "glm/glm.hpp"
+//#include <GLFW/glfw3.h>
+
+
 #include <string>
-#include "../icarus3D.h"
 //#include <stb_image.h>
 
 class UI {
@@ -19,11 +20,9 @@ public:
 	static bool hardwareAcceleration;
 	static float f_threshold;
 	static int   i_threshold;
-private:
-	icarus3D* instance;
 public:
 	UI();
-	bool init(GLFWwindow* window, icarus3D* instance);
+	bool init(GLFWwindow* window);
 	void draw();
 	void terminate();
 };
