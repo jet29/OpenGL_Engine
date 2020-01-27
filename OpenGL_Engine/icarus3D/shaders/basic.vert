@@ -9,6 +9,6 @@ uniform mat4 projection;
 
 void main()
 {
-	vec3 fragPos = vec3 (model * vec4(vertexPosition,1.0));
-    gl_Position = projection * view * vec4(fragPos,1.0);
+	vec3 fragPos = vec3 (model * vec4(vertexPosition,1.0f));
+    gl_Position = projection * view * vec4(fragPos,1.0f);
 }

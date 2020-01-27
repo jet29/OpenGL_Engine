@@ -55,9 +55,9 @@ void buildGeometry() {
 // The MAIN function, from here we start the application and run the game loop
 int main()
 {
-	icarus3D *icarus = new icarus3D();
+	icarus3D *icarus = icarus3D::Instance();
 
 	icarus->init();
 
-	return EXIT_SUCCESS;
+	return 0;
 }

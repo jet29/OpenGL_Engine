@@ -22,50 +22,39 @@ class icarus3D {
 	// Public variables
 	public:
 	std::vector<Model> models;
-	Camera camera;
+	static Camera camera;
 	// Private variables
 	private:
-	// Models array
-	// Window context
-	ICwindow* window;
-	// Window current width
-	ICuint windowWidth = 800;
-	// Window current height
-	ICuint windowHeight = 600;
-	// Delta Time
-	float currentTime = 0;
-	float lastTime = 0;
-	// Interface instance
-	UI ui;
+		//Holds the instance of the class
+		static icarus3D* instance; 
+		// Window context
+		ICwindow* window;
+		// Window current width
+		ICuint windowWidth = 800;
+		// Window current height
+		ICuint windowHeight = 600;
+		// Delta Time
+		float currentTime = 0;
+		float lastTime = 0;
+		// Interface instance
+		UI ui;
+
 	// Public functions
 	public:
-
-	//SINGLETON
-
-	static icarus3D& getInstance()
-	{
-		static icarus3D instance; // Guaranteed to be destroyed.
-								// Instantiated on first use.
-		return instance;
-	}
-
-	icarus3D();
-
-	icarus3D(icarus3D const&) = delete;
-	void operator=(icarus3D const&) = delete;
-
-	//END SINGLETON
-
-	void init();
-	static unsigned int loadTexture(const char* path, int& texWidth, int& texHeight, int& numOfChannels);
-	bool addModel(std::vector<Model>& scene);
-	// Private functions
+		//Method to obtain the only instance of the calls
+		static icarus3D* Instance();
+		void init();
+		static unsigned int loadTexture(const char* path, int& texWidth, int& texHeight, int& numOfChannels);
+		bool addModel(std::vector<Model>& scene);
+		// Private functions
 	private:
-	void resize(ICwindow* window, int width, int height);
-	void render();
-	void renderScene(std::vector<Model>& scene);
-	bool initWindow();
-	bool initGlad();
-	void initGL();
-	void processKeyboardInput(GLFWwindow* window);
+		icarus3D();
+		void resize(ICwindow* window, int width, int height);
+		static void onMouseMotion(ICwindow* window, double xpos, double ypos);
+		void render();
+		void renderScene(std::vector<Model>& scene);
+		bool initWindow();
+		bool initGlad();
+		void initGL();
+		void processKeyboardInput(GLFWwindow* window);
 };

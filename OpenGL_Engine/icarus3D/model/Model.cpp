@@ -79,21 +79,24 @@ bool Model::loadOBJ(const char* path) {
 				//return false;
 			}
 
+			//printf("f1 (%i,%i,%i)\n\
+			//		f2 (%i,%i,%i)\n\
+			//	    f3 (%i,%i,%i)\n",
+			//	vertexIndex[0], uvIndex[0], normalIndex[0],
+			//	vertexIndex[1], uvIndex[1], normalIndex[1],
+			//	vertexIndex[2], uvIndex[2], normalIndex[2]);
+
 			fCoord.push_back(vertexIndex[0]);
 			fCoord.push_back(vertexIndex[1]);
 			fCoord.push_back(vertexIndex[2]);
 			
 			break;
 		}
-
-
 	}
+	return true;
 }
 
 bool Model::buildGeometry() {
-
-	cout << vCoord.size() << endl;
-
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
@@ -111,6 +114,8 @@ bool Model::buildGeometry() {
 
 	glBindVertexArray(0);
 
+
+	return true;
 
 	return true;
 }

@@ -2,11 +2,26 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image/stb_image.h"
 
-// Public Functions
+// Global static pointer used to ensure a single instance of the class.
+icarus3D* icarus3D::instance = NULL;
+Camera icarus3D::camera;
+
+/**
+* Creates an instance of the class
+*
+* @return the instance of this class
+*/
+icarus3D* icarus3D::Instance() {
+	if (!instance)   // Only allow one instance of class to be generated.
+		instance = new icarus3D();
+	return instance;
+}
+
 icarus3D::icarus3D() {
 
 }
 
+// Public Functions
 unsigned int icarus3D::loadTexture(const char* path, int &texWidth, int &texHeight, int &numOfChannels)
 {
 	unsigned int id;
@@ -103,8 +118,16 @@ bool icarus3D::initWindow(){
 
 	// Window resize callback
 	//glfwSetFramebufferSizeCallback(window, resize);
+	// Mouse position callback
+	glfwSetCursorPosCallback(window, onMouseMotion);
 
 	return true;
+}
+
+void icarus3D::onMouseMotion(ICwindow* window, double xpos, double ypos)
+{
+	glm::vec2 mousePosition(xpos, ypos);
+	camera.mouseUpdate(mousePosition);
 }
 
 bool icarus3D::initGlad() {
@@ -142,8 +165,6 @@ void icarus3D::renderScene(std::vector<Model>& scene) {
 
 	for (int i = 0; i < scene.size(); i++) {
 
-		cout << "arre loco" << endl;
-
 		scene[i].shader->use();
 
 		glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 100.0f);
@@ -154,7 +175,6 @@ void icarus3D::renderScene(std::vector<Model>& scene) {
 
 		glm::mat4 viewMatrix = camera.getWorldToViewMatrix();
 
-
 		//glm::mat4 MVP = glm::matrixCompMult(projectionMatrix,viewMatrix);
 		//MVP = glm::matrixCompMult(MVP, modelMatrix);
 
@@ -164,9 +184,10 @@ void icarus3D::renderScene(std::vector<Model>& scene) {
 
 		// Binds the vertex array to be drawn
 		glBindVertexArray(scene[i].VAO);
-		// Renders the triangle gemotry
-		//glDrawElements(GL_TRIANGLES, scene[i].fCoord.size() , GL_UNSIGNED_INT, 0);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, scene[i].vCoord.size());
+		// Renders the triangle geometry
+		cout << "DEBUG::Faces size: " << scene[i].fCoord.size() << endl;
+		glDrawElements(GL_TRIANGLES, scene[i].fCoord.size() , GL_UNSIGNED_INT, 0);
+		//glDrawArrays(GL_TRIANGLE_STRIP, 0, scene[i].vCoord.size());
 
 		glBindVertexArray(0);
 	}
@@ -200,13 +221,9 @@ bool icarus3D::addModel(std::vector<Model>& scene) {
 	Model newModel;
 	newModel.loadOBJ("assets/models/caja.obj");
 	newModel.buildGeometry();
-
 	newModel.setShader("icarus3D/shaders/basic.vert", "icarus3D/shaders/basic.frag");
 
-	cout << "nombre del modelo: " << newModel.name << endl;
-
 	scene.push_back(newModel);
-
 
 	return true;
 }

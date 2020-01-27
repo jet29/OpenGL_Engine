@@ -29,8 +29,8 @@ bool UI::init(GLFWwindow* window) {
 		return false;
 	ImGui::StyleColorsDark();
 
-	//set icarus instance;
-	instance = new icarus3D();
+	//Get singleton instance;
+	instance = icarus3D::Instance();
 
 	return true;
 }
