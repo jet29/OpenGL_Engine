@@ -23,12 +23,7 @@ bool Model::loadOBJ(const char* path) {
 	fopen_s(&file, path, "r");
 	char token[255];
 	int check;
-
-	//vector< unsigned int > vertexIndices, uvIndices, normalIndices;
-	//vector< vec3 > tempVertices;
-	//vector< vec2 > tempUVs;
-	//vector< vec3 > tempNormals;
-
+	Model *part = new Model();
 	//Verify a valid path
 	if (file == NULL) {
 		cout<< "ERROR::Impossible to open model "<<path<<endl;
@@ -43,79 +38,80 @@ bool Model::loadOBJ(const char* path) {
 		check = getToken(token);
 		switch (check) {
 		case NEW_OBJECT:
-
 			fscanf_s(file, "%s", token, sizeof(token));
-			cout << token << endl;
-			name = token;
+			part = new Model();
+			part->name = token;
 			break;
 
 		case VCOORD:
-
 			glm::vec3 vertex;
 			fscanf_s(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
-			vCoord.push_back(vertex);
+			part->vCoord.push_back(vertex);
 
 			break;
 		case NCOORD:
 
 			glm::vec3 normal;
 			fscanf_s(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
-			nCoord.push_back(normal);
+			part->nCoord.push_back(normal);
 
 			break;
 		case TCOORD:
 
 			glm::vec2 uv;
 			fscanf_s(file, "%f %f\n", &uv.x, &uv.y);
-			tCoord.push_back(uv);
-			
+			part->tCoord.push_back(uv);
 			break;
 		case FACES:
 
 			unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
 			int matches = fscanf_s(file, "%i/%i/%i %i/%i/%i %i/%i/%i\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
 			if (matches != 9) {
-				//printf("File can't be read by our simple parser : ( Try exporting with other options\n");
-				//return false;
+				printf("ERROR::File can't be read by our parser: Try exporting with other options\n");
+				return false;
 			}
 
-			//printf("f1 (%i,%i,%i)\n\
-			//		f2 (%i,%i,%i)\n\
-			//	    f3 (%i,%i,%i)\n",
-			//	vertexIndex[0], uvIndex[0], normalIndex[0],
-			//	vertexIndex[1], uvIndex[1], normalIndex[1],
-			//	vertexIndex[2], uvIndex[2], normalIndex[2]);
-
-			fCoord.push_back(vertexIndex[0]);
-			fCoord.push_back(vertexIndex[1]);
-			fCoord.push_back(vertexIndex[2]);
-			
+			part->fCoord.push_back(vertexIndex[0]-1);
+			part->fCoord.push_back(vertexIndex[1]-1);
+			part->fCoord.push_back(vertexIndex[2]-1);
 			break;
 		}
 	}
+
+	// Push a new part
+	parts.push_back(part);
+
 	return true;
 }
 
 bool Model::buildGeometry() {
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+	// For each model part build it's geometry
+	std::vector<Model*>::iterator it = parts.begin();
+	for (it; it != parts.end(); it++) {
+		// Generate buffers
+		glGenVertexArrays(1, &(*it)->VAO);
+		glGenBuffers(1, &(*it)->VBO);
+		glGenBuffers(1, &(*it)->EBO);
 
-	glGenBuffers(1, &EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(fCoord), &fCoord[0], GL_STATIC_DRAW);
+		// Bind VAO
+		glBindVertexArray((*it)->VAO);
 
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vCoord.size() * sizeof(glm::vec3), &vCoord[0], GL_STATIC_DRAW);
+		// Bind VBO
+		glBindBuffer(GL_ARRAY_BUFFER, (*it)->VBO);
+		glBufferData(GL_ARRAY_BUFFER, (*it)->vCoord.size() * sizeof(glm::vec3), &(*it)->vCoord[0], GL_STATIC_DRAW);
+		
+		// Bind EBO
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (*it)->EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, (*it)->fCoord.size() * sizeof(int), &(*it)->fCoord[0], GL_STATIC_DRAW);
 
-	// Sets the vertex attributes
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		// Set vertex attributes
+		// Vertex position
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-	glBindVertexArray(0);
-
-
-	return true;
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
 
 	return true;
 }

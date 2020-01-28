@@ -17,7 +17,7 @@ typedef enum { NEW_OBJECT, VCOORD, TCOORD, NCOORD, FACES, NONE } DATA_TYPE;
 class Model {
 	// Public variables
 	public:
-		vector<Model> parts;
+		vector<Model* > parts;
 		vector<vec3> vCoord;
 		vector<vec3> nCoord;
 		vector<vec2> tCoord;
