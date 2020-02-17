@@ -54,6 +54,9 @@
     <ClCompile Include="icarus3D\camera\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="icarus3D\model\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="icarus3D\shaders\basic.frag" />
@@ -100,6 +103,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="icarus3D\camera\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="icarus3D\model\referenceCounter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="icarus3D\model\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

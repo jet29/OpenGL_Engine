@@ -99,7 +99,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../External_Resources/IMGUI;$(SolutionDir)/../External_Resources/GLAD/include;$(SolutionDir)/../External_Resources/GLFW/include;$(SolutionDir)/../External_Resources/GLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../External_Resources/ASSIMP/include;$(SolutionDir)/../External_Resources/IMGUI;$(SolutionDir)/../External_Resources/GLAD/include;$(SolutionDir)/../External_Resources/GLFW/include;$(SolutionDir)/../External_Resources/GLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,6 +153,7 @@
     <ClCompile Include="icarus3D\IMGUI\imgui_impl_glfw.cpp" />
     <ClCompile Include="icarus3D\IMGUI\imgui_impl_opengl3.cpp" />
     <ClCompile Include="icarus3D\IMGUI\imgui_widgets.cpp" />
+    <ClCompile Include="icarus3D\model\Mesh.cpp" />
     <ClCompile Include="icarus3D\model\Model.cpp" />
     <ClCompile Include="icarus3D\Shader.cpp" />
     <ClCompile Include="icarus3D\user_interface\userInterface.cpp" />
@@ -173,7 +174,9 @@
     <ClInclude Include="icarus3D\IMGUI\imstb_rectpack.h" />
     <ClInclude Include="icarus3D\IMGUI\imstb_textedit.h" />
     <ClInclude Include="icarus3D\IMGUI\imstb_truetype.h" />
+    <ClInclude Include="icarus3D\model\Mesh.h" />
     <ClInclude Include="icarus3D\model\Model.h" />
+    <ClInclude Include="icarus3D\model\referenceCounter.h" />
     <ClInclude Include="icarus3D\Shader.h" />
     <ClInclude Include="icarus3D\stb_image\stb_image.h" />
     <ClInclude Include="icarus3D\user_interface\userInterface.h" />

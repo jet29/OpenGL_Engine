@@ -161,32 +161,24 @@ void icarus3D::resize(ICwindow* window, int width, int height){
 
 void icarus3D::renderScene(std::vector<Model>& scene) {
 	// Iterate over scene models
-	for (int i = 0; i < scene.size(); i++) {
-		// Iterate over parts of a model
-		for (auto it = scene[i].parts.begin(); it != scene[i].parts.end(); it++) {
-			// Use a single shader per model
-			scene[i].shader->use();
-
-			// MVP matrix per model part
-			glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 100.0f);
-			glm::mat4 modelMatrix = glm::mat4(1.0f);
-			glm::vec3 modelPosition = (*it)->position;
-			modelMatrix = glm::translate(modelMatrix, modelPosition);
-			glm::mat4 viewMatrix = camera.getWorldToViewMatrix();
+	for (auto model = scene.begin(); model != scene.end();model++) {
+		
+		// Use a single shader per model
+		model->shader->use();
+		// MVP matrix per model part
+		glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 100.0f);
+		glm::mat4 modelMatrix = glm::mat4(1.0f);
+		glm::vec3 modelPosition = model->position;
+		modelMatrix = glm::translate(modelMatrix, modelPosition);
+		glm::mat4 viewMatrix = camera.getWorldToViewMatrix();
 			
-			// Set model shader configuration
-			scene[i].shader->setMat4("model", modelMatrix);
-			scene[i].shader->setMat4("view", viewMatrix);
-			scene[i].shader->setMat4("projection", projectionMatrix);
-
-			// Binds model part vertex array to be drawn
-			glBindVertexArray((*it)->VAO);
-
-			// Renders model part triangle geometry
-			glDrawElements(GL_TRIANGLES, (*it)->fCoord.size(), GL_UNSIGNED_INT, 0);
-
-			glBindVertexArray(0);
-		}
+		// Set model shader configuration
+		model->shader->setMat4("model", modelMatrix);
+		model->shader->setMat4("view", viewMatrix);
+		model->shader->setMat4("projection", projectionMatrix);
+		
+		// Render model
+		model->mesh->Draw();
 	}
 }
 
@@ -217,11 +209,8 @@ void icarus3D::render() {
 
 bool icarus3D::addModel(std::vector<Model>& scene) {
 	Model newModel;
-	if (!newModel.loadOBJ("assets/models/catscaled.obj"))
-		return false;
-	newModel.buildGeometry();
 	newModel.setShader("icarus3D/shaders/basic.vert", "icarus3D/shaders/basic.frag");
-
+	newModel.loadMesh("assets/models/Knight.obj");
 	scene.push_back(newModel);
 
 	return true;

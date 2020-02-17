@@ -6,25 +6,20 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <string>
 #include "../Shader.h"
+#include "Mesh.h"
 
 using std::vector;
 using namespace glm;
 using namespace std;
 
-typedef enum { NEW_OBJECT, VCOORD, TCOORD, NCOORD, FACES, NONE } DATA_TYPE;
-
-class Model {
+class Model{
 	// Public variables
 	public:
-		vector<Model* > parts;
-		vector<vec3> vCoord;
-		vector<vec3> nCoord;
-		vector<vec2> tCoord;
-		vector<int> fCoord;
+		Mesh* mesh;
 		string name;
 		Shader* shader;
-		unsigned int VAO, VBO, EBO;
 		vec3 position = vec3(0,0,0);
 		vec3 rotation = vec3(0,0,0);
 		vec3 scale = vec3(1,1,1);
@@ -33,10 +28,6 @@ class Model {
 	// Public functions
 	public:
 		Model();
-		bool loadOBJ(const char* path);
-		bool buildGeometry();
+		void loadMesh(string path);
 		void setShader(const char* vertexPath, const char* fragmentPath);
-	// Private functions
-	private:
-		int getToken(string token);
 };
