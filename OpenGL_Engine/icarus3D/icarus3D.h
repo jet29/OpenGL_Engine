@@ -33,18 +33,22 @@ class icarus3D {
 		ICuint windowWidth = 800;
 		// Window current height
 		ICuint windowHeight = 600;
-		// Delta Time
-		float currentTime = 0;
-		float lastTime = 0;
 		// Interface instance
 		UI ui;
-
+		// Windows FPS
+		float currentTime = 0;
+		float lastTime = 0;
+		float fps = 0;
+		float totalTime = 0;
+		int totalFrames = 0;
+		 
 	// Public functions
 	public:
 		//Method to obtain the only instance of the calls
 		static icarus3D* Instance();
 		void init();
 		static unsigned int loadTexture(const char* path, int& texWidth, int& texHeight, int& numOfChannels);
+		float getFPS();
 		bool addModel(std::vector<Model>& scene);
 		// Private functions
 	private:
@@ -57,4 +61,5 @@ class icarus3D {
 		bool initGlad();
 		void initGL();
 		void processKeyboardInput(GLFWwindow* window);
+		void updateFrames();
 };

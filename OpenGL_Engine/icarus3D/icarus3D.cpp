@@ -187,6 +187,10 @@ void icarus3D::render() {
 
 	while (!glfwWindowShouldClose(window))
 	{
+		//FPS
+		updateFrames();
+		cout << "FPS: " << getFPS()<< endl;
+
 		processKeyboardInput(window);
 
 		// Render
@@ -223,9 +227,6 @@ void icarus3D::processKeyboardInput(GLFWwindow* window)
 		// Tells glfw to close the window as soon as possible
 		glfwSetWindowShouldClose(window, true);
 
-	lastTime = currentTime;
-	currentTime = glfwGetTime();
-
 	float deltaTime = currentTime - lastTime;
 
 	// Move Forward
@@ -254,4 +255,27 @@ void icarus3D::processKeyboardInput(GLFWwindow* window)
 		camera.moveDown(deltaTime);
 	}
 
+}
+
+float icarus3D::getFPS() {
+	return fps;
+}
+
+void icarus3D::updateFrames() {
+
+	lastTime = currentTime;
+	currentTime = glfwGetTime();
+	float deltaTime = currentTime - lastTime;
+
+	totalFrames++;
+
+	if (totalTime > 1) {
+		fps = totalFrames;
+		totalFrames = 0;
+		totalTime = 0;
+
+		return;
+	}
+
+	totalTime += deltaTime;
 }
