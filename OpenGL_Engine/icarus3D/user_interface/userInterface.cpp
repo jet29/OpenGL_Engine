@@ -45,7 +45,7 @@ void UI::draw() {
 	// Techniques list
 	ImGui::Begin("Scene creation");
 	if (ImGui::Button("Add model", ImVec2(0, 0))) {
-		instance->addModel(instance->models);
+		instance->addModel();
 	}
 
 	ImGui::End();

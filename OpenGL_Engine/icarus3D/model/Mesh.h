@@ -47,6 +47,10 @@ public:
 	Mesh(Vertex* vertices, int vSize, int* indices, int indexSize, int indexMesh, bool calcNormals);
 	~Mesh();
 	void Draw() const;
+
+	glm::vec3 min;
+	glm::vec3 max;
+
 private:
 	static std::map<std::string, MeshData*> s_resourceMap;
 	// Create a Mesh with a given mesh

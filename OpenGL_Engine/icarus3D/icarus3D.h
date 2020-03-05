@@ -9,6 +9,7 @@
 #include "Shader.h"
 #include "user_interface/userInterface.h"
 #include "model/Model.h"
+#include "model/Scene.h"
 #include "camera/Camera.h"
 #include <vector>
 //#include ""
@@ -21,7 +22,7 @@ typedef unsigned int ICuint;
 class icarus3D {
 	// Public variables
 	public:
-	std::vector<Model> models;
+	Scene scene;
 	static Camera camera;
 	// Private variables
 	private:
@@ -49,7 +50,7 @@ class icarus3D {
 		void init();
 		static unsigned int loadTexture(const char* path, int& texWidth, int& texHeight, int& numOfChannels);
 		float getFPS();
-		bool addModel(std::vector<Model>& scene);
+		bool addModel();
 		// Private functions
 	private:
 		icarus3D();
@@ -62,4 +63,5 @@ class icarus3D {
 		void initGL();
 		void processKeyboardInput(GLFWwindow* window);
 		void updateFrames();
+		bool checkCollision(std::vector<Model>& scene);
 };
