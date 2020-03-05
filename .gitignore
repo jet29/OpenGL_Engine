@@ -46,3 +46,7 @@
 #/OpenGL_Engine/OpenGL_Engine.vcxproj
 #/OpenGL_Engine/OpenGL_Engine.vcxproj.filters
 #/OpenGL_Engine/OpenGL_Engine.vcxproj.user
+
+# Assets (Models, textures, shaders, etc)
+/OpenGL_Engine/assets/models/*
+
