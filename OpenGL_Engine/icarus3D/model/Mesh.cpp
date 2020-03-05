@@ -29,17 +29,52 @@ Mesh::Mesh(const string& filename) {
 	const aiScene* scene = importer.ReadFile(filename.c_str(),
 		aiProcess_Triangulate |
 		aiProcess_GenSmoothNormals |
-		aiProcess_FlipUVs);
+		aiProcess_FlipUVs |
+		aiProcess_GenBoundingBoxes);
 	if (!scene) {
 		cout << "Mesh load failed: " << filename << endl;
 		assert(0 != 0);
 	}
+
+	float max_x = INT_MIN;
+	float max_y = INT_MIN;
+	float max_z = INT_MIN;
+	float min_x = INT_MAX;
+	float min_y = INT_MAX;
+	float min_z = INT_MAX;
+
+
 	int numMeshes = scene->mNumMeshes;
 	m_meshdata = std::vector<MeshData*>(numMeshes, NULL);
 	vector<aiMesh*> model = vector<aiMesh*>(numMeshes, NULL);
 
 	for (int i = 0; i < numMeshes; i++) {
 		model[i] = scene->mMeshes[i];
+
+		//calculate AABB for all meshes
+		if (model[i]->mAABB.mMin.x < min_x) {
+			min_x = model[i]->mAABB.mMin.x;
+		}
+		if (model[i]->mAABB.mMin.y < min_y) {
+			min_y = model[i]->mAABB.mMin.y;
+		}
+		if (model[i]->mAABB.mMin.z < min_z) {
+			min_z = model[i]->mAABB.mMin.z;
+		}
+		if (model[i]->mAABB.mMax.x > max_x) {
+			max_x = model[i]->mAABB.mMax.x;
+		}
+		if (model[i]->mAABB.mMax.y > max_y) {
+			max_y = model[i]->mAABB.mMax.y;
+		}
+		if (model[i]->mAABB.mMax.z > max_z) {
+			max_z = model[i]->mAABB.mMax.z;
+		}
+		// ------> end calculate AABB
+
+		min = glm::vec3(min_x, min_y, min_z);
+		max = glm::vec3(max_x, max_y, max_z);
+
 		vector<Vertex> vertices;
 		vector<int> indices;
 		const aiVector3D aiZeroVector(0.0f, 0.0f, 0.0f);
@@ -132,3 +167,4 @@ void Mesh::calcNormals(Vertex* vertices, int vertSize, int* indices, int indexSi
 	for (int i = 0; i < vertSize; i++)
 		vertices[i].normal = glm::normalize(vertices[i].normal);
 }
+

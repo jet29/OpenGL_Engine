@@ -155,6 +155,7 @@
     <ClCompile Include="icarus3D\IMGUI\imgui_widgets.cpp" />
     <ClCompile Include="icarus3D\model\Mesh.cpp" />
     <ClCompile Include="icarus3D\model\Model.cpp" />
+    <ClCompile Include="icarus3D\model\Scene.cpp" />
     <ClCompile Include="icarus3D\Shader.cpp" />
     <ClCompile Include="icarus3D\user_interface\userInterface.cpp" />
     <ClCompile Include="main.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="icarus3D\model\Mesh.h" />
     <ClInclude Include="icarus3D\model\Model.h" />
     <ClInclude Include="icarus3D\model\referenceCounter.h" />
+    <ClInclude Include="icarus3D\model\Scene.h" />
     <ClInclude Include="icarus3D\Shader.h" />
     <ClInclude Include="icarus3D\stb_image\stb_image.h" />
     <ClInclude Include="icarus3D\user_interface\userInterface.h" />
