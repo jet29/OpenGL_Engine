@@ -33,10 +33,12 @@ void Scene::removeModel(int index) {
 
 string Scene::saveScene(string path) {
 
+
+	return "";
 }
 
 
 bool Scene::loadScene(string path) {
 
-
+	return true;
 }
