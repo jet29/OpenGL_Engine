@@ -189,9 +189,13 @@ void icarus3D::render() {
 	{
 		//FPS
 		updateFrames();
-		cout << "FPS: " << getFPS()<< endl;
+		//cout << "FPS: " << getFPS()<< endl;
 
 		processKeyboardInput(window);
+
+		if (checkCollision(scene.models)) {
+			cout << "COLLISION!" << endl;
+		}
 
 		// Render
 		// Clear the colorbuffer
@@ -199,7 +203,7 @@ void icarus3D::render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		// Render scene
-		renderScene(models);
+		renderScene(scene.models);
 		
 		// Draw interface
 		ui.draw();
@@ -211,11 +215,9 @@ void icarus3D::render() {
 	
 }
 
-bool icarus3D::addModel(std::vector<Model>& scene) {
-	Model newModel;
-	newModel.setShader("icarus3D/shaders/basic.vert", "icarus3D/shaders/basic.frag");
-	newModel.loadMesh("assets/models/Knight.obj");
-	scene.push_back(newModel);
+bool icarus3D::addModel() {
+
+	scene.addModel("assets/models/Sphere.obj");
 
 	return true;
 }
@@ -278,4 +280,27 @@ void icarus3D::updateFrames() {
 	}
 
 	totalTime += deltaTime;
+}
+
+bool icarus3D::checkCollision(std::vector<Model>& scene) {
+
+
+	//cout << "camera pos: " << camera.position.x << ", " << camera.position.y << ", " << camera.position.z << endl;
+	
+	// Iterate over scene models
+	for (auto model = scene.begin(); model != scene.end(); model++) {
+		//cout << "min model: " << model->mesh->min.x << ", " << model->mesh->min.y << ", " << model->mesh->min.z << endl;
+		//cout << "max model: " << model->mesh->max.x << ", " << model->mesh->max.y << ", " << model->mesh->max.z << endl;
+
+		if (   camera.position.x > model->position.x + model->mesh->min.x
+			&& camera.position.y > model->position.y + model->mesh->min.y
+			&& camera.position.z > model->position.z + model->mesh->min.z
+			&& camera.position.x < model->position.x + model->mesh->max.x
+			&& camera.position.y < model->position.y + model->mesh->max.y
+			&& camera.position.z < model->position.z + model->mesh->max.z){
+			return true;
+		}
+	}
+
+	return false;
 }
