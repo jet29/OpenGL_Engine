@@ -43,7 +43,6 @@ Mesh::Mesh(const string& filename) {
 	float min_y = INT_MAX;
 	float min_z = INT_MAX;
 
-
 	int numMeshes = scene->mNumMeshes;
 	m_meshdata = std::vector<MeshData*>(numMeshes, NULL);
 	vector<aiMesh*> model = vector<aiMesh*>(numMeshes, NULL);

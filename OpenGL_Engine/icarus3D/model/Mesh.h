@@ -15,7 +15,6 @@ struct Vertex {
 	glm::vec3 vertices;
 	glm::vec3 normal;
 	glm::vec2 texture;
-
 	Vertex(glm::vec3 pos, glm::vec2 texCoord = glm::vec2(0, 0), glm::vec3 normal = glm::vec3(0, 0, 0)) :
 		vertices(pos),
 		texture(texCoord),
@@ -26,7 +25,6 @@ class MeshData : public ReferenceCounter {
 public:
 	MeshData(int indexSize);
 	virtual ~MeshData();
-
 	inline unsigned int getVBO() { return m_vbo; }
 	inline unsigned int getIBO() { return m_ibo; }
 	inline unsigned int getVAO() { return m_vao; }
@@ -47,7 +45,7 @@ public:
 	Mesh(Vertex* vertices, int vSize, int* indices, int indexSize, int indexMesh, bool calcNormals);
 	~Mesh();
 	void Draw() const;
-
+	std::string name;
 	glm::vec3 min;
 	glm::vec3 max;
 

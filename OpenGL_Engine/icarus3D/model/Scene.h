@@ -27,5 +27,7 @@ public:
 	void removeModel(int index);
 
 private:
-
+	// initial color for picking
+	glm::vec3 pickingColor = { 1.0f,0.0f,0.0f };
+	void updatePickingColor();
 };

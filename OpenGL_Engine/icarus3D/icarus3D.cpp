@@ -1,10 +1,11 @@
-#include "icarus3D.h"
+﻿#include "icarus3D.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image/stb_image.h"
 
 // Global static pointer used to ensure a single instance of the class.
 icarus3D* icarus3D::instance = NULL;
 Camera icarus3D::camera;
+bool icarus3D::cameraMode = false;
 
 /**
 * Creates an instance of the class
@@ -18,7 +19,6 @@ icarus3D* icarus3D::Instance() {
 }
 
 icarus3D::icarus3D() {
-
 }
 
 // Public Functions
@@ -83,8 +83,9 @@ void icarus3D::init() {
 	initGL();
 	// Initialize user interface context
 	ui.init(window);
+	// Load picking shader
+	pickingShader = new Shader("icarus3d/shaders/picking.vert", "icarus3d/shaders/picking.frag");
 	// Begin render loop
-
 	render();
 
 	// Terminate interface instance
@@ -120,14 +121,11 @@ bool icarus3D::initWindow(){
 	//glfwSetFramebufferSizeCallback(window, resize);
 	// Mouse position callback
 	glfwSetCursorPosCallback(window, onMouseMotion);
-
+	// Mouse buttons callback
+	glfwSetMouseButtonCallback(window, onMouseButton);
+	// Keyboard buttons callback
+	glfwSetKeyCallback(window, onKeyPress);
 	return true;
-}
-
-void icarus3D::onMouseMotion(ICwindow* window, double xpos, double ypos)
-{
-	glm::vec2 mousePosition(xpos, ypos);
-	camera.mouseUpdate(mousePosition);
 }
 
 bool icarus3D::initGlad() {
@@ -150,6 +148,90 @@ void icarus3D::initGL() {
 	glViewport(0, 0, windowWidth, windowHeight);
 	// Sets the clear color
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+}
+
+void icarus3D::processKeyboardInput(ICwindow* window)
+{
+	// Checks if the escape key is pressed
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		// Tells glfw to close the window as soon as possible
+		glfwSetWindowShouldClose(window, true);
+
+	float deltaTime = currentTime - lastTime;
+	if (cameraMode) {
+		// Move Forward
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+			camera.moveForward(deltaTime);
+		}
+		// Move Backward
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+			camera.moveBackward(deltaTime);
+		}
+		// Move right
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+			camera.moveRight(deltaTime);
+		}
+		// Move left
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+			camera.moveLeft(deltaTime);
+		}
+
+		// Move Up
+		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+			camera.moveUp(deltaTime);
+		}
+		// Move Down
+		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+			camera.moveDown(deltaTime);
+		}
+	}
+
+
+}
+
+void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, int mods) {
+	// Actions when camera mode is disabled
+	if (action == GLFW_PRESS && !cameraMode) {
+		switch (key) {
+		case GLFW_KEY_F:
+			if (mods == GLFW_MOD_SHIFT) {
+				printf("Camera mode activated\n");
+				cameraMode = true;
+			}
+			break;
+		}
+	}
+	else if (action == GLFW_PRESS && cameraMode) {
+		switch (key) {
+		case GLFW_KEY_F:
+			if (mods == GLFW_MOD_SHIFT) {
+				printf("Camera mode deactivated\n");
+				cameraMode = false;
+			}
+			break;
+		}
+	}
+}
+
+void icarus3D::onMouseMotion(ICwindow* window, double xpos, double ypos)
+{
+	if (cameraMode){
+		glm::vec2 mousePosition(xpos, ypos);
+		camera.mouseUpdate(mousePosition);
+	}
+}
+
+void icarus3D::onMouseButton(ICwindow* window, int button, int action, int mods){
+	//auto a = action == GLFW_PRESS ? GLFW_PRESS : GLFW_RELEASE;
+	//auto b = GLFW_MOUSE_BUTTON_LEFT;
+
+	if (action == GLFW_PRESS) {
+		instance->pick();
+		// Load info of selected element into tweakbar's interface:
+		//ui->setUI(pickedIndex, model, light);
+		//if (button == 1)
+		//	pickedIndex = INT_MIN;
+	}
 }
 
 void icarus3D::resize(ICwindow* window, int width, int height){
@@ -218,49 +300,7 @@ void icarus3D::render() {
 bool icarus3D::addModel() {
 
 	scene.addModel("assets/models/Sphere.obj");
-
 	return true;
-}
-
-void icarus3D::processKeyboardInput(GLFWwindow* window)
-{
-	// Checks if the escape key is pressed
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		// Tells glfw to close the window as soon as possible
-		glfwSetWindowShouldClose(window, true);
-
-	float deltaTime = currentTime - lastTime;
-
-	// Move Forward
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		camera.moveForward(deltaTime);
-	}
-	// Move Backward
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		camera.moveBackward(deltaTime);
-	}
-	// Move right
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		camera.moveRight(deltaTime);
-	}
-	// Move left
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		camera.moveLeft(deltaTime);
-	}
-
-	// Move Up
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-		camera.moveUp(deltaTime);
-	}
-	// Move Down
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-		camera.moveDown(deltaTime);
-	}
-
-}
-
-float icarus3D::getFPS() {
-	return fps;
 }
 
 void icarus3D::updateFrames() {
@@ -303,4 +343,64 @@ bool icarus3D::checkCollision(std::vector<Model>& scene) {
 	}
 
 	return false;
+}
+
+void icarus3D::pick() {
+
+	if (scene.models.size() == 0)
+		return;
+
+	double cursorX, cursorY;
+
+	// Clear the screen in white
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Get Cursor position
+	glfwGetCursorPos(window, &cursorX, &cursorY);
+	cursorX = float(cursorX);
+	cursorY = windowHeight - float(cursorY);
+	// Set shader
+	pickingShader->use();
+	// Set projection matrix
+	pickingShader->setMat4("projection", glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 100.0f));
+	pickingShader->setMat4("view", camera.getWorldToViewMatrix());
+	
+	// Render all scene
+		// Iterate over scene models
+		for (auto& model : scene.models) {
+			// Compute Model matrix
+			glm::mat4 modelMatrix = glm::mat4(1.0f);
+			glm::vec3 modelPosition = model.position;
+			modelMatrix = glm::translate(modelMatrix, modelPosition);
+
+			// Set model matrix
+			pickingShader->setMat4("model", modelMatrix);
+
+			// Set model picking color
+			pickingShader->setVec3("pickingColor", model.pickingColor);
+
+			// Render model
+			model.mesh->Draw();
+		}
+
+		// Wait until all the pending drawing commands are really done. SLOW
+		glFlush();
+		glFinish();
+
+		// Read the pixel where click happened. SLOW 
+		vec4 readPixel;
+		glReadPixels((int)cursorX, (int)cursorY, 1, 1, GL_RGBA, GL_FLOAT, &readPixel);
+		// Round color floats to be able to compare
+		readPixel.r = roundf(readPixel.r * 100) / 100;
+
+		for (auto &model : scene.models) {
+			if (abs(readPixel.r - model.pickingColor.r) < 0.001 && readPixel.r != 0.0f) {
+				pickedIndex = &model - &scene.models[0];
+				printf("picked[%i] - name: %s\n", pickedIndex, model.name.c_str());
+
+			}
+		}
+		// Uncomment these lines to see the picking shader in effect
+		//glfwSwapBuffers(window);
 }

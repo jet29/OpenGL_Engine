@@ -24,6 +24,7 @@ class icarus3D {
 	public:
 	Scene scene;
 	static Camera camera;
+	static bool cameraMode;
 	// Private variables
 	private:
 		//Holds the instance of the class
@@ -34,6 +35,8 @@ class icarus3D {
 		ICuint windowWidth = 800;
 		// Window current height
 		ICuint windowHeight = 600;
+		// Picking shader
+		Shader *pickingShader;
 		// Interface instance
 		UI ui;
 		// Windows FPS
@@ -42,20 +45,22 @@ class icarus3D {
 		float fps = 0;
 		float totalTime = 0;
 		int totalFrames = 0;
-		 
+		int pickedIndex;
 	// Public functions
 	public:
 		//Method to obtain the only instance of the calls
 		static icarus3D* Instance();
 		void init();
 		static unsigned int loadTexture(const char* path, int& texWidth, int& texHeight, int& numOfChannels);
-		float getFPS();
 		bool addModel();
+		float inline getFPS() { return fps; }
 		// Private functions
 	private:
 		icarus3D();
 		void resize(ICwindow* window, int width, int height);
 		static void onMouseMotion(ICwindow* window, double xpos, double ypos);
+		static void onMouseButton(ICwindow* window, int button, int action, int mods);
+		static void onKeyPress(ICwindow* window, int key, int scancode, int action, int mods);
 		void render();
 		void renderScene(std::vector<Model>& scene);
 		bool initWindow();
@@ -64,4 +69,5 @@ class icarus3D {
 		void processKeyboardInput(GLFWwindow* window);
 		void updateFrames();
 		bool checkCollision(std::vector<Model>& scene);
+		void pick();
 };

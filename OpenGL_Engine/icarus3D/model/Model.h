@@ -18,11 +18,12 @@ class Model{
 	// Public variables
 	public:
 		Mesh* mesh;
-		string name;
+		std::string name;
 		Shader* shader;
 		vec3 position = vec3(0,0,0);
 		vec3 rotation = vec3(0,0,0);
 		vec3 scale = vec3(1,1,1);
+		vec3 pickingColor;
 	// Private variables
 	private:
 	// Public functions
