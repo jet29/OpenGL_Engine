@@ -16,7 +16,7 @@ bool Scene::addModel(string path) {
 
 	// Push back into scene models
 	Model *newModel = new Model();
-	newModel->setShader("icarus3D/shaders/basic.vert", "icarus3D/shaders/basic.frag");
+	newModel->setShader("icarus3D/shaders/light.vert", "icarus3D/shaders/light.frag");
 	newModel->loadMesh(path.c_str());
 	newModel->name = "Name test";
 	// Move object to test collisions

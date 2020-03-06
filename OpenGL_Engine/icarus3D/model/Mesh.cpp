@@ -30,8 +30,8 @@ Mesh::Mesh(const string& filename) {
 
 	const aiScene* scene = importer.ReadFile(filename.c_str(),
 		aiProcess_Triangulate |
+		aiProcess_GenUVCoords |
 		aiProcess_GenSmoothNormals |
-		aiProcess_FlipUVs |
 		aiProcess_GenBoundingBoxes);
 	if (!scene) {
 		cout << "Mesh load failed: " << filename << endl;
@@ -50,7 +50,7 @@ Mesh::Mesh(const string& filename) {
 	int numMeshes = scene->mNumMeshes;
 	m_meshdata = std::vector<MeshData*>(numMeshes, NULL);
 	vector<aiMesh*> model = vector<aiMesh*>(numMeshes, NULL);
-
+	cout << "numMeshes: " << numMeshes << endl;
 	for (int i = 0; i < numMeshes; i++) {
 		model[i] = scene->mMeshes[i];
 
@@ -80,6 +80,7 @@ Mesh::Mesh(const string& filename) {
 
 		vector<Vertex> vertices;
 		vector<int> indices;
+
 		const aiVector3D aiZeroVector(0.0f, 0.0f, 0.0f);
 		for (unsigned int j = 0; j < model[i]->mNumVertices; j++) {
 			const aiVector3D* pPos = &(model[i]->mVertices[j]);
@@ -112,9 +113,6 @@ Mesh::~Mesh() {
 void Mesh::initMesh(Vertex* vertices, int vertSize, int* indices, int indexSize, int indexMesh, bool calcNormals){
 	m_meshdata[indexMesh] = new MeshData(indexSize);
 
-	if (calcNormals)
-		this->calcNormals(vertices, vertSize, indices, indexSize);
-
 	// Bind VAO
 	glBindVertexArray(m_meshdata[indexMesh]->getVAO());
 	// Bind VBO
@@ -131,9 +129,9 @@ void Mesh::initMesh(Vertex* vertices, int vertSize, int* indices, int indexSize,
 	// Textures coord
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)sizeof(glm::vec3));
-	glEnableVertexAttribArray(2);
+
 	// Normals coord
-	glBindBuffer(GL_ARRAY_BUFFER, m_meshdata[indexMesh]->getVBO());
+	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(sizeof(glm::vec3) + sizeof(glm::vec2)));
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

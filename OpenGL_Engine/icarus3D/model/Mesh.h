@@ -13,8 +13,8 @@ using namespace std;
 
 struct Vertex {
 	glm::vec3 vertices;
-	glm::vec3 normal;
 	glm::vec2 texture;
+	glm::vec3 normal;
 	Vertex(glm::vec3 pos, glm::vec2 texCoord = glm::vec2(0, 0), glm::vec3 normal = glm::vec3(0, 0, 0)) :
 		vertices(pos),
 		texture(texCoord),

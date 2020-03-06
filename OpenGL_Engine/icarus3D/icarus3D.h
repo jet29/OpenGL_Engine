@@ -50,6 +50,7 @@ class icarus3D {
 		float lastTime = 0;
 		float fps = 0;
 		float totalTime = 0;
+		float deltaTime;
 		int totalFrames = 0;
 		int pickedIndex;
 	// Public functions

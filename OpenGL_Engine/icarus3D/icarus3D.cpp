@@ -198,6 +198,7 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 			if (mods == GLFW_MOD_SHIFT) {
 				printf("Camera mode activated\n");
 				cameraMode = true;
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			}
 			break;
 		}
@@ -208,6 +209,7 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 			if (mods == GLFW_MOD_SHIFT) {
 				printf("Camera mode deactivated\n");
 				cameraMode = false;
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			}
 			break;
 		}
@@ -217,8 +219,11 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 void icarus3D::onMouseMotion(ICwindow* window, double xpos, double ypos)
 {
 	if (cameraMode){
-		glm::vec2 mousePosition(xpos, ypos);
-		camera.mouseUpdate(mousePosition);
+		glfwSetCursorPos(window, instance->windowWidth / 2.0, instance->windowHeight / 2.0);
+		double xoffset = ((instance->windowWidth / 2.0) - xpos) * camera.mouseSpeed * instance->deltaTime;
+		double yoffset = ((instance->windowHeight / 2.0) - ypos) * camera.mouseSpeed * instance->deltaTime;
+
+		camera.mouseUpdate(glm::vec2(xoffset, yoffset));
 	}
 }
 
@@ -311,7 +316,7 @@ void icarus3D::render() {
 
 bool icarus3D::addModel() {
 
-	scene->addModel("assets/models/Sphere.obj");
+	scene->addModel("assets/models/sphere.obj");
 	return true;
 }
 
@@ -346,7 +351,7 @@ void icarus3D::updateFrames() {
 
 	lastTime = currentTime;
 	currentTime = glfwGetTime();
-	float deltaTime = currentTime - lastTime;
+	deltaTime = currentTime - lastTime;
 
 	totalFrames++;
 
