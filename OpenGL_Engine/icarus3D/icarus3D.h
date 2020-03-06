@@ -22,7 +22,7 @@ typedef unsigned int ICuint;
 class icarus3D {
 	// Public variables
 	public:
-	Scene scene;
+	Scene *scene;
 	static Camera camera;
 	// Private variables
 	private:
@@ -51,17 +51,20 @@ class icarus3D {
 		static unsigned int loadTexture(const char* path, int& texWidth, int& texHeight, int& numOfChannels);
 		float getFPS();
 		bool addModel();
+		bool createScene();
+		bool saveScene();
+		bool loadScene(string path);
 		// Private functions
 	private:
 		icarus3D();
 		void resize(ICwindow* window, int width, int height);
 		static void onMouseMotion(ICwindow* window, double xpos, double ypos);
 		void render();
-		void renderScene(std::vector<Model>& scene);
+		void renderScene(Scene *scene);
 		bool initWindow();
 		bool initGlad();
 		void initGL();
 		void processKeyboardInput(GLFWwindow* window);
 		void updateFrames();
-		bool checkCollision(std::vector<Model>& scene);
+		bool checkCollision(Scene *scene);
 };
