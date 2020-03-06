@@ -48,6 +48,8 @@ public:
 	std::string name;
 	glm::vec3 min;
 	glm::vec3 max;
+	string path;
+
 
 private:
 	static std::map<std::string, MeshData*> s_resourceMap;

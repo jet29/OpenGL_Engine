@@ -48,6 +48,18 @@ void UI::draw() {
 		instance->addModel();
 	}
 
+	if (ImGui::Button("Create New Scene", ImVec2(0, 0))) {
+		instance->createScene();
+	}
+
+	if (ImGui::Button("Load Scene", ImVec2(0, 0))) {
+		instance->loadScene("scene.json");
+	}
+
+	if (ImGui::Button("Save Scene", ImVec2(0, 0))) {
+		instance->saveScene();
+	}
+
 	ImGui::End();
 	// Render dear imgui into screen
 	ImGui::Render();

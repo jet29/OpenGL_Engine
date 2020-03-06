@@ -24,6 +24,8 @@ Mesh::Mesh(Vertex* vertices, int vertSize, int* indices, int indexSize, int inde
 }
 
 Mesh::Mesh(const string& filename) {
+
+
 	Assimp::Importer importer;
 
 	const aiScene* scene = importer.ReadFile(filename.c_str(),
@@ -35,6 +37,8 @@ Mesh::Mesh(const string& filename) {
 		cout << "Mesh load failed: " << filename << endl;
 		assert(0 != 0);
 	}
+
+	path = filename;
 
 	float max_x = INT_MIN;
 	float max_y = INT_MIN;

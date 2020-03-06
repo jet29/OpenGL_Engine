@@ -153,6 +153,7 @@
     <ClCompile Include="icarus3D\IMGUI\imgui_impl_glfw.cpp" />
     <ClCompile Include="icarus3D\IMGUI\imgui_impl_opengl3.cpp" />
     <ClCompile Include="icarus3D\IMGUI\imgui_widgets.cpp" />
+    <ClCompile Include="icarus3D\jsoncpp.cpp" />
     <ClCompile Include="icarus3D\model\Mesh.cpp" />
     <ClCompile Include="icarus3D\model\Model.cpp" />
     <ClCompile Include="icarus3D\model\Scene.cpp" />
@@ -177,6 +178,8 @@
     <ClInclude Include="icarus3D\IMGUI\imstb_rectpack.h" />
     <ClInclude Include="icarus3D\IMGUI\imstb_textedit.h" />
     <ClInclude Include="icarus3D\IMGUI\imstb_truetype.h" />
+    <ClInclude Include="icarus3D\json\json-forwards.h" />
+    <ClInclude Include="icarus3D\json\json.h" />
     <ClInclude Include="icarus3D\model\Mesh.h" />
     <ClInclude Include="icarus3D\model\Model.h" />
     <ClInclude Include="icarus3D\model\referenceCounter.h" />
