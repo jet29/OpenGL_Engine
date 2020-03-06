@@ -85,6 +85,8 @@ void icarus3D::init() {
 	ui.init(window);
 	// Load picking shader
 	pickingShader = new Shader("icarus3d/shaders/picking.vert", "icarus3d/shaders/picking.frag");
+	// Create Mandatory Dir Light
+	light = new DirectionalLight();
 	// Begin render loop
 	render();
 	// Terminate interface instance
@@ -254,6 +256,13 @@ void icarus3D::renderScene(Scene *scene) {
 		glm::mat4 viewMatrix = camera.getWorldToViewMatrix();
 			
 		// Set model shader configuration
+
+		scene->models[i]->shader->setVec3("light.direction", light->properties.direction);
+		scene->models[i]->shader->setVec3("light.color.ambient", light->properties.color.ambient);
+		scene->models[i]->shader->setVec3("light.color.diffuse", light->properties.color.diffuse);
+		scene->models[i]->shader->setVec3("light.color.specular", light->properties.color.specular);
+		scene->models[i]->shader->setVec3("viewPos", camera.position);
+		scene->models[i]->shader->setFloat("shininess", 32.0);
 		scene->models[i]->shader->setMat4("model", modelMatrix);
 		scene->models[i]->shader->setMat4("view", viewMatrix);
 		scene->models[i]->shader->setMat4("projection", projectionMatrix);

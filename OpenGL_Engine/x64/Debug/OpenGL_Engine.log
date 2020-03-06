@@ -1,3 +1,2 @@
-﻿  Scene.cpp
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\model\Scene.cpp(111,20): warning C4018: '<': signed/unsigned mismatch
-  OpenGL_Engine.vcxproj -> C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe
+﻿  Camera.cpp
+  OpenGL_Engine.vcxproj -> C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe

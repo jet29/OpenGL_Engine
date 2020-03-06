@@ -12,6 +12,11 @@
 #include "model/Scene.h"
 #include "camera/Camera.h"
 #include <vector>
+// Lights
+#include "light/DirectionalLight.h"
+#include "light/PointLight.h"
+#include "light/SpotLight.h"
+
 //#include ""
 
 //typedef sceneStruct icarusScene;
@@ -23,6 +28,7 @@ class icarus3D {
 	// Public variables
 	public:
 	Scene *scene;
+	DirectionalLight *light;
 	static Camera camera;
 	static bool cameraMode;
 	// Private variables
