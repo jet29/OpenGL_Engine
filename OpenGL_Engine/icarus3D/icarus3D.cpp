@@ -19,6 +19,7 @@ icarus3D* icarus3D::Instance() {
 
 icarus3D::icarus3D() {
 
+
 }
 
 // Public Functions
@@ -159,26 +160,26 @@ void icarus3D::resize(ICwindow* window, int width, int height){
 	glViewport(0, 0, windowWidth, windowHeight);
 }
 
-void icarus3D::renderScene(std::vector<Model>& scene) {
+void icarus3D::renderScene(Scene *scene) {
 	// Iterate over scene models
-	for (auto model = scene.begin(); model != scene.end();model++) {
+	for(int i = 0; i < scene->models.size(); i++){
 		
 		// Use a single shader per model
-		model->shader->use();
+		scene->models[i]->shader->use();
 		// MVP matrix per model part
 		glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 100.0f);
 		glm::mat4 modelMatrix = glm::mat4(1.0f);
-		glm::vec3 modelPosition = model->position;
+		glm::vec3 modelPosition = scene->models[i]->position;
 		modelMatrix = glm::translate(modelMatrix, modelPosition);
 		glm::mat4 viewMatrix = camera.getWorldToViewMatrix();
 			
 		// Set model shader configuration
-		model->shader->setMat4("model", modelMatrix);
-		model->shader->setMat4("view", viewMatrix);
-		model->shader->setMat4("projection", projectionMatrix);
+		scene->models[i]->shader->setMat4("model", modelMatrix);
+		scene->models[i]->shader->setMat4("view", viewMatrix);
+		scene->models[i]->shader->setMat4("projection", projectionMatrix);
 		
 		// Render model
-		model->mesh->Draw();
+		scene->models[i]->mesh->Draw();
 	}
 }
 
@@ -193,17 +194,21 @@ void icarus3D::render() {
 
 		processKeyboardInput(window);
 
-		if (checkCollision(scene.models)) {
-			cout << "COLLISION!" << endl;
-		}
-
 		// Render
 		// Clear the colorbuffer
 		glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		// Render scene
-		renderScene(scene.models);
+
+		// If there is any instanced scene, then render it
+		if (scene) {
+
+			if (checkCollision(scene)) {
+				cout << "COLLISION!" << endl;
+			}
+
+			// Render scene
+			renderScene(scene);
+		}
 		
 		// Draw interface
 		ui.draw();
@@ -217,8 +222,35 @@ void icarus3D::render() {
 
 bool icarus3D::addModel() {
 
-	scene.addModel("assets/models/Sphere.obj");
+	scene->addModel("assets/models/Sphere.obj");
 
+	return true;
+}
+
+bool icarus3D::createScene() {
+
+	delete scene;
+	scene = new Scene();
+	cout << "scene created successfully" << endl;
+	return true;
+}
+
+bool icarus3D::loadScene(string path) {
+
+	delete scene;
+	scene = new Scene();
+	scene->loadScene(path);
+
+	return true;
+}
+
+bool icarus3D::saveScene() {
+	if (!scene) {
+		cout << "there is no scene loaded " << endl;
+		return false;
+	}
+
+	scene->saveScene();
 	return true;
 }
 
@@ -256,7 +288,6 @@ void icarus3D::processKeyboardInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 		camera.moveDown(deltaTime);
 	}
-
 }
 
 float icarus3D::getFPS() {
@@ -282,22 +313,22 @@ void icarus3D::updateFrames() {
 	totalTime += deltaTime;
 }
 
-bool icarus3D::checkCollision(std::vector<Model>& scene) {
+bool icarus3D::checkCollision(Scene *scene) {
 
 
 	//cout << "camera pos: " << camera.position.x << ", " << camera.position.y << ", " << camera.position.z << endl;
 	
 	// Iterate over scene models
-	for (auto model = scene.begin(); model != scene.end(); model++) {
+	for (int i = 0; i < scene->models.size(); i++) {
 		//cout << "min model: " << model->mesh->min.x << ", " << model->mesh->min.y << ", " << model->mesh->min.z << endl;
 		//cout << "max model: " << model->mesh->max.x << ", " << model->mesh->max.y << ", " << model->mesh->max.z << endl;
 
-		if (   camera.position.x > model->position.x + model->mesh->min.x
-			&& camera.position.y > model->position.y + model->mesh->min.y
-			&& camera.position.z > model->position.z + model->mesh->min.z
-			&& camera.position.x < model->position.x + model->mesh->max.x
-			&& camera.position.y < model->position.y + model->mesh->max.y
-			&& camera.position.z < model->position.z + model->mesh->max.z){
+		if (   camera.position.x > scene->models[i]->position.x + scene->models[i]->mesh->min.x
+			&& camera.position.y > scene->models[i]->position.y + scene->models[i]->mesh->min.y
+			&& camera.position.z > scene->models[i]->position.z + scene->models[i]->mesh->min.z
+			&& camera.position.x < scene->models[i]->position.x + scene->models[i]->mesh->max.x
+			&& camera.position.y < scene->models[i]->position.y + scene->models[i]->mesh->max.y
+			&& camera.position.z < scene->models[i]->position.z + scene->models[i]->mesh->max.z){
 			return true;
 		}
 	}

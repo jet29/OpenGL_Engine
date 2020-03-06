@@ -17,12 +17,14 @@ public:
 
 	Scene();
 
-	std::vector<Model> models;
+	~Scene();
 
-	string saveScene(string path);
+	std::vector<Model *> models;
+
+	bool saveScene();
 	bool loadScene(string path);
 
-	bool addModel(Model model);
+	bool addModel(Model *model);
 	bool addModel(string path);
 	void removeModel(int index);
 
