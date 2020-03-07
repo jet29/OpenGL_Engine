@@ -163,11 +163,14 @@
     <ClCompile Include="icarus3D\model\Scene.cpp" />
     <ClCompile Include="icarus3D\Shader.cpp" />
     <ClCompile Include="icarus3D\user_interface\userInterface.cpp" />
+    <ClCompile Include="ImGuizmo.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="icarus3D\shaders\basic.frag" />
     <None Include="icarus3D\shaders\basic.vert" />
+    <None Include="icarus3D\shaders\bounding_box.frag" />
+    <None Include="icarus3D\shaders\bounding_box.vert" />
     <None Include="icarus3D\shaders\light.frag" />
     <None Include="icarus3D\shaders\light.vert" />
     <None Include="icarus3D\shaders\picking.frag" />

@@ -26,9 +26,12 @@ class Model{
 		vec3 pickingColor;
 	// Private variables
 	private:
+		GLuint BBVAO, BBVBO;
 	// Public functions
 	public:
 		Model();
 		void loadMesh(string path);
 		void setShader(const char* vertexPath, const char* fragmentPath);
+		void buildBoundingBox();
+		void DrawBoundingBox(mat4 projectionMatrix, mat4 viewMatrix, mat4 modelMatrix);
 };

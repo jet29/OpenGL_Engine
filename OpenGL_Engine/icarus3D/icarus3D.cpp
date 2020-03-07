@@ -19,6 +19,7 @@ icarus3D* icarus3D::Instance() {
 }
 
 icarus3D::icarus3D() {
+	
 }
 
 // Public Functions
@@ -231,13 +232,8 @@ void icarus3D::onMouseButton(ICwindow* window, int button, int action, int mods)
 	//auto a = action == GLFW_PRESS ? GLFW_PRESS : GLFW_RELEASE;
 	//auto b = GLFW_MOUSE_BUTTON_LEFT;
 
-	if (action == GLFW_PRESS && instance->scene) {
+	if (action == GLFW_PRESS && instance->scene)
 		instance->pick();
-		// Load info of selected element into tweakbar's interface:
-		//ui->setUI(pickedIndex, model, light);
-		//if (button == 1)
-		//	pickedIndex = INT_MIN;
-	}
 }
 
 void icarus3D::resize(ICwindow* window, int width, int height){
@@ -274,12 +270,28 @@ void icarus3D::renderScene(Scene *scene) {
 		
 		// Render model
 		scene->models[i]->mesh->Draw();
+		if (i == pickedIndex)
+			drawBoundingBox();
 	}
+}
+
+void icarus3D::drawBoundingBox() {
+	glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 100.0f);
+	glm::mat4 modelMatrix = glm::mat4(1.0f);
+	glm::vec3 modelPosition = scene->models[pickedIndex]->position;
+	modelMatrix = glm::translate(modelMatrix, modelPosition);
+	glm::mat4 viewMatrix = camera.getWorldToViewMatrix();
+	// Render Bounding box
+	boundingBox->use();
+	boundingBox->setMat4("model", modelMatrix);
+	boundingBox->setMat4("view", viewMatrix);
+	boundingBox->setMat4("projection", projectionMatrix);
+	scene->models[pickedIndex]->DrawBoundingBox(projectionMatrix, viewMatrix, modelMatrix);
 }
 
 void icarus3D::render() {
 	// Game loop
-
+	boundingBox = new Shader("icarus3D/shaders/bounding_box.vert", "icarus3D/shaders/bounding_box.frag");
 	while (!glfwWindowShouldClose(window))
 	{
 		//FPS
@@ -316,7 +328,7 @@ void icarus3D::render() {
 
 bool icarus3D::addModel() {
 
-	scene->addModel("assets/models/sphere.obj");
+	scene->addModel("assets/models/catscaled.obj");
 	return true;
 }
 
