@@ -12,12 +12,12 @@ Scene::~Scene() {
 
 }
 
-bool Scene::addModel(string path) {
+bool Scene::addModel(string pathObj, string pathMtl) {
 
 	// Push back into scene models
 	Model *newModel = new Model();
-	newModel->setShader("icarus3D/shaders/light.vert", "icarus3D/shaders/light.frag");
-	newModel->loadMesh(path.c_str());
+	newModel->setShader("icarus3D/shaders/material.vert", "icarus3D/shaders/material.frag");
+	newModel->loadMesh(pathObj.c_str(), pathMtl.c_str());
 	newModel->name = "Name test";
 	// Move object to test collisions
 	newModel->position = glm::vec3(0, 0, -10);
@@ -58,6 +58,7 @@ bool Scene::saveScene() {
 		
 		root["models"][i]["name"] = models[i]->name;
 		root["models"][i]["path"] = models[i]->mesh->path;
+		root["models"][i]["path"] = models[i]->mesh->mtlPath;
 		
 		root["models"][i]["pickingColor"]["r"] = models[i]->pickingColor.r;
 		root["models"][i]["pickingColor"]["g"] = models[i]->pickingColor.g;
@@ -113,7 +114,7 @@ bool Scene::loadScene(string path) {
 		Model* model = new Model();
 
 		model->setShader("icarus3D/shaders/basic.vert", "icarus3D/shaders/basic.frag");
-		model->loadMesh(root["models"][i]["path"].asCString());
+		model->loadMesh(root["models"][i]["path"].asCString(), root["models"][i]["pathMtl"].asCString());
 		
 		model->name = root["models"][i]["name"].asCString();
 

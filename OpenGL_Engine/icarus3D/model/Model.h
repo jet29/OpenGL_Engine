@@ -17,6 +17,8 @@ using namespace std;
 class Model{
 	// Public variables
 	public:
+
+	
 		Mesh* mesh;
 		std::string name;
 		Shader* shader;
@@ -24,13 +26,17 @@ class Model{
 		vec3 rotation = vec3(0,0,0);
 		vec3 scale = vec3(1,1,1);
 		vec3 pickingColor;
+
+		
 	// Private variables
 	private:
 		GLuint BBVAO, BBVBO;
 	// Public functions
 	public:
 		Model();
-		void loadMesh(string path);
+		~Model();
+
+		void loadMesh(string path, string mtlPath);
 		void setShader(const char* vertexPath, const char* fragmentPath);
 		void buildBoundingBox();
 		void DrawBoundingBox(mat4 projectionMatrix, mat4 viewMatrix, mat4 modelMatrix);

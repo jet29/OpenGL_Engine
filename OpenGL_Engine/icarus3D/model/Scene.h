@@ -25,7 +25,7 @@ public:
 	bool loadScene(string path);
 
 	bool addModel(Model *model);
-	bool addModel(string path);
+	bool addModel(string pathObj, string pathMtl);
 	void removeModel(int index);
 
 private:

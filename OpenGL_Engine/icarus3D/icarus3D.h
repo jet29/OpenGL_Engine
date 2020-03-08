@@ -25,6 +25,8 @@
 typedef GLFWwindow ICwindow;
 typedef unsigned int ICuint;
 
+
+
 class icarus3D {
 	// Public variables
 	public:
@@ -38,6 +40,7 @@ class icarus3D {
 	ICuint windowHeight = 600;
 	// Interface instance
 	UI ui;
+
 	// Private variables
 	private:
 		//Holds the instance of the class
@@ -67,6 +70,7 @@ class icarus3D {
 		bool createScene();
 		bool saveScene();
 		bool loadScene(string path);
+		unsigned int loadTexture(const char* path);
 		// Private functions
 	private:
 		icarus3D();

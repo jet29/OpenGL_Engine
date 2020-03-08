@@ -7,6 +7,10 @@ icarus3D* icarus3D::instance = NULL;
 Camera icarus3D::camera;
 bool icarus3D::cameraMode = false;
 
+// Textures
+unsigned int whiteTexture;
+unsigned int blackTexture;
+
 /**
 * Creates an instance of the class
 *
@@ -258,6 +262,7 @@ void icarus3D::renderScene(Scene *scene) {
 			
 		// Set model shader configuration
 
+
 		scene->models[i]->shader->setVec3("light.direction", light->properties.direction);
 		scene->models[i]->shader->setVec3("light.color.ambient", light->properties.color.ambient);
 		scene->models[i]->shader->setVec3("light.color.diffuse", light->properties.color.diffuse);
@@ -267,16 +272,16 @@ void icarus3D::renderScene(Scene *scene) {
 		scene->models[i]->shader->setMat4("model", modelMatrix);
 		scene->models[i]->shader->setMat4("view", viewMatrix);
 		scene->models[i]->shader->setMat4("projection", projectionMatrix);
-		
+
 		// Render model
-		scene->models[i]->mesh->Draw();
+		scene->models[i]->mesh->Draw(scene->models[i]->shader);
 		if (i == pickedIndex)
 			drawBoundingBox();
 	}
 }
 
 void icarus3D::drawBoundingBox() {
-	glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 100.0f);
+	glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 1000.0f);
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
 	glm::vec3 modelPosition = scene->models[pickedIndex]->position;
 	modelMatrix = glm::translate(modelMatrix, modelPosition);
@@ -291,6 +296,8 @@ void icarus3D::drawBoundingBox() {
 
 void icarus3D::render() {
 	// Game loop
+	whiteTexture = loadTexture("assets/textures/white_bg.png");
+	blackTexture = loadTexture("assets/textures/black_bg.png");
 	boundingBox = new Shader("icarus3D/shaders/bounding_box.vert", "icarus3D/shaders/bounding_box.frag");
 	while (!glfwWindowShouldClose(window))
 	{
@@ -328,7 +335,9 @@ void icarus3D::render() {
 
 bool icarus3D::addModel() {
 
-	scene->addModel("assets/models/catscaled.obj");
+	scene->addModel("assets/models/cottage/cottage_obj.obj", 
+					"assets/models/cottage/cottage_obj.mtl");
+
 	return true;
 }
 
@@ -437,7 +446,7 @@ void icarus3D::pick() {
 			pickingShader->setVec3("pickingColor", model->pickingColor);
 
 			// Render model
-			model->mesh->Draw();
+			model->mesh->Draw(model->shader);
 		}
 
 		// Wait until all the pending drawing commands are really done. SLOW
@@ -459,4 +468,57 @@ void icarus3D::pick() {
 		}
 		// Uncomment these lines to see the picking shader in effect
 		//glfwSwapBuffers(window);
+}
+
+
+unsigned int icarus3D::loadTexture(const char* path)
+{
+	unsigned int id;
+	// Creates the texture on GPU
+	glGenTextures(1, &id);
+	// Loads the texture
+	int textureWidth, textureHeight, numberOfChannels;
+	// Flips the texture when loads it because in opengl the texture coordinates are flipped
+	stbi_set_flip_vertically_on_load(true);
+	// Loads the texture file data
+	unsigned char* data = stbi_load(path, &textureWidth, &textureHeight, &numberOfChannels, 0);
+	if (data)
+	{
+		// Gets the texture channel format
+		GLenum format;
+		switch (numberOfChannels)
+		{
+		case 1:
+			format = GL_RED;
+			break;
+		case 3:
+			format = GL_RGB;
+			break;
+		case 4:
+			format = GL_RGBA;
+			break;
+		}
+
+		// Binds the texture
+		glBindTexture(GL_TEXTURE_2D, id);
+		// Creates the texture
+		glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth, textureHeight, 0, format, GL_UNSIGNED_BYTE, data);
+		// Creates the texture mipmaps
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		// Set the filtering parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+	else
+	{
+		std::cout << "ERROR:: Unable to load texture " << path << std::endl;
+		glDeleteTextures(1, &id);
+	}
+	// We dont need the data texture anymore because is loaded on the GPU
+	stbi_image_free(data);
+
+	return id;
 }

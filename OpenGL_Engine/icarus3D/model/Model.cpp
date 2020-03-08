@@ -12,13 +12,18 @@ Model::Model() {
 
 }
 
+Model::~Model() {
+
+}
+
 void Model::setShader(const char* vertexPath, const char* fragmentPath){
 	delete shader;
 	shader = new Shader(vertexPath, fragmentPath);
 }
 
-void Model::loadMesh(string path) {
-	mesh = new Mesh(path);
+void Model::loadMesh(string path, string mtlPath) {
+
+	mesh = new Mesh(path, mtlPath);
 	buildBoundingBox();
 }
 

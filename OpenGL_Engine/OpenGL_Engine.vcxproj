@@ -99,7 +99,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../External_Resources/ASSIMP/include;$(SolutionDir)/../External_Resources/IMGUIZMO;$(SolutionDir)/../External_Resources/IMGUI;$(SolutionDir)/../External_Resources/GLAD/include;$(SolutionDir)/../External_Resources/GLFW/include;$(SolutionDir)/../External_Resources/GLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../External_Resources/ASSIMP/include;$(SolutionDir)/../External_Resources/IMGUIZMO;$(SolutionDir)/../External_Resources/IMGUI;$(SolutionDir)/../External_Resources/GLAD/include;$(SolutionDir)/../External_Resources/GLFW/include;$(SolutionDir)/../External_Resources/GLM;$(SolutionDir)/../External_Resources/STB_IMAGE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
