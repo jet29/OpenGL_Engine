@@ -75,7 +75,7 @@
     <ClCompile Include="icarus3D\light\DirectionalLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuizmo.cpp">
+    <ClCompile Include="icarus3D\ImGuizmo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -121,9 +121,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="icarus3D\user_interface\userInterface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="icarus3D\stb_image\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="icarus3D\model\Model.h">

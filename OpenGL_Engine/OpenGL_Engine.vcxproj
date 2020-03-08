@@ -147,6 +147,7 @@
     <ClCompile Include="icarus3D\camera\Camera.cpp" />
     <ClCompile Include="icarus3D\glad\glad.c" />
     <ClCompile Include="icarus3D\icarus3D.cpp" />
+    <ClCompile Include="icarus3D\ImGuizmo.cpp" />
     <ClCompile Include="icarus3D\IMGUI\imgui.cpp" />
     <ClCompile Include="icarus3D\IMGUI\imgui_demo.cpp" />
     <ClCompile Include="icarus3D\IMGUI\imgui_draw.cpp" />
@@ -163,7 +164,6 @@
     <ClCompile Include="icarus3D\model\Scene.cpp" />
     <ClCompile Include="icarus3D\Shader.cpp" />
     <ClCompile Include="icarus3D\user_interface\userInterface.cpp" />
-    <ClCompile Include="ImGuizmo.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -198,7 +198,6 @@
     <ClInclude Include="icarus3D\model\referenceCounter.h" />
     <ClInclude Include="icarus3D\model\Scene.h" />
     <ClInclude Include="icarus3D\Shader.h" />
-    <ClInclude Include="icarus3D\stb_image\stb_image.h" />
     <ClInclude Include="icarus3D\user_interface\userInterface.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

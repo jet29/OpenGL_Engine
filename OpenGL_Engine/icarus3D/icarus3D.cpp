@@ -1,6 +1,6 @@
 ﻿#include "icarus3D.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image/stb_image.h"
+#include <stb_image.h>
 
 // Global static pointer used to ensure a single instance of the class.
 icarus3D* icarus3D::instance = NULL;
