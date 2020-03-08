@@ -46,7 +46,7 @@ void main()
 
     // Lambert cos(angle(Normal, Light))
     float diff=max(dot(normal,lightDir),0.f);
-    vec3 diffuse=diff * light.color.diffuse /* * material.kd */ * texture(albedo,dataIn.uv).rgb;
+    vec3 diffuse=diff * light.color.diffuse * material.kd * texture(albedo,dataIn.uv).rgb;
     lightContribution += diffuse;
 
     if(diff>0.f){
@@ -55,7 +55,7 @@ void main()
         // Blinn-Phong
         vec3 halfwayDir=normalize(lightDir+viewDir);
         float spec=pow(max(dot(normal,halfwayDir),0.f),material.shininess);
-        vec3 specular=light.color.specular*spec /* * material.ks */;
+        vec3 specular=light.color.specular*spec * material.ks;
         lightContribution += specular;
     }
 

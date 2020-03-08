@@ -16,7 +16,8 @@ long  UI::uniqueColors = 0;
 bool  UI::hardwareAcceleration = 0;
 float UI::f_threshold = 0.5f;
 int   UI::i_threshold = 122;
-
+vector<string> items;
+static const char* current_item = NULL;
 
 icarus3D* instance;
 
@@ -37,22 +38,47 @@ bool UI::init(GLFWwindow* window) {
 	return true;
 }
 
-void UI::draw() {
-	// Start new frame
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-	ImGuizmo::BeginFrame();
-	// Set ImGui parameters
-	// Techniques list
+int callback(ImGuiTextEditCallbackData* data) {
+
+	return 0;
+}
+
+void UI::mainConfigWindow() {
 	ImGui::Begin("Scene creation");
-	if (ImGui::Button("Add model", ImVec2(0, 0))) {
-		instance->addModel();
+
+
+	current_item = items.size() == 0 ? NULL : items[instance->currentScene].c_str();
+	// Scene selector
+	if (ImGui::BeginCombo("Current scene", current_item)) {
+		for (int n = 0; n < items.size(); n++)
+		{
+			bool is_selected = (current_item == items[n].c_str()); // You can store your selection however you want, outside or inside your objects
+			if (ImGui::Selectable(items[n].c_str(), is_selected)) {
+				current_item = items[n].c_str();
+				instance->currentScene = n;
+			}
+			if (is_selected)
+				ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+		}
+		ImGui::EndCombo();
 	}
 
 	if (ImGui::Button("Create New Scene", ImVec2(0, 0))) {
 		instance->createScene();
+		items.push_back("Scene " + to_string((items.size() + 1)));
 	}
+
+	if (instance->currentScene != -1) {
+		if (ImGui::CollapsingHeader("Add model", ImGuiTreeNodeFlags_DefaultOpen)) {
+			static char buffer[1024] = "assets/models/catscaled.obj";
+			ImGui::InputText("Path", buffer, IM_ARRAYSIZE(buffer));
+			if (ImGui::Button("Add", ImVec2(0, 0))) {
+				instance->addModel(string(buffer));
+			}
+		}
+	}
+
+	ImGui::Separator();
 
 	if (ImGui::Button("Load Scene", ImVec2(0, 0))) {
 		instance->loadScene("scene.json");
@@ -62,19 +88,63 @@ void UI::draw() {
 		instance->saveScene();
 	}
 	ImGui::End();
+}
+
+void UI::pickedModelWindow() {
 	// If there's an element picked show its info
 	if (instance->getPickedIndex() != -1) {
-
 		glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)instance->windowWidth / (float)instance->windowHeight, 1.0f, 100.0f);
 		glm::mat4 viewMatrix = instance->camera.getWorldToViewMatrix();
+		const float* viewMatrixFloat = glm::value_ptr(viewMatrix);
+		const float* projectionMatrixFloat = glm::value_ptr(projectionMatrix);
+		const float* modelMatrixFloat = glm::value_ptr(glm::mat4(1.0f));
+		float** matrix = new float*[4];
+		for (int i = 0; i < 4; i++)
+			matrix[i] = new float[4];
+		ImGuizmo::DrawCube(viewMatrixFloat, projectionMatrixFloat, modelMatrixFloat);
+		ImGuizmo::Manipulate(viewMatrixFloat, projectionMatrixFloat, ImGuizmo::ROTATE, ImGuizmo::WORLD, &matrix[0][0]);
+		string frameTitle = "Model: " + instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->name;
+		ImGui::Begin(frameTitle.c_str(), (bool*)true);
+		if (ImGui::IsKeyPressed(GLFW_KEY_T)) {
+			cout << "hola" << endl;
+		}
 
-		ImGuizmo::DrawCube(glm::value_ptr(viewMatrix), glm::value_ptr(projectionMatrix), glm::value_ptr(glm::mat4(1.0f)));
-		ImGui::Begin("Test");
-		char* buffer = new char(255);
-		ImGui::Text("Model Name: %s",instance->scene->models[instance->getPickedIndex()]->name.c_str());
 		ImGuizmo::TRANSLATE;
 		ImGui::End();
 	}
+}
+
+void UI::directionalLightWindow() {
+	ImGui::Begin("Directional light properties");
+	float direction[] = { instance->light->properties.direction.x,instance->light->properties.direction.y,instance->light->properties.direction.z };
+	ImGui::InputFloat3("Direction",direction,3);
+	instance->light->properties.direction = glm::vec3(direction[0], direction[1], direction[2]);
+	ImGui::End();
+
+}
+
+void UI::draw() {
+	// Start new frame
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+	ImGuizmo::BeginFrame();
+	ImGuizmo::Enable(true);
+	ImGuiIO& io = ImGui::GetIO();
+	ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+
+
+	// Main configuration window
+	mainConfigWindow();
+
+	// Directional light information
+	directionalLightWindow();
+	
+	// Picked model window
+	pickedModelWindow();
+
+
+
 	
 	// Render dear imgui into screen
 	ImGui::Render();

@@ -49,7 +49,6 @@ Mesh::Mesh(const string& _path, const string &_mtlPath) {
 		assert(0 != 0);
 	}
 
-
 	float max_x = INT_MIN;
 	float max_y = INT_MIN;
 	float max_z = INT_MIN;
@@ -145,8 +144,6 @@ Mesh::~Mesh() {
 
 void Mesh::initMesh(Vertex* vertices, int vertSize, int* indices, int indexSize, int indexMesh, bool calcNormals){
 	
-
-
 	// Bind VAO
 	glBindVertexArray(m_meshdata[indexMesh]->getVAO());
 	// Bind VBO
@@ -182,7 +179,7 @@ void Mesh::Draw(Shader *shader) const {
 
 		//cout << m_meshdata[i]->material->indexAlbedo << endl;
 		if (m_meshdata[i]->material->indexAlbedo == INT_MAX)
-			glBindTexture(GL_TEXTURE_2D, blackTexture);
+			glBindTexture(GL_TEXTURE_2D, whiteTexture);
 		
 		//set mesh material
 

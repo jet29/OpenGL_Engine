@@ -26,7 +26,7 @@ class Model{
 		vec3 rotation = vec3(0,0,0);
 		vec3 scale = vec3(1,1,1);
 		vec3 pickingColor;
-
+		const char* shaderPath[2];
 		
 	// Private variables
 	private:

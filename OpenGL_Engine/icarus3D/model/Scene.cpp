@@ -6,7 +6,6 @@ Scene::Scene() {
 
 }
 
-
 Scene::~Scene() {
 
 
@@ -16,7 +15,11 @@ bool Scene::addModel(string pathObj, string pathMtl) {
 
 	// Push back into scene models
 	Model *newModel = new Model();
-	newModel->setShader("icarus3D/shaders/material.vert", "icarus3D/shaders/material.frag");
+	// Set shader path to be able to hot reload shaders
+	newModel->shaderPath[0] = "icarus3D/shaders/light.vert";
+	newModel->shaderPath[1] = "icarus3D/shaders/light.frag";
+	// Set shader
+	newModel->setShader(newModel->shaderPath[0], newModel->shaderPath[1]);
 	newModel->loadMesh(pathObj.c_str(), pathMtl.c_str());
 	newModel->name = "Name test";
 	// Move object to test collisions
@@ -91,7 +94,6 @@ bool Scene::saveScene() {
 
 	return true;
 }
-
 
 bool Scene::loadScene(string path) {
 

@@ -96,7 +96,7 @@ void icarus3D::init() {
 	render();
 	// Terminate interface instance
 	ui.terminate();
-	// Terminate GLFW, clearing any resources allocated by GLFW.
+	// Terminate GLFW, clearing any resources allocated by GLFW.s
 	glfwTerminate();
 }
 
@@ -183,11 +183,11 @@ void icarus3D::processKeyboardInput(ICwindow* window)
 		}
 
 		// Move Up
-		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			camera.moveUp(deltaTime);
 		}
 		// Move Down
-		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			camera.moveDown(deltaTime);
 		}
 	}
@@ -204,10 +204,17 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 				printf("Camera mode activated\n");
 				cameraMode = true;
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				glfwSetCursorPos(window, instance->windowWidth / 2.0, instance->windowHeight / 2.0);
+			}
+			break;
+		case GLFW_KEY_R:
+			for (auto &model : instance->scene[instance->currentScene]->models) {
+				model->setShader(model->shaderPath[0], model->shaderPath[1]);
 			}
 			break;
 		}
 	}
+	// Actions when camera mode is activated
 	else if (action == GLFW_PRESS && cameraMode) {
 		switch (key) {
 		case GLFW_KEY_F:
@@ -236,7 +243,7 @@ void icarus3D::onMouseButton(ICwindow* window, int button, int action, int mods)
 	//auto a = action == GLFW_PRESS ? GLFW_PRESS : GLFW_RELEASE;
 	//auto b = GLFW_MOUSE_BUTTON_LEFT;
 
-	if (action == GLFW_PRESS && instance->scene)
+	if (action == GLFW_PRESS && instance->currentScene != -1)
 		instance->pick();
 }
 
@@ -262,7 +269,6 @@ void icarus3D::renderScene(Scene *scene) {
 			
 		// Set model shader configuration
 
-
 		scene->models[i]->shader->setVec3("light.direction", light->properties.direction);
 		scene->models[i]->shader->setVec3("light.color.ambient", light->properties.color.ambient);
 		scene->models[i]->shader->setVec3("light.color.diffuse", light->properties.color.diffuse);
@@ -283,7 +289,7 @@ void icarus3D::renderScene(Scene *scene) {
 void icarus3D::drawBoundingBox() {
 	glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 1000.0f);
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
-	glm::vec3 modelPosition = scene->models[pickedIndex]->position;
+	glm::vec3 modelPosition = scene[currentScene]->models[pickedIndex]->position;
 	modelMatrix = glm::translate(modelMatrix, modelPosition);
 	glm::mat4 viewMatrix = camera.getWorldToViewMatrix();
 	// Render Bounding box
@@ -291,7 +297,7 @@ void icarus3D::drawBoundingBox() {
 	boundingBox->setMat4("model", modelMatrix);
 	boundingBox->setMat4("view", viewMatrix);
 	boundingBox->setMat4("projection", projectionMatrix);
-	scene->models[pickedIndex]->DrawBoundingBox(projectionMatrix, viewMatrix, modelMatrix);
+	scene[currentScene]->models[pickedIndex]->DrawBoundingBox(projectionMatrix, viewMatrix, modelMatrix);
 }
 
 void icarus3D::render() {
@@ -313,14 +319,13 @@ void icarus3D::render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// If there is any instanced scene, then render it
-		if (scene) {
+		if (currentScene != -1) {
 
-			if (checkCollision(scene)) {
+			if (checkCollision(scene[currentScene])) {
 				cout << "COLLISION!" << endl;
 			}
-
 			// Render scene
-			renderScene(scene);
+			renderScene(scene[currentScene]);
 		}
 		
 		// Draw interface
@@ -333,38 +338,45 @@ void icarus3D::render() {
 	
 }
 
-bool icarus3D::addModel() {
-
-	scene->addModel("assets/models/cottage/cottage_obj.obj", 
-					"assets/models/cottage/cottage_obj.mtl");
+bool icarus3D::addModel(const string path) {
+	string mtl_path = path;
+	// Find mtl path
+	size_t pos = 0;
+	string token;
+	pos = path.find(".");
+	mtl_path = mtl_path.substr(0, pos);
+	mtl_path += ".mtl";
+	scene[currentScene]->addModel(path,mtl_path);
 
 	return true;
 }
 
 bool icarus3D::createScene() {
-
-	delete scene;
-	scene = new Scene();
+	
+	Scene *newScene = new Scene();
+	scene.push_back(newScene);
 	cout << "scene created successfully" << endl;
+	// Choose, by default, freshly new scene
+	instance->currentScene = instance->scene.size() - 1;
 	return true;
 }
 
 bool icarus3D::loadScene(string path) {
 
-	delete scene;
-	scene = new Scene();
-	scene->loadScene(path);
+	Scene* newScene = new Scene();
+	newScene->loadScene(path);
+	scene.push_back(newScene);
 
 	return true;
 }
 
 bool icarus3D::saveScene() {
-	if (!scene) {
+	if (!currentScene == -1) {
 		cout << "there is no scene loaded " << endl;
 		return false;
 	}
 
-	scene->saveScene();
+	scene[currentScene]->saveScene();
 	return true;
 }
 
@@ -412,7 +424,7 @@ bool icarus3D::checkCollision(Scene *scene) {
 
 void icarus3D::pick() {
 
-	if (scene->models.size() == 0)
+	if (scene[currentScene]->models.size() == 0)
 		return;
 
 	double cursorX, cursorY;
@@ -433,7 +445,7 @@ void icarus3D::pick() {
 	
 	// Render all scene
 		// Iterate over scene models
-		for (auto& model : scene->models) {
+		for (auto& model : scene[currentScene]->models) {
 			// Compute Model matrix
 			glm::mat4 modelMatrix = glm::mat4(1.0f);
 			glm::vec3 modelPosition = model->position;
@@ -459,9 +471,9 @@ void icarus3D::pick() {
 		// Round color floats to be able to compare
 		readPixel.r = roundf(readPixel.r * 100) / 100;
 
-		for (auto &model : scene->models) {
+		for (auto &model : scene[currentScene]->models) {
 			if (abs(readPixel.r - model->pickingColor.r) < 0.001 && readPixel.r != 0.0f) {
-				pickedIndex = &model - &scene->models[0];
+				pickedIndex = &model - &scene[currentScene]->models[0];
 				printf("picked[%i] - name: %s\n", pickedIndex, model->name.c_str());
 
 			}

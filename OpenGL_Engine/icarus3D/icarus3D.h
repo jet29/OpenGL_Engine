@@ -30,7 +30,7 @@ typedef unsigned int ICuint;
 class icarus3D {
 	// Public variables
 	public:
-	Scene *scene;
+	vector<Scene *> scene;
 	DirectionalLight *light;
 	static Camera camera;
 	static bool cameraMode;
@@ -40,6 +40,7 @@ class icarus3D {
 	ICuint windowHeight = 600;
 	// Interface instance
 	UI ui;
+	int currentScene = -1;
 
 	// Private variables
 	private:
@@ -64,7 +65,7 @@ class icarus3D {
 		static icarus3D* Instance();
 		void init();
 		static unsigned int loadTexture(const char* path, int& texWidth, int& texHeight, int& numOfChannels);
-		bool addModel();
+		bool addModel(const string path);
 		float inline getFPS() { return fps; }
 		int inline getPickedIndex(){ return pickedIndex; }
 		bool createScene();

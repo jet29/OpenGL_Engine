@@ -28,7 +28,7 @@ private:
 public:
 
 	glm::vec3 position;
-
+	static glm::vec3 setColor(int r, int g, int b);
 	Light();
 
 	~Light();

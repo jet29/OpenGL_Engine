@@ -25,4 +25,8 @@ public:
 	bool init(GLFWwindow* window);
 	void draw();
 	void terminate();
+private:
+	void mainConfigWindow();
+	void pickedModelWindow();
+	void directionalLightWindow();
 };

@@ -9,6 +9,7 @@ layout (location = 2) in vec3 vertexNormal;
 out Data{
     vec3 fragPos;
     vec3 normal;
+    vec2 uv;
 }dataOut;
 
 uniform mat4 model;
@@ -17,7 +18,7 @@ uniform mat4 projection;
 
 
 void main(){
-
+    dataOut.uv = vertexUV;
     dataOut.normal = mat3(transpose(inverse(model))) * vertexNormal;
     dataOut.fragPos = vec3(model*vec4(vertexPosition, 1.0f));
     gl_Position = projection * view * vec4(dataOut.fragPos, 1.0f);
