@@ -1,3 +1,4 @@
 ﻿  ImGuizmo.cpp
+  LINK : C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe not found or not built by the last incremental link; performing full link
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   OpenGL_Engine.vcxproj -> C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe
