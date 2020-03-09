@@ -67,7 +67,7 @@ void Model::buildBoundingBox() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
-void Model::DrawBoundingBox(mat4 projectionMatrix, mat4 viewMatrix, mat4 modelMatrix) {
+void Model::DrawBoundingBox() {
 	// Binds the vertex array to be drawn
 	glBindVertexArray(BBVAO);
 	// Renders the geometry (fixed to 16)
@@ -81,4 +81,20 @@ void Model::setRotationQuaternion(glm::vec3 eulerAngles) {
 
 glm::vec3 Model::getEulerAnglesFromQuat() {
 	return glm::eulerAngles(glm::toQuat(rotationMatrix));
+}
+
+void Model::setTranslationMatrix() {
+	translationMatrix = glm::translate(glm::mat4(1.0f), position);
+}
+
+void Model::setScaleMatrix() {
+	scalingMatrix = glm::scale(glm::mat4(1.0f), scale);
+}
+
+void Model::computeModelMatrix() {
+	modelMatrix = glm::mat4(1.0f);
+	modelMatrix *= translationMatrix;
+	modelMatrix *= scalingMatrix;
+	modelMatrix *= rotationMatrix;
+
 }

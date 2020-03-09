@@ -1,6 +1,6 @@
 #include "UserInterface.h"
 #include "../icarus3D.h"
-//#include <ImGuizmo.h>
+#include <ImGuizmo.h>
 
 
 int   UI::listbox_item_current = 0;
@@ -97,18 +97,33 @@ void UI::pickedModelWindow() {
 	if (instance->getPickedIndex() != -1) {
 		glm::mat4 viewMatrix = instance->camera.getWorldToViewMatrix();
 		float** matrix = new float*[4];
+		bool flag = false;
 		for (int i = 0; i < 4; i++)
 			matrix[i] = new float[4];
 		string frameTitle = "Model: " + instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->name;
 		ImGui::Begin(frameTitle.c_str(), (bool*)true);
 		
 		// Set euler angles from quaternion
-		ImGui::SliderFloat3("Rotation", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles.x, 0.0f, 360.0f, "%.2f");
-		glm::quat q(glm::radians(instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles));
-		instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationMatrix = glm::toMat4(q);
+		if (ImGui::SliderFloat3("Rotation", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles.x, 0.0f, 360.0f, "%.2f")) {
+			flag = true;
+			glm::quat q(glm::radians(instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles));
+			instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationMatrix = glm::toMat4(q);
+		}
 		
 		// Set translation matrix
-		ImGui::DragFloat3("Translation", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->position.x);
+		if (ImGui::DragFloat3("Translation", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->position.x,0.5f)) {
+			flag = true;
+			instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->setTranslationMatrix();
+		}
+
+		if (ImGui::DragFloat3("Scaling", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->scale.x,0.2f,1.0f,100.0f)) {
+			flag = true;
+			instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->setScaleMatrix();
+		}
+
+		// Update model Matrix if any change has been made
+		if (flag)
+			instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->computeModelMatrix();
 
 		if (ImGui::IsKeyPressed(GLFW_KEY_T)) {
 			cout << "hola" << endl;
@@ -243,14 +258,18 @@ void UI::draw() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
-	//ImGuizmo::BeginFrame();
+	ImGuizmo::SetOrthographic(false);
+	ImGuizmo::BeginFrame();
+	ImGuizmo::Enable(true);
 	ImGui::GetIO().WantCaptureMouse = true;
+	ImGuizmo::SetRect(0, 0, ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y);
+	ImGuizmo::DrawGrid(&instance->camera.getWorldToViewMatrix()[0][0], &instance->camera.getPerspectiveMatrix()[0][0], &glm::mat4(1.0f)[0][0], 20.0f);
+	ImGuizmo::Manipulate(&instance->camera.getWorldToViewMatrix()[0][0], &instance->camera.getPerspectiveMatrix()[0][0], ImGuizmo::BOUNDS, ImGuizmo::WORLD, &glm::mat4(1.0f)[0][0], NULL, NULL);
 
 	showMainMenuBar();
 	//showModal();
 
 	//ImGui::Begin("test");
-	//ImGuizmo::Enable(true);
 	//static const float identityMatrix[16] =
 	//{ 1.f, 0.f, 0.f, 0.f,
 	//	0.f, 1.f, 0.f, 0.f,
@@ -259,7 +278,6 @@ void UI::draw() {
 
 	//float cameraProjection[16];
 
-	//ImGuizmo::DrawGrid(value_ptr(instance->camera.getWorldToViewMatrix()), cameraProjection, identityMatrix, 10.f);
 
 	//ImGui::End();
 
@@ -275,6 +293,7 @@ void UI::draw() {
 	drawModals(); 
 
 	// Render dear imgui into screen
+	ImGui::EndFrame();
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

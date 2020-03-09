@@ -57,7 +57,7 @@ bool Scene::saveScene() {
 
 		glm::vec3 pos = models[i]->position;
 		glm::vec3 scale = models[i]->scale;
-		glm::vec3 rot = models[i]->rotation;
+		glm::vec3 rot = models[i]->rotationAngles;
 		
 		root["models"][i]["name"] = models[i]->name;
 		root["models"][i]["path"] = models[i]->mesh->path;
@@ -134,7 +134,7 @@ bool Scene::loadScene(string path) {
 		cout << z << endl;
 
 		model->position = glm::vec3(x, y, z);
-		model->rotation = glm::vec3(0, 0, 0);
+		model->rotationAngles = glm::vec3(0, 0, 0);
 		model->scale = glm::vec3(1, 1, 1);
 
 		models.push_back(model);

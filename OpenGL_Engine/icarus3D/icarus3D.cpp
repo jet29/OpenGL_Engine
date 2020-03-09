@@ -260,14 +260,7 @@ void icarus3D::renderScene(Scene *scene) {
 		
 		// Use a single shader per model
 		model->shader->use();
-		// MVP matrix per model part
-		glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 100.0f);
-		glm::mat4 modelMatrix = glm::mat4(1.0f);
-		glm::vec3 modelPosition = model->position;
-		modelMatrix = glm::translate(modelMatrix, modelPosition);
-		modelMatrix *= model->rotationMatrix;
-		glm::mat4 viewMatrix = camera.getWorldToViewMatrix();
-			
+	
 		// Set model shader configuration
 
 		model->shader->setVec3("light.direction", light->properties.direction);
@@ -276,9 +269,9 @@ void icarus3D::renderScene(Scene *scene) {
 		model->shader->setVec3("light.color.specular", light->properties.color.specular);
 		model->shader->setVec3("viewPos", camera.position);
 		model->shader->setFloat("shininess", 32.0);
-		model->shader->setMat4("model", modelMatrix);
-		model->shader->setMat4("view", viewMatrix);
-		model->shader->setMat4("projection", projectionMatrix);
+		model->shader->setMat4("model", model->modelMatrix);
+		model->shader->setMat4("view", camera.getWorldToViewMatrix());
+		model->shader->setMat4("projection", camera.getPerspectiveMatrix());
 	
 		// Render model
 		model->mesh->Draw(model->shader);
@@ -288,18 +281,14 @@ void icarus3D::renderScene(Scene *scene) {
 }
 
 void icarus3D::drawBoundingBox() {
-	glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 1000.0f);
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
-	modelMatrix *= scene[currentScene]->models[pickedIndex]->rotationMatrix;
-	glm::vec3 modelPosition = scene[currentScene]->models[pickedIndex]->position;
-	modelMatrix = glm::translate(modelMatrix, modelPosition);
-	glm::mat4 viewMatrix = camera.getWorldToViewMatrix();
 	// Render Bounding box
 	boundingBox->use();
-	boundingBox->setMat4("model", modelMatrix);
-	boundingBox->setMat4("view", viewMatrix);
-	boundingBox->setMat4("projection", projectionMatrix);
-	scene[currentScene]->models[pickedIndex]->DrawBoundingBox(projectionMatrix, viewMatrix, modelMatrix);
+	boundingBox->setMat4("model", scene[currentScene]->models[pickedIndex]->modelMatrix);
+	boundingBox->setMat4("view", camera.getWorldToViewMatrix());
+	boundingBox->setMat4("projection", camera.getPerspectiveMatrix());
+
+	// Draw Bounding Box
+	scene[currentScene]->models[pickedIndex]->DrawBoundingBox();
 }
 
 void icarus3D::render() {
@@ -444,20 +433,14 @@ void icarus3D::pick() {
 	// Set shader
 	pickingShader->use();
 	// Set projection matrix
-	pickingShader->setMat4("projection", glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 100.0f));
+	pickingShader->setMat4("projection", camera.getPerspectiveMatrix());
 	pickingShader->setMat4("view", camera.getWorldToViewMatrix());
 	
 	// Render all scene
 		// Iterate over scene models
 		for (auto& model : scene[currentScene]->models) {
-			// Compute Model matrix
-			glm::mat4 modelMatrix = glm::mat4(1.0f);
-			modelMatrix *= model->rotationMatrix;
-			glm::vec3 modelPosition = model->position;
-			modelMatrix = glm::translate(modelMatrix, modelPosition);
-
 			// Set model matrix
-			pickingShader->setMat4("model", modelMatrix);
+			pickingShader->setMat4("model", model->modelMatrix);
 
 			// Set model picking color
 			pickingShader->setVec3("pickingColor", model->pickingColor);
