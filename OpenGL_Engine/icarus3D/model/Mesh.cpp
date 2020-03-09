@@ -36,7 +36,7 @@ Mesh::Mesh(const string& _path, const string &_mtlPath) {
 	path = _path;
 	mtlPath = _mtlPath;
 
-	loadMaterials(mtlPath);
+	hasMtl = loadMaterials(mtlPath);
 
 	Assimp::Importer importer;
 	
@@ -126,7 +126,7 @@ Mesh::Mesh(const string& _path, const string &_mtlPath) {
 			
 			const aiFace& face = model[i]->mFaces[j];
 			
-			assert(face.mNumIndices == 3);
+			//assert(face.mNumIndices == 3);
 
 			indices.push_back(face.mIndices[0]);
 			indices.push_back(face.mIndices[1]);
@@ -135,7 +135,10 @@ Mesh::Mesh(const string& _path, const string &_mtlPath) {
 
 		m_meshdata[i] = new MeshData(indices.size());
 
-		m_meshdata[i]->material = materials[model[i]->mMaterialIndex];
+		m_meshdata[i]->material = materials[0]; //set default material
+
+		//if Mtl file was found replace default material
+		if (hasMtl) m_meshdata[i]->material = materials[model[i]->mMaterialIndex];
 
 		initMesh(&vertices[0], vertices.size(), (int*)&indices[0], indices.size(), i, false);
 	}
@@ -223,7 +226,17 @@ void Mesh::calcNormals(Vertex* vertices, int vertSize, int* indices, int indexSi
 
 bool Mesh::loadMaterials(string path) {
 
-	materials.push_back(new Material());
+	Material *defaultMaterial = new Material();
+
+	defaultMaterial->ambient = glm::vec3(1, 1, 1);
+	defaultMaterial->diffuse = glm::vec3(1, 1, 1);
+	defaultMaterial->specular = glm::vec3(1, 1, 1);
+	defaultMaterial->shininess = 32;
+	defaultMaterial->indexAlbedo = whiteTexture;
+	defaultMaterial->ilum = 2;
+
+
+	materials.push_back(defaultMaterial);
 
 	FILE* file;
 
