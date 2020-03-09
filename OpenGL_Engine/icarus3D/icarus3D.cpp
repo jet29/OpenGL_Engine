@@ -263,9 +263,9 @@ void icarus3D::renderScene(Scene *scene) {
 		// MVP matrix per model part
 		glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 1.0f, 100.0f);
 		glm::mat4 modelMatrix = glm::mat4(1.0f);
-		modelMatrix *= model->rotationMatrix;
 		glm::vec3 modelPosition = model->position;
 		modelMatrix = glm::translate(modelMatrix, modelPosition);
+		modelMatrix *= model->rotationMatrix;
 		glm::mat4 viewMatrix = camera.getWorldToViewMatrix();
 			
 		// Set model shader configuration

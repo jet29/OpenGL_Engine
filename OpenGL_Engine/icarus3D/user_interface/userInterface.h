@@ -26,7 +26,13 @@ public:
 	void draw();
 	void terminate();
 private:
+	void showMainMenuBar();
+	void showMenuFile();
+	void drawModals();
 	void mainConfigWindow();
 	void pickedModelWindow();
 	void directionalLightWindow();
+	// UI Control variables
+	int dirLight_dir_radioButtons_opt;
+	bool flag;
 };
