@@ -6,6 +6,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#undef AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY
+#define AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY 0.1f
+
 extern unsigned int blackTexture;
 extern unsigned int whiteTexture;
 
@@ -36,12 +39,13 @@ Mesh::Mesh(const string& _path, const string &_mtlPath) {
 	loadMaterials(mtlPath);
 
 	Assimp::Importer importer;
-
+	
 	const aiScene* scene = importer.ReadFile(path.c_str(),
 		aiProcess_Triangulate |
 		aiProcess_GenUVCoords |
 		aiProcess_GenSmoothNormals |
-		aiProcess_GenBoundingBoxes);
+		aiProcess_GenBoundingBoxes |
+		aiProcess_GlobalScale);
 
 
 	if (!scene) {

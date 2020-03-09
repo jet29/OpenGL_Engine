@@ -89,7 +89,6 @@ void UI::mainConfigWindow() {
 void UI::pickedModelWindow() {
 	// If there's an element picked show its info
 	if (instance->getPickedIndex() != -1) {
-		cout << "apachurrale" << endl;
 		glm::mat4 viewMatrix = instance->camera.getWorldToViewMatrix();
 		float** matrix = new float*[4];
 		for (int i = 0; i < 4; i++)
