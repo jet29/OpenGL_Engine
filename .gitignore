@@ -36,7 +36,7 @@
 /.vs
 
 # x64 files
-/OpenGL_Engine/x64
+/OpenGL_Engine/x64/*
 
 # OpenGL Resources
 #/External_Resources
