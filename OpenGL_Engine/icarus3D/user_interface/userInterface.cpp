@@ -27,7 +27,6 @@ UI::UI() {
 bool UI::init(GLFWwindow* window) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
 	if (!ImGui_ImplGlfw_InitForOpenGL(window, true) || !ImGui_ImplOpenGL3_Init("#version 330 core"))
 		return false;
 	ImGui::StyleColorsDark();
@@ -38,10 +37,6 @@ bool UI::init(GLFWwindow* window) {
 	return true;
 }
 
-int callback(ImGuiTextEditCallbackData* data) {
-
-	return 0;
-}
 
 void UI::mainConfigWindow() {
 	ImGui::Begin("Scene creation");
@@ -56,6 +51,7 @@ void UI::mainConfigWindow() {
 			if (ImGui::Selectable(items[n].c_str(), is_selected)) {
 				current_item = items[n].c_str();
 				instance->currentScene = n;
+				instance->setPickedIndex(-1);
 			}
 			if (is_selected)
 				ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
@@ -93,26 +89,31 @@ void UI::mainConfigWindow() {
 void UI::pickedModelWindow() {
 	// If there's an element picked show its info
 	if (instance->getPickedIndex() != -1) {
-		glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)instance->windowWidth / (float)instance->windowHeight, 1.0f, 100.0f);
+		cout << "apachurrale" << endl;
 		glm::mat4 viewMatrix = instance->camera.getWorldToViewMatrix();
-		const float* viewMatrixFloat = glm::value_ptr(viewMatrix);
-		const float* projectionMatrixFloat = glm::value_ptr(projectionMatrix);
-		const float* modelMatrixFloat = glm::value_ptr(glm::mat4(1.0f));
 		float** matrix = new float*[4];
 		for (int i = 0; i < 4; i++)
 			matrix[i] = new float[4];
-		ImGuizmo::DrawCube(viewMatrixFloat, projectionMatrixFloat, modelMatrixFloat);
-		ImGuizmo::Manipulate(viewMatrixFloat, projectionMatrixFloat, ImGuizmo::ROTATE, ImGuizmo::WORLD, &matrix[0][0]);
 		string frameTitle = "Model: " + instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->name;
 		ImGui::Begin(frameTitle.c_str(), (bool*)true);
+		// Set euler angles from quaternion
+		glm::vec3 angles = instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles;
+		ImGui::SliderFloat3("Rotation", value_ptr(angles), 0.0f, 360.0f, "%.2f");
+		glm::quat q(glm::radians(angles));
+		instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationMatrix = glm::toMat4(q);
+		instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles = angles;
+
+		// Set rotation quaternion from euler angels
+		//instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->
+		//		setRotationQuaternion(glm::vec3(eulerAngles[0], eulerAngles[1], eulerAngles[2]));
+
 		if (ImGui::IsKeyPressed(GLFW_KEY_T)) {
 			cout << "hola" << endl;
 		}
-
-		ImGuizmo::TRANSLATE;
 		ImGui::End();
 	}
 }
+
 
 void UI::directionalLightWindow() {
 	ImGui::Begin("Directional light properties");
@@ -129,10 +130,21 @@ void UI::draw() {
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 	ImGuizmo::BeginFrame();
-	ImGuizmo::Enable(true);
-	ImGuiIO& io = ImGui::GetIO();
-	ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+	ImGui::GetIO().WantCaptureMouse = true;
 
+	//ImGui::Begin("test");
+	//ImGuizmo::Enable(true);
+	//static const float identityMatrix[16] =
+	//{ 1.f, 0.f, 0.f, 0.f,
+	//	0.f, 1.f, 0.f, 0.f,
+	//	0.f, 0.f, 1.f, 0.f,
+	//	0.f, 0.f, 0.f, 1.f };
+
+	//float cameraProjection[16];
+
+	//ImGuizmo::DrawGrid(value_ptr(instance->camera.getWorldToViewMatrix()), cameraProjection, identityMatrix, 10.f);
+
+	//ImGui::End();
 
 	// Main configuration window
 	mainConfigWindow();
@@ -143,9 +155,6 @@ void UI::draw() {
 	// Picked model window
 	pickedModelWindow();
 
-
-
-	
 	// Render dear imgui into screen
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

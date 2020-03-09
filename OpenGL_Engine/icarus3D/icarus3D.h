@@ -68,6 +68,7 @@ class icarus3D {
 		bool addModel(const string path);
 		float inline getFPS() { return fps; }
 		int inline getPickedIndex(){ return pickedIndex; }
+		void inline setPickedIndex(int index) { pickedIndex = index; }
 		bool createScene();
 		bool saveScene();
 		bool loadScene(string path);

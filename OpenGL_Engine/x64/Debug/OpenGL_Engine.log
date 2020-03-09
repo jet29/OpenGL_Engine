@@ -1,2 +1,8 @@
-﻿  userInterface.cpp
+﻿  Mesh.cpp
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\model\Mesh.cpp(55,23): warning C4305: 'initializing': truncation from 'int' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\model\Mesh.cpp(56,23): warning C4305: 'initializing': truncation from 'int' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\model\Mesh.cpp(57,23): warning C4305: 'initializing': truncation from 'int' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\model\Mesh.cpp(132,47): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\model\Mesh.cpp(136,86): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\model\Mesh.cpp(173,33): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   OpenGL_Engine.vcxproj -> C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe

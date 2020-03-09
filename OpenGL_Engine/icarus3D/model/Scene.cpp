@@ -23,7 +23,7 @@ bool Scene::addModel(string pathObj, string pathMtl) {
 	newModel->loadMesh(pathObj.c_str(), pathMtl.c_str());
 	newModel->name = "Name test";
 	// Move object to test collisions
-	newModel->position = glm::vec3(0, 0, -10);
+	newModel->position = glm::vec3(0, 0, 0);
 	newModel->pickingColor = pickingColor;
 	// Update picking color
 	updatePickingColor();

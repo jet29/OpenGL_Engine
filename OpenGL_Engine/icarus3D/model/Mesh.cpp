@@ -176,21 +176,18 @@ void Mesh::Draw(Shader *shader) const {
 
 		shader->setInt("albedo", 0);
 		glActiveTexture(GL_TEXTURE0);
-
 		//cout << m_meshdata[i]->material->indexAlbedo << endl;
-		if (m_meshdata[i]->material->indexAlbedo == INT_MAX)
+		if (m_meshdata[i]->material->indexAlbedo == INT_MAX) 
 			glBindTexture(GL_TEXTURE_2D, whiteTexture);
-		
+		else
+			glBindTexture(GL_TEXTURE_2D, m_meshdata[i]->material->indexAlbedo);
+
 		//set mesh material
 
 		shader->setVec3("material.ka", m_meshdata[i]->material->ambient);
 		shader->setVec3("material.kd", m_meshdata[i]->material->diffuse);
 		shader->setVec3("material.ks", m_meshdata[i]->material->specular);
 		shader->setFloat("material.shininess", m_meshdata[i]->material->shininess);
-
-
-		glBindTexture(GL_TEXTURE_2D, m_meshdata[i]->material->indexAlbedo);
-
 
 		glBindVertexArray(m_meshdata[i]->getVAO());
 		glDrawElements(GL_TRIANGLES, m_meshdata[i]->getSize(), GL_UNSIGNED_INT, 0);

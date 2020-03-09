@@ -74,3 +74,11 @@ void Model::DrawBoundingBox(mat4 projectionMatrix, mat4 viewMatrix, mat4 modelMa
 	glDrawArrays(GL_LINE_STRIP, 0, 16);
 	glBindVertexArray(0);
 }
+
+void Model::setRotationQuaternion(glm::vec3 eulerAngles) {
+	rotationMatrix = glm::mat4(glm::quat(eulerAngles));
+}
+
+glm::vec3 Model::getEulerAnglesFromQuat() {
+	return glm::eulerAngles(glm::toQuat(rotationMatrix));
+}

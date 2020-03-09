@@ -26,6 +26,11 @@ glm::mat4 Camera::getWorldToViewMatrix() const {
 	return glm::lookAt(position, position + viewDirection, UP);
 }
 
+glm::mat4 Camera::getPerspectiveMatrix()const{
+	return glm::perspective(glm::radians(45.0f), (float)800 / (float)600, 1.0f, 100.0f);
+}
+
+
 void Camera::moveForward(float time) {
 	float speed = MOVEMENT_SPEED * time;
 	position += speed * viewDirection;
