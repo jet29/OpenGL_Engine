@@ -1,2 +1,8 @@
-﻿  userInterface.cpp
-  OpenGL_Engine.vcxproj -> C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe
+﻿  Mesh.cpp
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Mesh.cpp(55,23): warning C4305: 'initializing': truncation from 'int' to 'float'
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Mesh.cpp(56,23): warning C4305: 'initializing': truncation from 'int' to 'float'
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Mesh.cpp(57,23): warning C4305: 'initializing': truncation from 'int' to 'float'
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Mesh.cpp(132,47): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Mesh.cpp(139,86): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Mesh.cpp(176,33): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  OpenGL_Engine.vcxproj -> C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe

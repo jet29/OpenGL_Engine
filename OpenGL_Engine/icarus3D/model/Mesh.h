@@ -86,4 +86,5 @@ private:
 	unsigned int loadTexture(const char* path);
 	string m_filename;
 	vector<MeshData*> m_meshdata;
+	bool hasMtl;
 };
