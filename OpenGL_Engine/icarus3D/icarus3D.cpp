@@ -265,7 +265,7 @@ void icarus3D::resize(ICwindow* window, int width, int height){
 	// Sets the OpenGL viewport size and position
 	glViewport(0, 0, windowWidth, windowHeight);
 
-	camera.resize(windowWidth, windowHeight);
+	//camera.resize(windowWidth, windowHeight);
 	instance->setFrameBuffer(instance->dsTexture);
 }
 
@@ -276,16 +276,45 @@ void icarus3D::renderScene(Scene *scene) {
 		// Use a single shader per model
 		model->shader->use();
 	
-		// Set model shader configuration
+		if (model->type == MODEL) {
+		// Set Directional light shader uniforms
+		model->shader->setVec3("dirlight.direction", light->properties.direction);
+		model->shader->setVec3("dirlight.color.ambient", light->properties.color.ambient);
+		model->shader->setVec3("dirlight.color.diffuse", light->properties.color.diffuse);
+		model->shader->setVec3("dirlight.color.specular", light->properties.color.specular);
+		model->shader->setBool("dirlight.lightSwitch", light->lightSwitch);
+			// Set Point lights shader uniforms
+			model->shader->setInt("numOfPointLight", scene->pointlight_index.size());
+			for (ICuint i = 0; i < scene->pointlight_index.size(); i++) {
+				PointLight* pointlight = (PointLight*)scene->models[scene->pointlight_index[i]];
+				std::string index = std::to_string(i);
+				// Set pointlight position
+				model->shader->setVec3("pointlight[" + index + "].position", pointlight->position);
+				// Set pointlight color
+				model->shader->setVec3("pointlight[" + index + "].color.ambient", pointlight->properties.color.ambient);
+				model->shader->setVec3("pointlight[" + index + "].color.diffuse", pointlight->properties.color.diffuse);
+				model->shader->setVec3("pointlight[" + index + "].color.specular", pointlight->properties.color.specular);
+				// Set pointlight attenuationF
+				model->shader->setFloat("pointlight[" + index + "].attenuation.constant", pointlight->properties.attenuation.constant);
+				model->shader->setFloat("pointlight[" + index + "].attenuation.linear", pointlight->properties.attenuation.linear);
+				model->shader->setFloat("pointlight[" + index + "].attenuation.quadratic", pointlight->properties.attenuation.quadratic);
+				// Set pointlight switch bool
+				model->shader->setBool("pointlight[" + index + "].lightSwitch", pointlight->lightSwitch);
+				// Set directional light switch bool
+			}
+		}
+		else if (model->type == POINTLIGHT) {
+			PointLight* pointlight = (PointLight*)model;
+			model->shader->setVec3("ambient", pointlight->properties.color.ambient);
+			model->shader->setVec3("diffuse", pointlight->properties.color.diffuse);
+			model->shader->setVec3("specular", pointlight->properties.color.specular);
+			model->shader->setBool("lightSwitch", pointlight->lightSwitch);
+		}
 
-		model->shader->setVec3("light.direction", light->properties.direction);
-		model->shader->setVec3("light.color.ambient", light->properties.color.ambient);
-		model->shader->setVec3("light.color.diffuse", light->properties.color.diffuse);
-		model->shader->setVec3("light.color.specular", light->properties.color.specular);
+		// Set model shader uniforms
 		model->shader->setVec3("viewPos", camera.position);
-		model->shader->setFloat("shininess", 32.0);
 		model->shader->setMat4("model", model->modelMatrix);
-		model->shader->setMat4("view", camera.getWorldToViewMatrix());
+		model->shader->setMat4("view", camera.viewMatrix);
 		model->shader->setMat4("projection", camera.getPerspectiveMatrix());
 	
 		// Render model
@@ -299,7 +328,7 @@ void icarus3D::drawBoundingBox() {
 	// Render Bounding box
 	boundingBoxShader->use();
 	boundingBoxShader->setMat4("model", scene[currentScene]->models[pickedIndex]->modelMatrix);
-	boundingBoxShader->setMat4("view", camera.getWorldToViewMatrix());
+	boundingBoxShader->setMat4("view", camera.viewMatrix);
 	boundingBoxShader->setMat4("projection", camera.getPerspectiveMatrix());
 
 	// Draw Bounding Box
@@ -322,7 +351,7 @@ void icarus3D::render() {
 		glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+		
 		// If there is any instanced scene, then render it
 		if (currentScene != -1) {
 
@@ -340,13 +369,13 @@ void icarus3D::render() {
 		ui.draw();
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
-		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
+		// Check if any events have been activated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 	}
 	
 }
 
-bool icarus3D::addModel(const string path) {
+bool icarus3D::addModel(const string path, const string name) {
 	string mtl_path = path;
 	// Find mtl path
 	size_t pos = 0;
@@ -354,7 +383,7 @@ bool icarus3D::addModel(const string path) {
 	pos = path.find(".");
 	mtl_path = mtl_path.substr(0, pos);
 	mtl_path += ".mtl";
-	scene[currentScene]->addModel(path,mtl_path);
+	scene[currentScene]->addModel(path,mtl_path,name);
 	return true;
 }
 
@@ -456,7 +485,7 @@ void icarus3D::pick() {
 	pickingShader->use();
 	// Set projection matrix
 	pickingShader->setMat4("projection", camera.getPerspectiveMatrix());
-	pickingShader->setMat4("view", camera.getWorldToViewMatrix());
+	pickingShader->setMat4("view", camera.viewMatrix);
 	
 	// Render all scene
 		// Iterate over scene models

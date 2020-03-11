@@ -12,6 +12,8 @@
 #include "../Shader.h"
 #include "Mesh.h"
 
+typedef enum { MODEL, POINTLIGHT} MODEL_TYPE;
+
 using std::vector;
 using namespace glm;
 using namespace std;
@@ -20,9 +22,9 @@ class Model{
 	// Public variables
 	public:
 
-	
 		Mesh* mesh;
 		std::string name;
+		MODEL_TYPE type;
 		Shader* shader;
 		vec3 position = vec3(0,0,0);
 		vec3 scale = vec3(1,1,1);

@@ -13,7 +13,6 @@ public:
 		LightColor color;
 		Attenuation attenuation;
 	} properties;
-
 private:
 
 };

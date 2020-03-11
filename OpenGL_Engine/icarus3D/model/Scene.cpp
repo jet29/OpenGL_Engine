@@ -11,17 +11,18 @@ Scene::~Scene() {
 
 }
 
-bool Scene::addModel(string pathObj, string pathMtl) {
+bool Scene::addModel(string pathObj, string pathMtl, string name) {
 
 	// Push back into scene models
 	Model *newModel = new Model();
 	// Set shader path to be able to hot reload shaders
-	newModel->shaderPath[0] = "icarus3D/shaders/light.vert";
-	newModel->shaderPath[1] = "icarus3D/shaders/light.frag";
+	newModel->shaderPath[0] = "icarus3D/shaders/modelShader.vert";
+	newModel->shaderPath[1] = "icarus3D/shaders/modelShader.frag";
 	// Set shader
 	newModel->setShader(newModel->shaderPath[0], newModel->shaderPath[1]);
 	newModel->loadMesh(pathObj.c_str(), pathMtl.c_str());
-	newModel->name = "Name test";
+	newModel->name = name;
+	newModel->type = MODEL;
 	newModel->pickingColor = pickingColor;
 	// Update picking color
 	updatePickingColor();
@@ -41,6 +42,7 @@ bool Scene::addLight(string name) {
 	PointLight* newLight = new PointLight();
 
 	newLight->name = name;
+	newLight->type = POINTLIGHT;
 	// Set shader path to be able to hot reload shaders
 	newLight->shaderPath[0] = "icarus3D/shaders/pointlight.vert";
 	newLight->shaderPath[1] = "icarus3D/shaders/pointlight.frag";
@@ -50,13 +52,14 @@ bool Scene::addLight(string name) {
 	newLight->pickingColor = pickingColor;
 	// Update picking color
 	updatePickingColor();
-	
+	// Push new light index
+	pointlight_index.push_back(models.size());
+	// Push light to model list
 	models.push_back(newLight);
-
-	cout << typeid(newLight).name() << endl;
 
 	return true;
 }
+
 
 void Scene::removeModel(int index) {
 

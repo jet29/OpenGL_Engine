@@ -98,3 +98,4 @@ void Model::computeModelMatrix() {
 	modelMatrix *= rotationMatrix;
 
 }
+

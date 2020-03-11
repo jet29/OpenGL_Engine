@@ -26,9 +26,9 @@ class Light : public Model{
 private:
 
 public:
-	glm::vec3 position;
 	static glm::vec3 setColor(int r, int g, int b);
 	static glm::vec3 setColor(glm::ivec3 color);
+	bool lightSwitch = true;
 	Light();
 
 	~Light();

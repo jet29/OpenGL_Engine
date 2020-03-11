@@ -72,7 +72,7 @@ class icarus3D {
 		static icarus3D* Instance();
 		void init();
 		static unsigned int loadTexture(const char* path, int& texWidth, int& texHeight, int& numOfChannels);
-		bool addModel(const string path);
+		bool addModel(const string path, const string name="");
 		bool addLight(const string path="");
 		float inline getFPS() { return fps; }
 		int inline getPickedIndex(){ return pickedIndex; }

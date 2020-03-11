@@ -23,12 +23,13 @@ public:
 	~Scene();
 
 	std::vector<Model *> models;
+	std::vector<int> pointlight_index;
 	string name;
 	bool saveScene();
 	bool loadScene(string path);
 
 	bool addModel(Model *model);
-	bool addModel(string pathObj, string pathMtl);
+	bool addModel(string pathObj, string pathMtl, string name = "Model");
 
 	bool addLight(string name = "");
 	void removeModel(int index);

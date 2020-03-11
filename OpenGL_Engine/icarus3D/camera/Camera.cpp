@@ -21,6 +21,7 @@ void Camera::mouseUpdate(const glm::vec2& newMousePosition) {
 	glm::mat4 Rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), 0.0f);
 	viewDirection = glm::vec3(Rotation * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f));
 	UP = glm::vec3(Rotation * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
 }
 
 glm::mat4 Camera::getWorldToViewMatrix() {
@@ -37,33 +38,45 @@ glm::mat4 Camera::getPerspectiveMatrix(){
 void Camera::moveForward(float time) {
 	float speed = MOVEMENT_SPEED * time;
 	position += speed * viewDirection;
+	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
+
 }
 
 void Camera::moveBackward(float time) {
 	float speed = MOVEMENT_SPEED * time;
 	position -= speed * viewDirection;
+	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
+
 }
 
 void Camera::moveLeft(float time) {
 	float speed = MOVEMENT_SPEED * time;
 	glm::vec3 moveDirection = glm::cross(viewDirection, UP);
 	position += -speed * moveDirection;
+	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
+
 }
 
 void Camera::moveRight(float time) {
 	float speed = MOVEMENT_SPEED * time;
 	glm::vec3 moveDirection = glm::cross(viewDirection, UP);
 	position += speed * moveDirection;
+	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
+
 }
 
 void Camera::moveUp(float time) {
 	float speed = MOVEMENT_SPEED * 0.7 * time;
 	position += speed * UP;
+	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
+
 }
 
 void Camera::moveDown(float time) {
 	float speed = MOVEMENT_SPEED * 0.7 * time;
 	position -= speed * UP;
+	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
+
 }
 
 void Camera::resize(int windowWidth, int windowHeight) {

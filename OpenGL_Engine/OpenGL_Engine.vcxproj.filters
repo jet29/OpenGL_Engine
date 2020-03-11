@@ -84,10 +84,12 @@
     <None Include="icarus3D\shaders\basic.vert" />
     <None Include="icarus3D\shaders\picking.vert" />
     <None Include="icarus3D\shaders\picking.frag" />
-    <None Include="icarus3D\shaders\light.frag" />
-    <None Include="icarus3D\shaders\light.vert" />
     <None Include="icarus3D\shaders\bounding_box.frag" />
     <None Include="icarus3D\shaders\bounding_box.vert" />
+    <None Include="icarus3D\shaders\modelShader.frag" />
+    <None Include="icarus3D\shaders\modelShader.vert" />
+    <None Include="icarus3D\shaders\pointlight.frag" />
+    <None Include="icarus3D\shaders\pointlight.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icarus3D\icarus3D.h">
