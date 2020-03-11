@@ -2,18 +2,18 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+// Static Variables
+ICuint icarus3D::windowWidth = 800;
+ICuint icarus3D::windowHeight = 600;
+
 // Global static pointer used to ensure a single instance of the class.
 icarus3D* icarus3D::instance = NULL;
-Camera icarus3D::camera;
+Camera icarus3D::camera(windowWidth, windowHeight);
 bool icarus3D::cameraMode = false;
 
 // Textures
 unsigned int whiteTexture;
 unsigned int blackTexture;
-
-// Static Variables
-ICuint icarus3D::windowWidth = 800;
-ICuint icarus3D::windowHeight = 600;
 
 /**
 * Creates an instance of the class
@@ -84,7 +84,7 @@ unsigned int icarus3D::loadTexture(const char* path, int &texWidth, int &texHeig
 
 void icarus3D::init() {
 	// Initialize window and glad components
-	if (!initWindow() || !initGlad()) {
+	if (!initWindow() || !initGlad() || !setFrameBuffer(dsTexture)) {
 		std::cout << "ERROR::Couldn't initialize window or GLAD components" << std::endl;
 		return;
 	}
@@ -92,10 +92,18 @@ void icarus3D::init() {
 	initGL();
 	// Initialize user interface context
 	ui.init(window);
-	// Load picking shader
-	pickingShader = new Shader("icarus3d/shaders/picking.vert", "icarus3d/shaders/picking.frag");
+
+	// Init Icarus3D variables
+	pickingShader = new Shader("icarus3D/shaders/picking.vert", "icarus3D/shaders/picking.frag");
+	boundingBoxShader = new Shader("icarus3D/shaders/bounding_box.vert", "icarus3D/shaders/bounding_box.frag");
+	deferredShader = new Shader("icarus3D/shaders/deferred.vert", "icarus3D/shaders/deferred.frag");
+	whiteTexture = loadTexture("assets/textures/white_bg.png");
+	blackTexture = loadTexture("assets/textures/black_bg.png");
+	buildDeferredPlane();
 	// Create Mandatory Dir Light
 	light = new DirectionalLight();
+
+	
 	// Begin render loop
 	render();
 	// Terminate interface instance
@@ -157,7 +165,7 @@ void icarus3D::initGL() {
 	// Sets the ViewPort
 	glViewport(0, 0, windowWidth, windowHeight);
 	// Sets the clear color
-	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
 }
 
 void icarus3D::processKeyboardInput(ICwindow* window)
@@ -256,6 +264,9 @@ void icarus3D::resize(ICwindow* window, int width, int height){
 	windowHeight = height;
 	// Sets the OpenGL viewport size and position
 	glViewport(0, 0, windowWidth, windowHeight);
+
+	camera.resize(windowWidth, windowHeight);
+	instance->setFrameBuffer(instance->dsTexture);
 }
 
 void icarus3D::renderScene(Scene *scene) {
@@ -286,21 +297,18 @@ void icarus3D::renderScene(Scene *scene) {
 
 void icarus3D::drawBoundingBox() {
 	// Render Bounding box
-	boundingBox->use();
-	boundingBox->setMat4("model", scene[currentScene]->models[pickedIndex]->modelMatrix);
-	boundingBox->setMat4("view", camera.getWorldToViewMatrix());
-	boundingBox->setMat4("projection", camera.getPerspectiveMatrix());
+	boundingBoxShader->use();
+	boundingBoxShader->setMat4("model", scene[currentScene]->models[pickedIndex]->modelMatrix);
+	boundingBoxShader->setMat4("view", camera.getWorldToViewMatrix());
+	boundingBoxShader->setMat4("projection", camera.getPerspectiveMatrix());
 
 	// Draw Bounding Box
 	scene[currentScene]->models[pickedIndex]->DrawBoundingBox();
 }
 
 void icarus3D::render() {
+
 	// Game loop
-	whiteTexture = loadTexture("assets/textures/white_bg.png");
-	blackTexture = loadTexture("assets/textures/black_bg.png");
-	cout << "init: " + to_string(whiteTexture) << endl;
-	boundingBox = new Shader("icarus3D/shaders/bounding_box.vert", "icarus3D/shaders/bounding_box.frag");
 	while (!glfwWindowShouldClose(window))
 	{
 		//FPS
@@ -313,7 +321,7 @@ void icarus3D::render() {
 		// Clear the colorbuffer
 		glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// If there is any instanced scene, then render it
 		if (currentScene != -1) {
@@ -321,10 +329,13 @@ void icarus3D::render() {
 			if (checkCollision(scene[currentScene])) {
 				cout << "COLLISION!" << endl;
 			}
-			// Render scene
-			renderScene(scene[currentScene]);
+
+			//Deferred shading
+			renderToTexture();
+
+			forwardRendering();
 		}
-		
+
 		// Draw interface
 		ui.draw();
 		// Swap the screen buffers
@@ -430,7 +441,7 @@ void icarus3D::pick() {
 	double cursorX, cursorY;
 
 	// Clear the screen in white
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Get Cursor position
@@ -528,4 +539,101 @@ unsigned int icarus3D::loadTexture(const char* path)
 	stbi_image_free(data);
 
 	return id;
+}
+
+void icarus3D::renderToTexture() {
+
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	// Clears the color and depth buffers from the frame buffer
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Render scene
+	renderScene(scene[currentScene]);
+
+	glBindVertexArray(0);
+
+}
+
+void icarus3D::forwardRendering() {
+	// Forward rendering
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Use the shader
+	deferredShader->use();
+	deferredShader->setInt("image", 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, dsTexture);
+	//Binds the vertex array to be drawn
+	glBindVertexArray(VAO);
+	// Renders the triangle geometry
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
+
+void icarus3D::buildDeferredPlane() {
+
+	// Quad for debug purposes:
+	float quadVertices[] = {
+		// positions        // Color   		   // texture Coords
+		-1.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+		 1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+		 1.0f, -1.0f, 0.0f, 0.5f, 0.5f, 0.75f, 1.0f, 0.0f,
+	};
+	// Setup plane VAO
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	// Position
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	// Color
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	// Texture Coords
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
+}
+
+bool icarus3D::setFrameBuffer(GLuint& texture) {
+
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+	// The texture we're going to render to
+	glGenTextures(1, &texture);
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// Give an empty image to OpenGL (Which is done with last "0")
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	// Depth buffer
+	glGenRenderbuffers(1, &depthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+
+	// Frame buffer configuration
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
+
+	// Set list of draw buffers
+	GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, DrawBuffers);
+
+	// Always check that our framebuffer is ok
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cout << "ERROR::Framebuffer configuration went wrong" << std::endl;
+		return false;
+	}
+	return true;
+
 }

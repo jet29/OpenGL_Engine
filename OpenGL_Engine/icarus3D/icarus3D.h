@@ -59,7 +59,13 @@ class icarus3D {
 		float deltaTime;
 		int totalFrames = 0;
 		int pickedIndex = -1;
-		Shader* boundingBox;
+		Shader* boundingBoxShader;
+		Shader* deferredShader;
+		// Deferred Shading
+		GLuint framebuffer, depthBuffer;
+		GLuint dsTexture;
+		unsigned int VBO;
+		unsigned int VAO;
 	// Public functions
 	public:
 		//Method to obtain the only instance of the calls
@@ -84,12 +90,16 @@ class icarus3D {
 		static void onKeyPress(ICwindow* window, int key, int scancode, int action, int mods);
 		void render();
 		void drawBoundingBox();
+		void renderToTexture();
+		void forwardRendering();
 		bool initWindow();
 		bool initGlad();
 		void initGL();
-		void processKeyboardInput(GLFWwindow* window);
+		void processKeyboardInput(ICwindow* window);
 		void updateFrames();
 		bool checkCollision(Scene *scene);
+		void buildDeferredPlane();
+		bool setFrameBuffer(GLuint& texture);
 		void pick();
 
 };
