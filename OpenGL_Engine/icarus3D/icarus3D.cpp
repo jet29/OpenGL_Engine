@@ -11,6 +11,10 @@ bool icarus3D::cameraMode = false;
 unsigned int whiteTexture;
 unsigned int blackTexture;
 
+// Static Variables
+ICuint icarus3D::windowWidth = 800;
+ICuint icarus3D::windowHeight = 600;
+
 /**
 * Creates an instance of the class
 *
@@ -124,7 +128,7 @@ bool icarus3D::initWindow(){
 	glfwMakeContextCurrent(window);
 
 	// Window resize callback
-	//glfwSetFramebufferSizeCallback(window, resize);
+	glfwSetFramebufferSizeCallback(window, resize);
 	// Mouse position callback
 	glfwSetCursorPosCallback(window, onMouseMotion);
 	// Mouse buttons callback
