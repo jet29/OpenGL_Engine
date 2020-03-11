@@ -15,7 +15,7 @@ public:
 	float yaw, pitch;
 	glm::mat4 viewMatrix = glm::mat4(1.0f);
 	glm::mat4 perspectiveMatrix = glm::mat4(1.0f);
-	Camera();
+	Camera(int windowWidth, int windowHeight);
 	glm::mat4 getWorldToViewMatrix();
 	glm::mat4 getPerspectiveMatrix();
 	void mouseUpdate(const glm::vec2& newMousePosition);
@@ -25,4 +25,5 @@ public:
 	void moveRight(float time);
 	void moveUp(float time);
 	void moveDown(float time);
+	void resize(int windowWidth, int windowHeight);
 };

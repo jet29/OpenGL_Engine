@@ -36,9 +36,9 @@ class icarus3D {
 	static Camera camera;
 	static bool cameraMode;
 	// Window current width
-	ICuint windowWidth = 800;
+	static ICuint windowWidth;
 	// Window current height
-	ICuint windowHeight = 600;
+	static ICuint windowHeight;
 	// Interface instance
 	UI ui;
 	int currentScene = -1;
@@ -59,7 +59,13 @@ class icarus3D {
 		float deltaTime;
 		int totalFrames = 0;
 		int pickedIndex = -1;
-		Shader* boundingBox;
+		Shader* boundingBoxShader;
+		Shader* deferredShader;
+		// Deferred Shading
+		GLuint framebuffer, depthBuffer;
+		GLuint dsTexture;
+		unsigned int VBO;
+		unsigned int VAO;
 	// Public functions
 	public:
 		//Method to obtain the only instance of the calls
@@ -79,18 +85,22 @@ class icarus3D {
 		// Private functions
 	private:
 		icarus3D();
-		void resize(ICwindow* window, int width, int height);
+		static void resize(ICwindow* window, int width, int height);
 		static void onMouseMotion(ICwindow* window, double xpos, double ypos);
 		static void onMouseButton(ICwindow* window, int button, int action, int mods);
 		static void onKeyPress(ICwindow* window, int key, int scancode, int action, int mods);
 		void render();
 		void drawBoundingBox();
+		void renderToTexture();
+		void forwardRendering();
 		bool initWindow();
 		bool initGlad();
 		void initGL();
-		void processKeyboardInput(GLFWwindow* window);
+		void processKeyboardInput(ICwindow* window);
 		void updateFrames();
 		bool checkCollision(Scene *scene);
+		void buildDeferredPlane();
+		bool setFrameBuffer(GLuint& texture);
 		void pick();
 
 };

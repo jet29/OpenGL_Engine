@@ -3,7 +3,7 @@
 
 const float MOVEMENT_SPEED = 25.0f;
 
-Camera::Camera() :
+Camera::Camera(int windowWidth, int windowHeight) :
 	viewDirection(0, 0, -1),
 	UP(0.0f, 1.0f, 0.0f),
 	position(0, 0, 0)
@@ -12,7 +12,7 @@ Camera::Camera() :
 	yaw = 0.0f;
 	pitch = 0.0f;
 	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
-	perspectiveMatrix = glm::perspective(glm::radians(45.0f), (float)800 / (float)600, 1.0f, 100.0f);
+	perspectiveMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 0.3f, 1000.0f);
 }
 
 void Camera::mouseUpdate(const glm::vec2& newMousePosition) {
@@ -64,4 +64,8 @@ void Camera::moveUp(float time) {
 void Camera::moveDown(float time) {
 	float speed = MOVEMENT_SPEED * 0.7 * time;
 	position -= speed * UP;
+}
+
+void Camera::resize(int windowWidth, int windowHeight) {
+	perspectiveMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 0.3f, 1000.0f);
 }
