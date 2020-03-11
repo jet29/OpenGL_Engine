@@ -2,5 +2,6 @@
 
 
 PointLight::PointLight(){
-
+	shaderPath[0] = "";
+	shaderPath[1] = "";
 }

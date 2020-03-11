@@ -340,7 +340,11 @@ bool icarus3D::addModel(const string path) {
 	mtl_path = mtl_path.substr(0, pos);
 	mtl_path += ".mtl";
 	scene[currentScene]->addModel(path,mtl_path);
+	return true;
+}
 
+bool icarus3D::addLight(const string name) {
+	scene[currentScene]->addLight(name);
 	return true;
 }
 

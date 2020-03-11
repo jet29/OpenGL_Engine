@@ -32,6 +32,7 @@ private:
 	void drawModals();
 	void settingsWindow();
 	void directionalLightProperties();
+	void pointLightProperties();
 	void pickedModelWindow();
 	void directionalLightWindow();
 	// UI Control variables

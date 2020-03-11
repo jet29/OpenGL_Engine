@@ -1,8 +1,8 @@
 #pragma once
+#include "../model/Model.h"
 #include "Light.h"
 
-
-class PointLight : Light {
+class PointLight : public Light{
 
 public:
 

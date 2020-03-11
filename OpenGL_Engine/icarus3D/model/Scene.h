@@ -6,6 +6,9 @@
 #include <vector>
 #include <map>
 #include "Model.h"
+#include "../light/Light.h"
+#include "../light/Pointlight.h"
+#include "../light/Spotlight.h"
 
 using std::vector;
 using namespace glm;
@@ -26,6 +29,8 @@ public:
 
 	bool addModel(Model *model);
 	bool addModel(string pathObj, string pathMtl);
+
+	bool addLight(string name = "");
 	void removeModel(int index);
 
 private:

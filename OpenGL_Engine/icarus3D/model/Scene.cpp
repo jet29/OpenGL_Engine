@@ -22,8 +22,6 @@ bool Scene::addModel(string pathObj, string pathMtl) {
 	newModel->setShader(newModel->shaderPath[0], newModel->shaderPath[1]);
 	newModel->loadMesh(pathObj.c_str(), pathMtl.c_str());
 	newModel->name = "Name test";
-	// Move object to test collisions
-	newModel->position = glm::vec3(0, 0, 0);
 	newModel->pickingColor = pickingColor;
 	// Update picking color
 	updatePickingColor();
@@ -35,6 +33,27 @@ bool Scene::addModel(string pathObj, string pathMtl) {
 bool Scene::addModel(Model *model) {
 
 	models.push_back(model);
+
+	return true;
+}
+
+bool Scene::addLight(string name) {
+	PointLight* newLight = new PointLight();
+
+	newLight->name = name;
+	// Set shader path to be able to hot reload shaders
+	newLight->shaderPath[0] = "icarus3D/shaders/pointlight.vert";
+	newLight->shaderPath[1] = "icarus3D/shaders/pointlight.frag";
+	// Set shader
+	newLight->setShader(newLight->shaderPath[0], newLight->shaderPath[1]);
+	newLight->loadMesh("assets/models/light_sphere.obj", "assets/models/light_sphere.mtl");
+	newLight->pickingColor = pickingColor;
+	// Update picking color
+	updatePickingColor();
+	
+	models.push_back(newLight);
+
+	cout << typeid(newLight).name() << endl;
 
 	return true;
 }

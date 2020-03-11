@@ -18,6 +18,8 @@ float UI::f_threshold = 0.5f;
 int   UI::i_threshold = 122;
 static const char* current_item_scene = NULL;
 static const char* current_item_light = NULL;
+static const char* current_item_light_selector = NULL;
+
 vector<string> lights = { "Directional", "Pointlight" };
 
 icarus3D* instance;
@@ -36,7 +38,6 @@ bool UI::init(GLFWwindow* window) {
 	instance = icarus3D::Instance();
 	return true;
 }
-
 
 void UI::settingsWindow() {
 	if (settingFlag) {
@@ -62,7 +63,7 @@ void UI::settingsWindow() {
 		ImGui::Separator();
 
 		// Light selector
-
+		string test;
 		ImGui::Text("Directional Light Properties");
 		if (ImGui::BeginCombo("##combo_lights", current_item_light)){
 			for (int n = 0; n < 2; n++)
@@ -76,10 +77,8 @@ void UI::settingsWindow() {
 			}
 			ImGui::EndCombo();
 		}
-
-		//if (current_item_light == "Directional")
-			cout << current_item_light << endl;
-			//directionalLightProperties();
+		directionalLightProperties();
+		pointLightProperties();
 		//if (current_item_light == "Pointlight")
 			
 
@@ -119,6 +118,27 @@ void UI::directionalLightProperties() {
 			ImGui::ColorPicker3("Ks", &instance->light->properties.color.specular.x);
 		}
 	}
+}
+
+void UI::pointLightProperties() {
+
+	// Scene selector
+	ImGui::Text("Light selector");
+	if (ImGui::BeginCombo("##combo_light_selector", current_item_light_selector)) {
+		for (int n = 0; n < instance->scene.size(); n++)
+		{
+			//bool is_selected = (current_item_light_selector == instance->scene[n]->name.c_str()); // You can store your selection however you want, outside or inside your objects
+/*			if (ImGui::Selectable(instance->scene[n]->name.c_str(), is_selected)) {
+				current_item_light_selector = instance->scene[n]->name.c_str();
+				instance->currentScene = n;
+				instance->setPickedIndex(-1);
+			}
+			if (is_selected)
+				ImGui::SetItemDefaultFocus();*/   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::Separator();
 }
 
 void UI::pickedModelWindow() {
@@ -206,7 +226,7 @@ void UI::drawModals() {
 		ImGui::EndPopup();
 	}
 
-	// Create new scene modal
+	// Create new scene  - modal
 	ImGui::SetNextWindowSize(ImVec2(300, 130));
 	if (ImGui::BeginPopupModal("Create Scene##modal",0))
 	{
@@ -229,6 +249,30 @@ void UI::drawModals() {
 		}
 		ImGui::EndPopup();
 	}
+
+	// Add a new light - modal
+	ImGui::SetNextWindowSize(ImVec2(300, 130));
+	if (ImGui::BeginPopupModal("Add a new light"))
+	{
+		ImGui::Text("Please name your light");
+		string defaultLightName = "Light " /*+ to_string(instance->scene[instance->getPickedIndex()])*/;
+		char buffer[1024];
+		strcpy_s(buffer, defaultLightName.c_str());
+		ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer));
+		if (ImGui::Button("Add", ImVec2(80, 30))) {
+			instance->addLight(string(buffer));
+			ImGui::CloseCurrentPopup();
+			activateModal = "";
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel", ImVec2(80, 30)))
+		{
+			ImGui::CloseCurrentPopup();
+			activateModal = "";
+		}
+		ImGui::EndPopup();
+	}
+
 }
 
 void UI::showMainMenuBar() {
@@ -246,6 +290,9 @@ void UI::showMainMenuBar() {
 			if (ImGui::BeginMenu("Scene")){
 				if (ImGui::MenuItem("Add model")) {
 					activateModal = "Add a new model";
+				}
+				if (ImGui::MenuItem("Add light")) {
+					activateModal = "Add a new light";
 				}
 				ImGui::EndMenu();
 			}

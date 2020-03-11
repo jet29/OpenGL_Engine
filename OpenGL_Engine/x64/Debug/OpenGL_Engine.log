@@ -1,6 +1,10 @@
-﻿  userInterface.cpp
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(286,57): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(286,34): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(290,95): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(287,12): warning C4101: 'matrix': unreferenced local variable
+﻿  icarus3D.cpp
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(360,53): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(375,25): warning C4806: '==': unsafe operation: no value of type 'bool' promoted to type 'int' can equal the given constant
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(387,27): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(393,9): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(472,26): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
+  main.cpp
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   OpenGL_Engine.vcxproj -> C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe
