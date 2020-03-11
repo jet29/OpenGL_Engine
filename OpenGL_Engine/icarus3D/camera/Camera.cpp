@@ -11,6 +11,8 @@ Camera::Camera() :
 	mouseSpeed = 70.0f;
 	yaw = 0.0f;
 	pitch = 0.0f;
+	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
+	perspectiveMatrix = glm::perspective(glm::radians(45.0f), (float)800 / (float)600, 1.0f, 100.0f);
 }
 
 void Camera::mouseUpdate(const glm::vec2& newMousePosition) {
@@ -21,13 +23,14 @@ void Camera::mouseUpdate(const glm::vec2& newMousePosition) {
 	UP = glm::vec3(Rotation * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
 }
 
-glm::mat4 Camera::getWorldToViewMatrix() const {
-	//printf("position (%f,%f,%f) viewDiw (%f,%f,%f)\n", position[0], position[1], position[2], viewDirection[0], viewDirection[1], viewDirection[2]);
-	return glm::lookAt(position, position + viewDirection, UP);
+glm::mat4 Camera::getWorldToViewMatrix() {
+	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
+	return viewMatrix;
 }
 
-glm::mat4 Camera::getPerspectiveMatrix()const{
-	return glm::perspective(glm::radians(45.0f), (float)800 / (float)600, 1.0f, 100.0f);
+glm::mat4 Camera::getPerspectiveMatrix(){
+	perspectiveMatrix = glm::perspective(glm::radians(45.0f), (float)800 / (float)600, 1.0f, 100.0f);
+	return perspectiveMatrix;
 }
 
 
@@ -54,11 +57,11 @@ void Camera::moveRight(float time) {
 }
 
 void Camera::moveUp(float time) {
-	float speed = MOVEMENT_SPEED * time;
+	float speed = MOVEMENT_SPEED * 0.7 * time;
 	position += speed * UP;
 }
 
 void Camera::moveDown(float time) {
-	float speed = MOVEMENT_SPEED * time;
+	float speed = MOVEMENT_SPEED * 0.7 * time;
 	position -= speed * UP;
 }

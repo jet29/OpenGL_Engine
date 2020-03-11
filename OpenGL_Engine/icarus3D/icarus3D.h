@@ -17,7 +17,7 @@
 #include "light/DirectionalLight.h"
 #include "light/PointLight.h"
 #include "light/SpotLight.h"
-
+#include <ImGuizmo.h>
 
 //#include ""
 
@@ -70,10 +70,11 @@ class icarus3D {
 		float inline getFPS() { return fps; }
 		int inline getPickedIndex(){ return pickedIndex; }
 		void inline setPickedIndex(int index) { pickedIndex = index; }
-		bool createScene();
+		bool createScene(string name = "");
 		bool saveScene();
 		bool loadScene(string path);
 		unsigned int loadTexture(const char* path);
+		void renderScene(Scene *scene);
 		// Private functions
 	private:
 		icarus3D();
@@ -83,7 +84,6 @@ class icarus3D {
 		static void onKeyPress(ICwindow* window, int key, int scancode, int action, int mods);
 		void render();
 		void drawBoundingBox();
-		void renderScene(Scene *scene);
 		bool initWindow();
 		bool initGlad();
 		void initGL();

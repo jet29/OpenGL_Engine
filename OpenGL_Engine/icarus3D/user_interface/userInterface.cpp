@@ -16,8 +16,9 @@ long  UI::uniqueColors = 0;
 bool  UI::hardwareAcceleration = 0;
 float UI::f_threshold = 0.5f;
 int   UI::i_threshold = 122;
-vector<string> items;
-static const char* current_item = NULL;
+static const char* current_item_scene = NULL;
+static const char* current_item_light = NULL;
+vector<string> lights = { "Directional", "Pointlight" };
 
 icarus3D* instance;
 
@@ -37,59 +38,87 @@ bool UI::init(GLFWwindow* window) {
 }
 
 
-void UI::mainConfigWindow() {
-	ImGui::Begin("Scene creation");
+void UI::settingsWindow() {
+	if (settingFlag) {
+		ImGui::Begin("Settings");
 
-
-	current_item = items.size() == 0 ? NULL : items[instance->currentScene].c_str();
-	// Scene selector
-	if (ImGui::BeginCombo("Current scene", current_item)) {
-		for (int n = 0; n < items.size(); n++)
-		{
-			bool is_selected = (current_item == items[n].c_str()); // You can store your selection however you want, outside or inside your objects
-			if (ImGui::Selectable(items[n].c_str(), is_selected)) {
-				current_item = items[n].c_str();
-				instance->currentScene = n;
-				instance->setPickedIndex(-1);
+		current_item_scene = instance->scene.size() == 0 ? NULL : instance->scene[instance->currentScene]->name.c_str();
+		// Scene selector
+		ImGui::Text("Current scene");
+		if (ImGui::BeginCombo("##combo_scenes", current_item_scene)) {
+			for (int n = 0; n < instance->scene.size(); n++)
+			{
+				bool is_selected = (current_item_scene == instance->scene[n]->name.c_str()); // You can store your selection however you want, outside or inside your objects
+				if (ImGui::Selectable(instance->scene[n]->name.c_str(), is_selected)) {
+					current_item_scene = instance->scene[n]->name.c_str();
+					instance->currentScene = n;
+					instance->setPickedIndex(-1);
+				}
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
 			}
-			if (is_selected)
-				ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+			ImGui::EndCombo();
 		}
-		ImGui::EndCombo();
+		ImGui::Separator();
+
+		// Light selector
+
+		ImGui::Text("Directional Light Properties");
+		if (ImGui::BeginCombo("##combo_lights", current_item_light)){
+			for (int n = 0; n < 2; n++)
+			{
+				bool is_selected2 = (current_item_light == lights[n].c_str()); // You can store your selection however you want, outside or inside your objects
+				if (ImGui::Selectable(lights[n].c_str(), is_selected2)) {
+					current_item_light = lights[n].c_str();
+				}
+				if (is_selected2)
+					ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+			}
+			ImGui::EndCombo();
+		}
+
+		//if (current_item_light == "Directional")
+			cout << current_item_light << endl;
+			//directionalLightProperties();
+		//if (current_item_light == "Pointlight")
+			
+
+		ImGui::End();
+	}
+}
+
+void UI::directionalLightProperties() {
+	ImGui::RadioButton("X", &dirLight_dir_radioButtons_opt, 0); ImGui::SameLine();
+	ImGui::RadioButton("Y", &dirLight_dir_radioButtons_opt, 1); ImGui::SameLine();
+	ImGui::RadioButton("Z", &dirLight_dir_radioButtons_opt, 2);
+	switch (dirLight_dir_radioButtons_opt) {
+	case 0:
+		ImGui::SliderFloat("", &instance->light->properties.direction.x, -10.0f, 10.0f, "%.2f");
+		break;
+	case 1:
+		ImGui::SliderFloat("", &instance->light->properties.direction.y, -10.0f, 10.0f, "%.2f");
+		break;
+	case 2:
+		ImGui::SliderFloat("", &instance->light->properties.direction.z, -10.0f, 10.0f, "%.2f");
+		break;
 	}
 
-	if (ImGui::Button("Create New Scene", ImVec2(0, 0))) {
-		instance->createScene();
-		items.push_back("Scene " + to_string((items.size() + 1)));
+	if (ImGui::CollapsingHeader("Light Color")) {
+		// Ambient color
+		if (ImGui::CollapsingHeader("Ambient")) {
+			ImGui::ColorPicker3("Ka", &instance->light->properties.color.ambient.x);
+		}
+
+		// Diffuse color
+		if (ImGui::CollapsingHeader("Diffuse")) {
+			ImGui::ColorPicker3("Kd", &instance->light->properties.color.diffuse.x);
+		}
+
+		// Specular color
+		if (ImGui::CollapsingHeader("Specular")) {
+			ImGui::ColorPicker3("Ks", &instance->light->properties.color.specular.x);
+		}
 	}
-
-	//if (instance->currentScene != -1) {
-	//	if (ImGui::CollapsingHeader("Add model", ImGuiTreeNodeFlags_DefaultOpen)) {
-	//		static char buffer[1024] = "assets/models/catscaled.obj";
-	//		ImGui::InputText("Path", buffer, IM_ARRAYSIZE(buffer));
-	//		if (ImGui::Button("Add", ImVec2(0, 0))) {
-	//			instance->addModel(string(buffer));
-	//		}
-	//	}
-	//}
-
-	ImGui::Separator();
-
-	if (ImGui::Button("Load Scene", ImVec2(0, 0))) {
-		instance->loadScene("scene.json");
-	}
-
-	if (ImGui::Button("Save Scene", ImVec2(0, 0))) {
-		instance->saveScene();
-	}
-
-	if (ImGui::Button("Add model"))
-	{
-		//flag = true;
-	}
-
-
-	ImGui::End();
 }
 
 void UI::pickedModelWindow() {
@@ -134,37 +163,7 @@ void UI::pickedModelWindow() {
 
 void UI::directionalLightWindow() {
 	ImGui::Begin("Directional light properties");
-	ImGui::RadioButton("X", &dirLight_dir_radioButtons_opt, 0); ImGui::SameLine();
-	ImGui::RadioButton("Y", &dirLight_dir_radioButtons_opt, 1); ImGui::SameLine();
-	ImGui::RadioButton("Z", &dirLight_dir_radioButtons_opt, 2);
-	switch (dirLight_dir_radioButtons_opt) {
-		case 0:
-			ImGui::SliderFloat("", &instance->light->properties.direction.x, -10.0f, 10.0f, "%.2f");
-			break;
-		case 1:
-			ImGui::SliderFloat("", &instance->light->properties.direction.y, -10.0f, 10.0f, "%.2f");
-			break;
-		case 2:
-			ImGui::SliderFloat("", &instance->light->properties.direction.z, -10.0f, 10.0f, "%.2f");
-			break;
-	}
 
-	if(ImGui::CollapsingHeader("Light Color")) {
-		// Ambient color
-		if (ImGui::CollapsingHeader("Ambient")) {
-			ImGui::ColorPicker3("Ka", &instance->light->properties.color.ambient.x);
-		}
-
-		// Diffuse color
-		if (ImGui::CollapsingHeader("Diffuse")) {
-			ImGui::ColorPicker3("Kd", &instance->light->properties.color.diffuse.x);
-		}
-
-		// Specular color
-		if (ImGui::CollapsingHeader("Specular")) {
-			ImGui::ColorPicker3("Ks", &instance->light->properties.color.specular.x);
-		}
-	}
 	ImGui::End();
 
 }
@@ -172,34 +171,21 @@ void UI::directionalLightWindow() {
 void UI::showMenuFile() {
 	//ImGui::MenuItem("(dummy menu)", NULL, false, false);
 	if (ImGui::MenuItem("New Scene")) {
-		instance->createScene();
-		items.push_back("Scene " + to_string((items.size() + 1)));
+		activateModal = "Create Scene##modal";
 	}
-	if (ImGui::MenuItem("Open", "Ctrl+O")) {}
-	if (ImGui::BeginMenu("Open Recent"))
-	{
-		ImGui::MenuItem("fish_hat.c");
-		ImGui::MenuItem("fish_hat.inl");
-		ImGui::MenuItem("fish_hat.h");
-		if (ImGui::BeginMenu("More.."))
-		{
-			ImGui::MenuItem("Hello");
-			ImGui::MenuItem("Sailor");
-			if (ImGui::BeginMenu("Recurse.."))
-			{
-				//ShowExampleMenuFile();
-				ImGui::EndMenu();
-			}
-			ImGui::EndMenu();
-		}
-		ImGui::EndMenu();
+	if (ImGui::MenuItem("Open Scene")) {
 	}
+
+	if (ImGui::MenuItem("Save Scene",NULL,false, instance->currentScene != -1)) {
+	}
+
 }
 
 void UI::drawModals() {
-	if (flag)
-		ImGui::OpenPopup("Add a new model");
+	if (activateModal != "")
+		ImGui::OpenPopup(activateModal.c_str());
 
+	// Save new model  - modal
 	ImGui::SetNextWindowSize(ImVec2(300, 130));
 	if (ImGui::BeginPopupModal("Add a new model"))
 	{
@@ -209,13 +195,37 @@ void UI::drawModals() {
 		if (ImGui::Button("Add", ImVec2(80, 30))){
 			instance->addModel(string(buffer));
 			ImGui::CloseCurrentPopup();
-			flag = false;
+			activateModal = "";
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Cancel", ImVec2(80, 30)))
 		{
 			ImGui::CloseCurrentPopup();
-			flag = false;
+			activateModal = "";
+		}
+		ImGui::EndPopup();
+	}
+
+	// Create new scene modal
+	ImGui::SetNextWindowSize(ImVec2(300, 130));
+	if (ImGui::BeginPopupModal("Create Scene##modal",0))
+	{
+		ImGui::Text("Please name your scene");
+		string defaultSceneName = "Scene " + to_string(instance->scene.size());
+		char buffer[1024];
+		strcpy_s(buffer, defaultSceneName.c_str());
+
+		ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer));
+		if (ImGui::Button("Create", ImVec2(80, 30))) {
+			instance->createScene(string(buffer));
+			ImGui::CloseCurrentPopup();
+			activateModal = "";
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel", ImVec2(80, 30)))
+		{
+			ImGui::CloseCurrentPopup();
+			activateModal = "";
 		}
 		ImGui::EndPopup();
 	}
@@ -225,30 +235,40 @@ void UI::showMainMenuBar() {
 
 	if (ImGui::BeginMainMenuBar())
 	{
+		// File Option
 		if (ImGui::BeginMenu("File"))
 		{
 			showMenuFile();
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginMenu("Edit"))
-		{
-			if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-			if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-			ImGui::Separator();
-			if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-			if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-			if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-			ImGui::EndMenu();
-		}
+		// Scene Option
 		if (instance->currentScene != -1) {
 			if (ImGui::BeginMenu("Scene")){
 				if (ImGui::MenuItem("Add model")) {
-					flag = true;
+					activateModal = "Add a new model";
 				}
 				ImGui::EndMenu();
 			}
 		}
-		ImGui::Button("test");
+		// Settings button
+		if (settingFlag) {
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+			if (ImGui::Button("Settings")) {
+				settingFlag = settingFlag == true ? false : true;
+			}
+			ImGui::PopStyleColor(2);
+		}
+		else {
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(3 / 255.0f, 60 / 255.0f, 84 / 255.0f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+			if (ImGui::Button("Settings")) {
+				settingFlag = settingFlag == true ? false : true;
+			}
+			ImGui::PopStyleColor(3);
+		}
+
 		ImGui::EndMainMenuBar();
 	}
 }
@@ -262,27 +282,17 @@ void UI::draw() {
 	ImGuizmo::BeginFrame();
 	ImGuizmo::Enable(true);
 	ImGui::GetIO().WantCaptureMouse = true;
-	ImGuizmo::SetRect(0, 0, ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y);
-	ImGuizmo::DrawGrid(&instance->camera.getWorldToViewMatrix()[0][0], &instance->camera.getPerspectiveMatrix()[0][0], &glm::mat4(1.0f)[0][0], 20.0f);
-	ImGuizmo::Manipulate(&instance->camera.getWorldToViewMatrix()[0][0], &instance->camera.getPerspectiveMatrix()[0][0], ImGuizmo::BOUNDS, ImGuizmo::WORLD, &glm::mat4(1.0f)[0][0], NULL, NULL);
-
+	ImGuizmo::DrawGrid(&instance->camera.viewMatrix[0][0], &instance->camera.getPerspectiveMatrix()[0][0], &glm::mat4(1.0f)[0][0], 10.0f);
+	ImGuizmo::SetRect(0, 0, instance->windowWidth, instance->windowHeight);
+	glm::mat4 matrix;
+	//ImGuizmo::Manipulate(&instance->camera.getWorldToViewMatrix()[0][0], &instance->camera.getPerspectiveMatrix()[0][0], ImGuizmo::ROTATE, ImGuizmo::WORLD, &matrix[0][0], NULL, NULL);
+	//ImGuizmo::DecomposeMatrixToComponents(&matrix[0][0],&instance->camera.position[0], &instance->camera.viewDirection[0], &glm::vec3(1.0f)[0]);
+	ImGuizmo::ViewManipulate(&instance->camera.viewMatrix[0][0],8.0f,ImVec2(instance->windowWidth-128,0),ImVec2(128,128),0x10101010);
 	showMainMenuBar();
-	//showModal();
 
-	//ImGui::Begin("test");
-	//static const float identityMatrix[16] =
-	//{ 1.f, 0.f, 0.f, 0.f,
-	//	0.f, 1.f, 0.f, 0.f,
-	//	0.f, 0.f, 1.f, 0.f,
-	//	0.f, 0.f, 0.f, 1.f };
-
-	//float cameraProjection[16];
-
-
-	//ImGui::End();
 
 	// Main configuration window
-	//mainConfigWindow();
+	settingsWindow();
 
 	// Directional light information
 	//directionalLightWindow();

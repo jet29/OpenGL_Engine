@@ -13,9 +13,11 @@ public:
 	glm::vec2 oldMousePosition;
 	float mouseSpeed;
 	float yaw, pitch;
+	glm::mat4 viewMatrix = glm::mat4(1.0f);
+	glm::mat4 perspectiveMatrix = glm::mat4(1.0f);
 	Camera();
-	glm::mat4 getWorldToViewMatrix() const;
-	glm::mat4 getPerspectiveMatrix() const;
+	glm::mat4 getWorldToViewMatrix();
+	glm::mat4 getPerspectiveMatrix();
 	void mouseUpdate(const glm::vec2& newMousePosition);
 	void moveForward(float time);
 	void moveBackward(float time);

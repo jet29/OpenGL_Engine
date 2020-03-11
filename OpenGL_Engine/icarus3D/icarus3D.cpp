@@ -310,6 +310,7 @@ void icarus3D::render() {
 		glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
 		// If there is any instanced scene, then render it
 		if (currentScene != -1) {
 
@@ -343,9 +344,11 @@ bool icarus3D::addModel(const string path) {
 	return true;
 }
 
-bool icarus3D::createScene() {
-	
+bool icarus3D::createScene(string name) {
 	Scene *newScene = new Scene();
+	if (name == "")
+		name = "Scene" + to_string(this->scene.size());
+	newScene->name = name;
 	scene.push_back(newScene);
 	cout << "scene created successfully" << endl;
 	// Choose, by default, freshly new scene

@@ -20,7 +20,7 @@ public:
 	~Scene();
 
 	std::vector<Model *> models;
-
+	string name;
 	bool saveScene();
 	bool loadScene(string path);
 

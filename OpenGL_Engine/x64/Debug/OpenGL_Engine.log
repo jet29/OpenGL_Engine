@@ -1,2 +1,6 @@
 ﻿  userInterface.cpp
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(286,57): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(286,34): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(290,95): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(287,12): warning C4101: 'matrix': unreferenced local variable
   OpenGL_Engine.vcxproj -> C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe

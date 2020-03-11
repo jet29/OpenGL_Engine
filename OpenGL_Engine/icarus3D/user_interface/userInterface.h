@@ -1,5 +1,6 @@
 #pragma once
 #include <imgui.hpp>
+#include <string.h>
 //#include "glm/glm.hpp"
 //#include <GLFW/glfw3.h>
 
@@ -29,10 +30,12 @@ private:
 	void showMainMenuBar();
 	void showMenuFile();
 	void drawModals();
-	void mainConfigWindow();
+	void settingsWindow();
+	void directionalLightProperties();
 	void pickedModelWindow();
 	void directionalLightWindow();
 	// UI Control variables
 	int dirLight_dir_radioButtons_opt;
-	bool flag;
+	std::string activateModal = "";
+	bool settingFlag = false;
 };
