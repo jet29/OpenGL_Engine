@@ -24,6 +24,7 @@ public:
 
 	std::vector<Model *> models;
 	string name;
+	float DOFThreshold = 0.5f;
 	bool saveScene();
 	bool loadScene(string path);
 

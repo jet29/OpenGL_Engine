@@ -61,9 +61,12 @@ class icarus3D {
 		int pickedIndex = -1;
 		Shader* boundingBoxShader;
 		Shader* deferredShader;
+		Shader* deferredDepthShader;
 		// Deferred Shading
 		GLuint framebuffer, depthBuffer;
+		GLuint DOFframebuffer, depthTexture;
 		GLuint dsTexture;
+		GLuint kernel7, kernel11;
 		unsigned int VBO;
 		unsigned int VAO;
 	// Public functions
@@ -93,6 +96,7 @@ class icarus3D {
 		void drawBoundingBox();
 		void renderToTexture();
 		void forwardRendering();
+		void renderDOF();
 		bool initWindow();
 		bool initGlad();
 		void initGL();
@@ -101,6 +105,8 @@ class icarus3D {
 		bool checkCollision(Scene *scene);
 		void buildDeferredPlane();
 		bool setFrameBuffer(GLuint& texture);
+		bool setFrameBufferDepth(GLuint& texture);
+		bool initKernel();
 		void pick();
 
 };

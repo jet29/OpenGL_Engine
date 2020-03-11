@@ -60,6 +60,9 @@ void UI::settingsWindow() {
 			}
 			ImGui::EndCombo();
 		}
+
+		ImGui::DragFloat("DOF Threshold", &instance->scene[instance->currentScene]->DOFThreshold, 0.005f, 0, 100);
+
 		ImGui::Separator();
 
 		// Light selector

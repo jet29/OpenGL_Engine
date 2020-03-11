@@ -12,6 +12,8 @@ public:
 	glm::vec3 UP;
 	glm::vec2 oldMousePosition;
 	float mouseSpeed;
+	float nearPlane = 1.0f;
+	float farPlane = 50.0f;
 	float yaw, pitch;
 	glm::mat4 viewMatrix = glm::mat4(1.0f);
 	glm::mat4 perspectiveMatrix = glm::mat4(1.0f);
