@@ -10,6 +10,7 @@ ICuint icarus3D::windowHeight = 600;
 icarus3D* icarus3D::instance = NULL;
 Camera icarus3D::camera(windowWidth, windowHeight);
 bool icarus3D::cameraMode = false;
+bool icarus3D::shiftBool = false;
 
 // Textures
 unsigned int whiteTexture;
@@ -213,6 +214,9 @@ void icarus3D::processKeyboardInput(ICwindow* window)
 void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, int mods) {
 	// Actions when camera mode is disabled
 	if (action == GLFW_PRESS && !cameraMode) {
+
+		if (mods == GLFW_MOD_SHIFT) shiftBool = true;
+
 		switch (key) {
 		case GLFW_KEY_F:
 			if (mods == GLFW_MOD_SHIFT) {
@@ -225,6 +229,16 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 		case GLFW_KEY_R:
 			for (auto &model : instance->scene[instance->currentScene]->models) {
 				model->setShader(model->shaderPath[0], model->shaderPath[1]);
+
+				delete instance->pickingShader;
+				delete instance->boundingBoxShader;
+				delete instance->deferredShader;
+				delete instance->deferredDepthShader;
+
+				instance->pickingShader = new Shader("icarus3D/shaders/picking.vert", "icarus3D/shaders/picking.frag");
+				instance->boundingBoxShader = new Shader("icarus3D/shaders/bounding_box.vert", "icarus3D/shaders/bounding_box.frag");
+				instance->deferredShader = new Shader("icarus3D/shaders/deferred.vert", "icarus3D/shaders/deferred.frag");
+				instance->deferredDepthShader = new Shader("icarus3D/shaders/deferredDepth.vert", "icarus3D/shaders/deferredDepth.frag");
 			}
 			break;
 		}
@@ -241,6 +255,10 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 			break;
 		}
 	}
+	
+	if (mods != GLFW_MOD_SHIFT) shiftBool = false;
+
+	
 }
 
 void icarus3D::onMouseMotion(ICwindow* window, double xpos, double ypos)
@@ -258,7 +276,7 @@ void icarus3D::onMouseButton(ICwindow* window, int button, int action, int mods)
 	//auto a = action == GLFW_PRESS ? GLFW_PRESS : GLFW_RELEASE;
 	//auto b = GLFW_MOUSE_BUTTON_LEFT;
 
-	if (action == GLFW_PRESS && instance->currentScene != -1)
+	if (action == GLFW_PRESS && instance->currentScene != -1 && instance->shiftBool)
 		instance->pick();
 }
 
@@ -728,7 +746,7 @@ bool icarus3D::setFrameBufferDepth(GLuint &texture) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	float borderColor[] = { 0.78f, 0.78f, 0.78f, 1.0f };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	// attach depth texture as FBO's depth buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, DOFframebuffer);

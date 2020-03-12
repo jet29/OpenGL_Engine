@@ -215,13 +215,26 @@ void UI::pickedModelWindow() {
 		ImGui::RadioButton("World", &radio_button_loc_w, 1); ImGui::SameLine();
 		ImGuizmo::MODE space = radio_button_loc_w == 0 ? ImGuizmo::LOCAL : ImGuizmo::WORLD;
 
+		vector<float> bound = vector<float>(6);
+		vector<float> boundSnap = vector<float>(3,0.1);
+		vector<float> snap = vector<float>(3,1);
+
+		bound[0] = model->mesh->min.x;
+		bound[1] = model->mesh->min.y;
+		bound[2] = model->mesh->min.z;
+		bound[3] = model->mesh->max.x;
+		bound[4] = model->mesh->max.y;
+		bound[5] = model->mesh->max.z;
+
+		ImGui::GetIO().WantCaptureMouse = true;
+
 		ImGuizmo::RecomposeMatrixFromComponents(&model->position[0], &model->rotationAngles[0], &model->scale[0], &model->modelMatrix[0][0]);
-		if ( radio_button_trans_type == 0)
-			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::ROTATE, space, &model->modelMatrix[0][0], NULL, NULL);
+		if (radio_button_trans_type == 0)
+			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::ROTATE, space, &model->modelMatrix[0][0], NULL,NULL);
 		else if (radio_button_trans_type == 1)
 			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::TRANSLATE, space, &model->modelMatrix[0][0], NULL, NULL);
 		else if (radio_button_trans_type == 2)
-			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::SCALE, space, &model->modelMatrix[0][0], NULL, NULL);
+			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::SCALE, space, &model->modelMatrix[0][0], NULL, &snap[0], &bound[0], &boundSnap[0]);
 
 		ImGui::End();
 	}
