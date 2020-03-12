@@ -62,6 +62,9 @@ void UI::settingsWindow() {
 			}
 			ImGui::EndCombo();
 		}
+
+		ImGui::DragFloat("DOF Threshold", &instance->scene[instance->currentScene]->DOFThreshold, 0.005f, 0, 100);
+
 		ImGui::Separator();
 
 		// Light selector
@@ -380,7 +383,7 @@ void UI::draw() {
 	ImGuizmo::BeginFrame();
 	ImGuizmo::Enable(true);
 	//ImGui::GetIO().WantCaptureMouse = true;
-	ImGuizmo::DrawGrid(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], &glm::mat4(1.0f)[0][0], 100.0f);
+	//ImGuizmo::DrawGrid(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], &glm::mat4(1.0f)[0][0], 100.0f);
 	ImGuizmo::SetRect(0, 0, instance->windowWidth, instance->windowHeight);
 	glm::mat4 matrix;
 	//ImGuizmo::DecomposeMatrixToComponents(&matrix[0][0],&instance->camera.position[0], &instance->camera.viewDirection[0], &glm::vec3(1.0f)[0]);

@@ -84,7 +84,7 @@ unsigned int icarus3D::loadTexture(const char* path, int &texWidth, int &texHeig
 
 void icarus3D::init() {
 	// Initialize window and glad components
-	if (!initWindow() || !initGlad() || !setFrameBuffer(dsTexture)) {
+	if (!initWindow() || !initGlad() || !setFrameBuffer(dsTexture) || !setFrameBufferDepth(depthTexture))  {
 		std::cout << "ERROR::Couldn't initialize window or GLAD components" << std::endl;
 		return;
 	}
@@ -93,10 +93,13 @@ void icarus3D::init() {
 	// Initialize user interface context
 	ui.init(window);
 
+	initKernel();
+
 	// Init Icarus3D variables
 	pickingShader = new Shader("icarus3D/shaders/picking.vert", "icarus3D/shaders/picking.frag");
 	boundingBoxShader = new Shader("icarus3D/shaders/bounding_box.vert", "icarus3D/shaders/bounding_box.frag");
 	deferredShader = new Shader("icarus3D/shaders/deferred.vert", "icarus3D/shaders/deferred.frag");
+	deferredDepthShader = new Shader("icarus3D/shaders/deferredDepth.vert", "icarus3D/shaders/deferredDepth.frag");
 	whiteTexture = loadTexture("assets/textures/white_bg.png");
 	blackTexture = loadTexture("assets/textures/black_bg.png");
 	buildDeferredPlane();
@@ -360,9 +363,10 @@ void icarus3D::render() {
 			}
 
 			//Deferred shading
-			renderToTexture();
+			/*renderToTexture();
+			forwardRendering();*/
 
-			forwardRendering();
+			renderDOF();
 		}
 
 		// Draw interface
@@ -587,6 +591,50 @@ void icarus3D::renderToTexture() {
 
 }
 
+void icarus3D::renderDOF() {
+
+	//render image with colors
+	renderToTexture();
+
+	//render depth image
+	glBindFramebuffer(GL_FRAMEBUFFER, DOFframebuffer);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	renderScene(scene[currentScene]);
+	glBindVertexArray(0);
+
+	
+
+	// Forward rendering
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Use the shader
+	deferredDepthShader->use();
+	deferredDepthShader->setInt("depthMap", 0);
+	deferredDepthShader->setInt("image", 1);
+	deferredDepthShader->setInt("kernel7", 2);
+	deferredDepthShader->setInt("kernel11", 3);
+
+	deferredDepthShader->setFloat("DOFThreshold", scene[currentScene]->DOFThreshold);
+	deferredDepthShader->setFloat("near_plane", camera.nearPlane);
+	deferredDepthShader->setFloat("far_plane", camera.farPlane);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, depthTexture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, dsTexture);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_1D, kernel7);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_1D, kernel11);
+	//Binds the vertex array to be drawn
+	glBindVertexArray(VAO);
+	// Renders the triangle geometry
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+
+
+}
+
+
 void icarus3D::forwardRendering() {
 	// Forward rendering
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -668,5 +716,65 @@ bool icarus3D::setFrameBuffer(GLuint& texture) {
 		return false;
 	}
 	return true;
+}
+
+bool icarus3D::setFrameBufferDepth(GLuint &texture) {
+
+	glGenFramebuffers(1, &DOFframebuffer);
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowWidth, windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	// attach depth texture as FBO's depth buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, DOFframebuffer);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// Always check that our framebuffer is ok
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cout << "ERROR::Framebuffer configuration went wrong" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+bool icarus3D::initKernel() {
+
+	//prepare for blur
+	vector<int> kernelData = vector<int>(49, 1);
+
+	glGenTextures(1, &kernel7);
+	glBindTexture(GL_TEXTURE_1D, kernel7);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_R32I, 49, 0, GL_RED_INTEGER, GL_INT, kernelData.data());
+
+	glBindTexture(GL_TEXTURE_1D, 0);
+
+	//prepare for blur
+	kernelData = vector<int>(121, 1);
+
+	glGenTextures(1, &kernel11);
+	glBindTexture(GL_TEXTURE_1D, kernel11);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_R32I, 121, 0, GL_RED_INTEGER, GL_INT, kernelData.data());
+
+	glBindTexture(GL_TEXTURE_1D, 0);
+
+	return true;
 
 }
+

@@ -12,7 +12,7 @@ Camera::Camera(int windowWidth, int windowHeight) :
 	yaw = 0.0f;
 	pitch = 0.0f;
 	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
-	perspectiveMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 0.3f, 1000.0f);
+	perspectiveMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, nearPlane, farPlane);
 }
 
 void Camera::mouseUpdate(const glm::vec2& newMousePosition) {
@@ -80,5 +80,5 @@ void Camera::moveDown(float time) {
 }
 
 void Camera::resize(int windowWidth, int windowHeight) {
-	perspectiveMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 0.3f, 1000.0f);
+	perspectiveMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, nearPlane, farPlane);
 }

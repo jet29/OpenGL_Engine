@@ -25,6 +25,7 @@ public:
 	std::vector<Model *> models;
 	std::vector<int> pointlight_index;
 	string name;
+	float DOFThreshold = 0.5f;
 	bool saveScene();
 	bool loadScene(string path);
 
