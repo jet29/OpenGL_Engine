@@ -20,6 +20,7 @@ static const char* current_item_scene = NULL;
 static const char* current_item_light = NULL;
 static const char* current_item_light_selector = NULL;
 int radio_button_trans_type = 0;
+int radio_button_loc_w = 0;
 
 vector<string> lights = { "Directional", "Pointlight" };
 
@@ -205,13 +206,19 @@ void UI::pickedModelWindow() {
 		if (ImGui::IsKeyPressed(GLFW_KEY_T)) {
 			cout << "hola" << endl;
 		}
+
+		ImGui::Text("Transformation space");
+		ImGui::RadioButton("Local", &radio_button_loc_w, 0); ImGui::SameLine();
+		ImGui::RadioButton("World", &radio_button_loc_w, 1); ImGui::SameLine();
+		ImGuizmo::MODE space = radio_button_loc_w == 0 ? ImGuizmo::LOCAL : ImGuizmo::WORLD;
+
 		ImGuizmo::RecomposeMatrixFromComponents(&model->position[0], &model->rotationAngles[0], &model->scale[0], &model->modelMatrix[0][0]);
 		if ( radio_button_trans_type == 0)
-			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::ROTATE, ImGuizmo::WORLD, &model->modelMatrix[0][0], NULL, NULL);
+			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::ROTATE, space, &model->modelMatrix[0][0], NULL, NULL);
 		else if (radio_button_trans_type == 1)
-			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::TRANSLATE, ImGuizmo::WORLD, &model->modelMatrix[0][0], NULL, NULL);
+			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::TRANSLATE, space, &model->modelMatrix[0][0], NULL, NULL);
 		else if (radio_button_trans_type == 2)
-			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::SCALE, ImGuizmo::WORLD, &model->modelMatrix[0][0], NULL, NULL);
+			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::SCALE, space, &model->modelMatrix[0][0], NULL, NULL);
 
 		ImGui::End();
 	}
@@ -373,7 +380,7 @@ void UI::draw() {
 	ImGuizmo::BeginFrame();
 	ImGuizmo::Enable(true);
 	//ImGui::GetIO().WantCaptureMouse = true;
-	ImGuizmo::DrawGrid(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], &glm::mat4(1.0f)[0][0], 20.0f);
+	ImGuizmo::DrawGrid(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], &glm::mat4(1.0f)[0][0], 100.0f);
 	ImGuizmo::SetRect(0, 0, instance->windowWidth, instance->windowHeight);
 	glm::mat4 matrix;
 	//ImGuizmo::DecomposeMatrixToComponents(&matrix[0][0],&instance->camera.position[0], &instance->camera.viewDirection[0], &glm::vec3(1.0f)[0]);
