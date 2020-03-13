@@ -38,7 +38,7 @@ void main(){
 	ivec2 texIndex = ivec2(vTexPos.xy * vec2(texSize.xy));
 	vec3 mean      = vec3(0.0f);
 
-    if(linearizedValue > 0.50){
+    if(linearizedValue >= 0.50 && linearizedValue < 1.0){
 
 	    ivec2 pivot = ivec2(11/2,11/2);
         // Kernel application
@@ -65,7 +65,7 @@ void main(){
 
         color = vec4(mean,1.0);
     }
-    else if(linearizedValue < 0.30){
+    else if(linearizedValue <= 0.30 || linearizedValue >= 1){
         color =  vec4(texColor,1.0);
     }
 

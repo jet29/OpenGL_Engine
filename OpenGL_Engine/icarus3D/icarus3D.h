@@ -35,6 +35,7 @@ class icarus3D {
 	DirectionalLight *light;
 	static Camera camera;
 	static bool cameraMode;
+	static bool shiftBool;
 	// Window current width
 	static ICuint windowWidth;
 	// Window current height
