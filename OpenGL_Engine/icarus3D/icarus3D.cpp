@@ -363,10 +363,13 @@ void icarus3D::render() {
 			}
 
 			//Deferred shading
-			/*renderToTexture();
-			forwardRendering();*/
+			if (DoFBool)
+				renderDOF();
+			else{
+				renderToTexture();
+				forwardRendering();
+			}
 
-			renderDOF();
 		}
 
 		// Draw interface

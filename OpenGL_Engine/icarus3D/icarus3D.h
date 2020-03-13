@@ -42,7 +42,7 @@ class icarus3D {
 	// Interface instance
 	UI ui;
 	int currentScene = -1;
-
+	bool DoFBool = false;
 	// Private variables
 	private:
 		//Holds the instance of the class

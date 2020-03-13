@@ -45,8 +45,12 @@ void UI::settingsWindow() {
 	if (settingFlag) {
 		ImGui::Begin("Settings");
 
-		current_item_scene = instance->scene.size() == 0 ? NULL : instance->scene[instance->currentScene]->name.c_str();
+		// DoF render selector
+		ImGui::Text("Depth of Field");
+		ImGui::Checkbox("##dof_checkbox", &instance->DoFBool);
+
 		// Scene selector
+		current_item_scene = instance->scene.size() == 0 ? NULL : instance->scene[instance->currentScene]->name.c_str();
 		ImGui::Text("Current scene");
 		if (ImGui::BeginCombo("##combo_scenes", current_item_scene)) {
 			for (int n = 0; n < instance->scene.size(); n++)
