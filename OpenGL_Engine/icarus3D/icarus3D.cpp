@@ -107,7 +107,9 @@ void icarus3D::init() {
 	// Create Mandatory Dir Light
 	light = new DirectionalLight();
 
-	
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
 	// Begin render loop
 	render();
 	// Terminate interface instance
