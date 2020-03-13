@@ -1,7 +1,7 @@
 #include "Camera.h"
 #include <iostream>
 
-const float MOVEMENT_SPEED = 25.0f;
+const float MOVEMENT_SPEED = 10.0f;
 
 Camera::Camera(int windowWidth, int windowHeight) :
 	viewDirection(0, 0, -1),

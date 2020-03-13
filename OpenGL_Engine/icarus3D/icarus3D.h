@@ -60,16 +60,22 @@ class icarus3D {
 		float deltaTime;
 		int totalFrames = 0;
 		int pickedIndex = -1;
+		int gridLength;
 		Shader* boundingBoxShader;
 		Shader* deferredShader;
 		Shader* deferredDepthShader;
+		Shader* gridShader;
+		Shader* skyboxShader;
 		// Deferred Shading
 		GLuint framebuffer, depthBuffer;
 		GLuint DOFframebuffer, depthTexture;
 		GLuint dsTexture;
+		GLuint cubemapTexture;
 		GLuint kernel7, kernel11;
-		unsigned int VBO;
-		unsigned int VAO;
+		unsigned int VBO, gridVBO;
+		unsigned int VAO, gridVAO, skyboxVAO;
+		unsigned int gridIBO;
+		glm::mat4 gridModelMatrix = glm::mat4(1.0f);
 	// Public functions
 	public:
 		//Method to obtain the only instance of the calls
@@ -98,9 +104,14 @@ class icarus3D {
 		void renderToTexture();
 		void forwardRendering();
 		void renderDOF();
+		void drawGrid();
+		void drawSkybox();
 		bool initWindow();
 		bool initGlad();
 		void initGL();
+		void initGrid();
+		void initSkybox();
+		void loadCubeMap(std::vector<std::string> faces);
 		void processKeyboardInput(ICwindow* window);
 		void updateFrames();
 		bool checkCollision(Scene *scene);

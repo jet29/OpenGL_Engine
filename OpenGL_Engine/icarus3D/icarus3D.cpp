@@ -93,16 +93,26 @@ void icarus3D::init() {
 	initGL();
 	// Initialize user interface context
 	ui.init(window);
+	
+	// Initialize grid data
+	initGrid();
 
+	// Init DIP kernels
 	initKernel();
+
+	// init skybox
+	initSkybox();
 
 	// Init Icarus3D variables
 	pickingShader = new Shader("icarus3D/shaders/picking.vert", "icarus3D/shaders/picking.frag");
 	boundingBoxShader = new Shader("icarus3D/shaders/bounding_box.vert", "icarus3D/shaders/bounding_box.frag");
 	deferredShader = new Shader("icarus3D/shaders/deferred.vert", "icarus3D/shaders/deferred.frag");
 	deferredDepthShader = new Shader("icarus3D/shaders/deferredDepth.vert", "icarus3D/shaders/deferredDepth.frag");
+	gridShader = new Shader("icarus3D/shaders/gridShader.vert", "icarus3D/shaders/gridShader.frag");
+	skyboxShader = new	Shader("icarus3D/shaders/skyboxShader.vert","icarus3D/shaders/skyboxShader.frag");
 	whiteTexture = loadTexture("assets/textures/white_bg.png");
 	blackTexture = loadTexture("assets/textures/black_bg.png");
+
 	buildDeferredPlane();
 	// Create Mandatory Dir Light
 	light = new DirectionalLight();
@@ -116,6 +126,124 @@ void icarus3D::init() {
 	ui.terminate();
 	// Terminate GLFW, clearing any resources allocated by GLFW.s
 	glfwTerminate();
+}
+
+void icarus3D::initSkybox() {
+	// Cubemap and Skybox initialization
+	std::vector<std::string> faces{
+		"assets/textures/skybox/default/right.jpg",
+		"assets/textures/skybox/default/left.jpg",
+		"assets/textures/skybox/default/top.jpg",
+		"assets/textures/skybox/default/bottom.jpg",
+		"assets/textures/skybox/default/front.jpg",
+		"assets/textures/skybox/default/back.jpg"
+	};
+
+	// Load cubemap texture
+	loadCubeMap(faces);
+	
+	// Skybox vertices
+	float skyboxVertices[] = {
+		// positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		 1.0f, -1.0f,  1.0f
+	};
+
+	// Load skybox into GPU
+	unsigned int skyboxVBO;
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+}
+
+void icarus3D::initGrid() {
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::uvec4> indices;
+
+	gridModelMatrix = glm::scale(gridModelMatrix, glm::vec3(400.0, 1.0f, 400.0f));
+	int slices = 30;
+
+	for (int j = 0; j <= slices; ++j) {
+		for (int i = 0; i <= slices; ++i) {
+			float x = (float)i / (float)slices;
+			float y = 0;
+			float z = (float)j / (float)slices;
+			vertices.push_back(glm::vec3(x - 0.5f, y, z - 0.5f));
+		}
+	}
+
+	for (int j = 0; j < slices; ++j) {
+		for (int i = 0; i < slices; ++i) {
+
+			int row1 = j * (slices + 1);
+			int row2 = (j + 1) * (slices + 1);
+
+			indices.push_back(glm::uvec4(row1 + i, row1 + i + 1, row1 + i + 1, row2 + i + 1));
+			indices.push_back(glm::uvec4(row2 + i + 1, row2 + i, row2 + i, row1 + i));
+
+		}
+	}
+
+	glGenVertexArrays(1, &gridVAO);
+	glBindVertexArray(gridVAO);
+	glGenBuffers(1, &gridVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	glGenBuffers(1, &gridIBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridIBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(glm::uvec4), &indices[0], GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	gridLength = (GLuint)indices.size() * 4;
 }
 
 // Private Functions
@@ -174,6 +302,37 @@ void icarus3D::initGL() {
 	glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
 }
 
+void icarus3D::loadCubeMap(std::vector<std::string> faces) {
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+	// Flips the texture when loads it because in opengl the texture coordinates are flipped
+	stbi_set_flip_vertically_on_load(false);
+	int width, height, nrChannels;
+	unsigned char* data;
+	for (unsigned int i = 0; i < faces.size(); i++)
+	{
+		data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	cubemapTexture = textureID;
+}
+
 void icarus3D::processKeyboardInput(ICwindow* window)
 {
 	// Checks if the escape key is pressed
@@ -229,19 +388,22 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 			}
 			break;
 		case GLFW_KEY_R:
-			for (auto &model : instance->scene[instance->currentScene]->models) {
-				model->setShader(model->shaderPath[0], model->shaderPath[1]);
+			if (instance->getPickedIndex() != -1)
+				for (auto &model : instance->scene[instance->currentScene]->models)
+					model->setShader(model->shaderPath[0], model->shaderPath[1]);
 
-				delete instance->pickingShader;
-				delete instance->boundingBoxShader;
-				delete instance->deferredShader;
-				delete instance->deferredDepthShader;
+			delete instance->pickingShader;
+			delete instance->boundingBoxShader;
+			delete instance->deferredShader;
+			delete instance->deferredDepthShader;
+			delete instance->gridShader;
 
-				instance->pickingShader = new Shader("icarus3D/shaders/picking.vert", "icarus3D/shaders/picking.frag");
-				instance->boundingBoxShader = new Shader("icarus3D/shaders/bounding_box.vert", "icarus3D/shaders/bounding_box.frag");
-				instance->deferredShader = new Shader("icarus3D/shaders/deferred.vert", "icarus3D/shaders/deferred.frag");
-				instance->deferredDepthShader = new Shader("icarus3D/shaders/deferredDepth.vert", "icarus3D/shaders/deferredDepth.frag");
-			}
+			instance->gridShader = new Shader("icarus3D/shaders/gridShader.vert", "icarus3D/shaders/gridShader.frag");
+			instance->pickingShader = new Shader("icarus3D/shaders/picking.vert", "icarus3D/shaders/picking.frag");
+			instance->boundingBoxShader = new Shader("icarus3D/shaders/bounding_box.vert", "icarus3D/shaders/bounding_box.frag");
+			instance->deferredShader = new Shader("icarus3D/shaders/deferred.vert", "icarus3D/shaders/deferred.frag");
+			instance->deferredDepthShader = new Shader("icarus3D/shaders/deferredDepth.vert", "icarus3D/shaders/deferredDepth.frag");
+
 			break;
 		}
 	}
@@ -290,6 +452,7 @@ void icarus3D::resize(ICwindow* window, int width, int height){
 
 	//camera.resize(windowWidth, windowHeight);
 	instance->setFrameBuffer(instance->dsTexture);
+	instance->setFrameBufferDepth(instance->depthTexture);
 }
 
 void icarus3D::renderScene(Scene *scene) {
@@ -358,11 +521,48 @@ void icarus3D::drawBoundingBox() {
 	scene[currentScene]->models[pickedIndex]->DrawBoundingBox();
 }
 
+void icarus3D::drawGrid() {
+	
+	gridShader->use();
+	gridShader->setMat4("model", gridModelMatrix);
+	gridShader->setMat4("view", camera.viewMatrix);
+	gridShader->setMat4("projection", camera.getPerspectiveMatrix());
+	glEnable(GL_DEPTH_TEST);
+
+	glBindVertexArray(gridVAO);
+
+	glDrawElements(GL_LINES, gridLength, GL_UNSIGNED_INT, NULL);
+
+	glBindVertexArray(0);
+
+	glDisable(GL_DEPTH_TEST);
+}
+
+void icarus3D::drawSkybox() {
+	// Draw skybox as last
+	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+	skyboxShader->use();
+	skyboxShader->setInt("skybox", 0);
+	skyboxShader->setMat4("view", glm::mat4(glm::mat3(camera.viewMatrix)));
+	skyboxShader->setMat4("projection", camera.perspectiveMatrix);
+
+	// skybox cube
+	glBindVertexArray(skyboxVAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+
+	// set depth function back to default
+	glDepthFunc(GL_LESS); 
+}
+
 void icarus3D::render() {
 
 	// Game loop
 	while (!glfwWindowShouldClose(window))
 	{
+
 		//FPS
 		updateFrames();
 		//cout << "FPS: " << getFPS()<< endl;
@@ -374,6 +574,9 @@ void icarus3D::render() {
 		glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// Skybox
+		drawSkybox();
 		
 		// If there is any instanced scene, then render it
 		if (currentScene != -1) {
@@ -391,7 +594,8 @@ void icarus3D::render() {
 			}
 
 		}
-
+		// Draw grid
+		drawGrid();
 		// Draw interface
 		ui.draw();
 		// Swap the screen buffers

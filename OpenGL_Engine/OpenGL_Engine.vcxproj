@@ -171,12 +171,24 @@
     <None Include="icarus3D\shaders\basic.vert" />
     <None Include="icarus3D\shaders\bounding_box.frag" />
     <None Include="icarus3D\shaders\bounding_box.vert" />
+    <None Include="icarus3D\shaders\deferred.frag" />
+    <None Include="icarus3D\shaders\deferred.vert" />
+    <None Include="icarus3D\shaders\deferredDepth.frag" />
+    <None Include="icarus3D\shaders\deferredDepth.vert" />
+    <None Include="icarus3D\shaders\depth.frag" />
+    <None Include="icarus3D\shaders\depth.vert" />
+    <None Include="icarus3D\shaders\gridShader.frag" />
+    <None Include="icarus3D\shaders\gridShader.vert" />
+    <None Include="icarus3D\shaders\material.frag" />
+    <None Include="icarus3D\shaders\material.vert" />
     <None Include="icarus3D\shaders\modelShader.frag" />
     <None Include="icarus3D\shaders\modelShader.vert" />
     <None Include="icarus3D\shaders\picking.frag" />
     <None Include="icarus3D\shaders\picking.vert" />
     <None Include="icarus3D\shaders\pointlight.frag" />
     <None Include="icarus3D\shaders\pointlight.vert" />
+    <None Include="icarus3D\shaders\skyboxShader.frag" />
+    <None Include="icarus3D\shaders\skyboxShader.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icarus3D\camera\Camera.h" />

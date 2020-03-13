@@ -1,25 +1,9 @@
 ﻿  icarus3D.cpp
-<<<<<<< HEAD
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(290,75): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(410,53): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(425,25): warning C4806: '==': unsafe operation: no value of type 'bool' promoted to type 'int' can equal the given constant
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(437,27): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(443,9): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(522,26): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-  userInterface.cpp
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(391,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(391,36): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(395,96): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(392,12): warning C4101: 'matrix': unreferenced local variable
-  main.cpp
-  Generating Code...
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(473,75): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(634,53): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(649,25): warning C4806: '==': unsafe operation: no value of type 'bool' promoted to type 'int' can equal the given constant
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(661,27): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(667,9): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(746,26): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   OpenGL_Engine.vcxproj -> C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe
-=======
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(310,75): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(427,53): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(442,25): warning C4806: '==': unsafe operation: no value of type 'bool' promoted to type 'int' can equal the given constant
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(454,27): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(460,9): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(539,26): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-  OpenGL_Engine.vcxproj -> C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe
->>>>>>> JT-dev

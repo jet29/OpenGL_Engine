@@ -21,6 +21,7 @@ static const char* current_item_light = NULL;
 static const char* current_item_light_selector = NULL;
 int radio_button_trans_type = 0;
 int radio_button_loc_w = 0;
+bool fps_bool_checkbox = true;
 
 vector<string> lights = { "Directional", "Pointlight" };
 
@@ -45,51 +46,55 @@ void UI::settingsWindow() {
 	if (settingFlag) {
 		ImGui::Begin("Settings");
 
+		// Show fps settings
+		ImGui::Text("Show FPS");
+		ImGui::Checkbox("##fps_checkbox", &fps_bool_checkbox);
+
 		// DoF render selector
 		ImGui::Text("Depth of Field");
 		ImGui::Checkbox("##dof_checkbox", &instance->DoFBool);
 
 		// Scene selector
-		current_item_scene = instance->scene.size() == 0 ? NULL : instance->scene[instance->currentScene]->name.c_str();
-		ImGui::Text("Current scene");
-		if (ImGui::BeginCombo("##combo_scenes", current_item_scene)) {
-			for (int n = 0; n < instance->scene.size(); n++)
-			{
-				bool is_selected = (current_item_scene == instance->scene[n]->name.c_str()); // You can store your selection however you want, outside or inside your objects
-				if (ImGui::Selectable(instance->scene[n]->name.c_str(), is_selected)) {
-					current_item_scene = instance->scene[n]->name.c_str();
-					instance->currentScene = n;
-					instance->setPickedIndex(-1);
+		if (instance->currentScene != -1) {
+			current_item_scene = instance->scene.size() == 0 ? NULL : instance->scene[instance->currentScene]->name.c_str();
+			ImGui::Text("Current scene");
+			if (ImGui::BeginCombo("##combo_scenes", current_item_scene)) {
+				for (int n = 0; n < instance->scene.size(); n++)
+				{
+					bool is_selected = (current_item_scene == instance->scene[n]->name.c_str()); // You can store your selection however you want, outside or inside your objects
+					if (ImGui::Selectable(instance->scene[n]->name.c_str(), is_selected)) {
+						current_item_scene = instance->scene[n]->name.c_str();
+						instance->currentScene = n;
+						instance->setPickedIndex(-1);
+					}
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
 				}
-				if (is_selected)
-					ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+				ImGui::EndCombo();
 			}
-			ImGui::EndCombo();
-		}
+			ImGui::DragFloat("DOF Threshold", &instance->scene[instance->currentScene]->DOFThreshold, 0.005f, 0, 100);
 
-		ImGui::DragFloat("DOF Threshold", &instance->scene[instance->currentScene]->DOFThreshold, 0.005f, 0, 100);
+			ImGui::Separator();
 
-		ImGui::Separator();
-
-		// Light selector
-		string test;
-		ImGui::Text("Directional Light Properties");
-		if (ImGui::BeginCombo("##combo_lights", current_item_light)){
-			for (int n = 0; n < 2; n++)
-			{
-				bool is_selected2 = (current_item_light == lights[n].c_str()); // You can store your selection however you want, outside or inside your objects
-				if (ImGui::Selectable(lights[n].c_str(), is_selected2)) {
-					current_item_light = lights[n].c_str();
+			// Light selector
+			string test;
+			ImGui::Text("Directional Light Properties");
+			if (ImGui::BeginCombo("##combo_lights", current_item_light)) {
+				for (int n = 0; n < 2; n++)
+				{
+					bool is_selected2 = (current_item_light == lights[n].c_str()); // You can store your selection however you want, outside or inside your objects
+					if (ImGui::Selectable(lights[n].c_str(), is_selected2)) {
+						current_item_light = lights[n].c_str();
+					}
+					if (is_selected2)
+						ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
 				}
-				if (is_selected2)
-					ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+				ImGui::EndCombo();
 			}
-			ImGui::EndCombo();
+			directionalLightProperties();
+			pointLightProperties();
+			//if (current_item_light == "Pointlight")
 		}
-		directionalLightProperties();
-		pointLightProperties();
-		//if (current_item_light == "Pointlight")
-			
 
 		ImGui::End();
 	}
@@ -391,6 +396,17 @@ void UI::showMainMenuBar() {
 	}
 }
 
+void UI::fpsWindow() {
+	if (fps_bool_checkbox) {
+		ImGui::SetNextWindowSize(ImVec2(100, 30));
+		ImGui::SetNextWindowPos(ImVec2(instance->windowWidth-100-10, 10+128));
+		ImGui::SetNextWindowBgAlpha(0.3f);
+		ImGui::Begin("##fps_modal", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+			ImGui::Text("FPS: %.1f", instance->getFPS());
+		ImGui::End();
+	}
+}
+
 void UI::draw() {
 	// Start new frame
 	ImGui_ImplOpenGL3_NewFrame();
@@ -409,6 +425,7 @@ void UI::draw() {
 	//ImGuizmo::DecomposeMatrixToComponents(&instance->camera.viewMatrix[0][0], &instance->camera.position[0], &instance->camera.viewDirection[0],NULL);
 	showMainMenuBar();
 
+	fpsWindow();
 
 	// Main configuration window
 	settingsWindow();

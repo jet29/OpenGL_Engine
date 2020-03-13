@@ -35,6 +35,7 @@ private:
 	void pointLightProperties();
 	void pickedModelWindow();
 	void directionalLightWindow();
+	void fpsWindow();
 	// UI Control variables
 	int dirLight_dir_radioButtons_opt;
 	std::string activateModal = "";
