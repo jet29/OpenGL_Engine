@@ -85,7 +85,8 @@ unsigned int icarus3D::loadTexture(const char* path, int &texWidth, int &texHeig
 
 void icarus3D::init() {
 	// Initialize window and glad components
-	if (!initWindow() || !initGlad() || !setFrameBuffer(dsTexture) || !setFrameBufferDepth(depthTexture))  {
+	if (!initWindow() || !initGlad() || !setFrameBuffer(dsTexture) || !setFrameBufferDepth(depthTexture)
+	|| !setGeometryBuffer()) {
 		std::cout << "ERROR::Couldn't initialize window or GLAD components" << std::endl;
 		return;
 	}
@@ -103,17 +104,22 @@ void icarus3D::init() {
 	// init skybox
 	initSkybox();
 
-	// Init Icarus3D variables
+	// Init shaders
 	pickingShader = new Shader("icarus3D/shaders/picking.vert", "icarus3D/shaders/picking.frag");
 	boundingBoxShader = new Shader("icarus3D/shaders/bounding_box.vert", "icarus3D/shaders/bounding_box.frag");
 	deferredShader = new Shader("icarus3D/shaders/deferred.vert", "icarus3D/shaders/deferred.frag");
 	deferredDepthShader = new Shader("icarus3D/shaders/deferredDepth.vert", "icarus3D/shaders/deferredDepth.frag");
 	gridShader = new Shader("icarus3D/shaders/gridShader.vert", "icarus3D/shaders/gridShader.frag");
 	skyboxShader = new	Shader("icarus3D/shaders/skyboxShader.vert","icarus3D/shaders/skyboxShader.frag");
+	geometryPassShader = new Shader("icarus3D/shaders/geometryPassShader.vert", "icarus3D/shaders/geometryPassShader.frag");
+	lightingPassShader = new Shader("icarus3D/shaders/lightingPassShader.vert", "icarus3D/shaders/lightingPassShader.frag");
+
+	// Load default textures
 	whiteTexture = loadTexture("assets/textures/white_bg.png");
 	blackTexture = loadTexture("assets/textures/black_bg.png");
 
 	buildDeferredPlane();
+
 	// Create Mandatory Dir Light
 	light = new DirectionalLight();
 
@@ -397,13 +403,16 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 			delete instance->deferredShader;
 			delete instance->deferredDepthShader;
 			delete instance->gridShader;
+			delete instance->geometryPassShader;
+			delete instance->lightingPassShader;
 
 			instance->gridShader = new Shader("icarus3D/shaders/gridShader.vert", "icarus3D/shaders/gridShader.frag");
 			instance->pickingShader = new Shader("icarus3D/shaders/picking.vert", "icarus3D/shaders/picking.frag");
 			instance->boundingBoxShader = new Shader("icarus3D/shaders/bounding_box.vert", "icarus3D/shaders/bounding_box.frag");
 			instance->deferredShader = new Shader("icarus3D/shaders/deferred.vert", "icarus3D/shaders/deferred.frag");
 			instance->deferredDepthShader = new Shader("icarus3D/shaders/deferredDepth.vert", "icarus3D/shaders/deferredDepth.frag");
-
+			instance->geometryPassShader = new Shader("icarus3D/shaders/geometryPassShader.vert", "icarus3D/shaders/geometryPassShader.frag");
+			instance->lightingPassShader = new Shader("icarus3D/shaders/lightingPassShader.vert", "icarus3D/shaders/lightingPassShader.frag");
 			break;
 		}
 	}
@@ -439,7 +448,6 @@ void icarus3D::onMouseMotion(ICwindow* window, double xpos, double ypos)
 void icarus3D::onMouseButton(ICwindow* window, int button, int action, int mods){
 	//auto a = action == GLFW_PRESS ? GLFW_PRESS : GLFW_RELEASE;
 	//auto b = GLFW_MOUSE_BUTTON_LEFT;
-
 	if (action == GLFW_PRESS && instance->currentScene != -1 && instance->shiftBool)
 		instance->pick();
 }
@@ -505,8 +513,97 @@ void icarus3D::renderScene(Scene *scene) {
 	
 		// Render model
 		model->mesh->Draw(model->shader);
-		if (&model - &scene->models[0] == pickedIndex)
-			drawBoundingBox();
+
+	}
+}
+
+void icarus3D::renderSceneGeometryPass(Scene* scene) {
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Render geometry only first into MRT
+	geometryPassShader->use();
+	// Iterate over scene models
+	for (auto& model : scene->models) {
+		// Ignore pointlight models
+		if (model->type == POINTLIGHT ) continue;
+
+		// Set model shader general uniform
+		geometryPassShader->setMat4("model", model->modelMatrix);
+		geometryPassShader->setMat4("view", camera.viewMatrix);
+		geometryPassShader->setMat4("projection", camera.getPerspectiveMatrix());
+
+		// Render model
+		model->mesh->Draw(geometryPassShader);
+		//if (&model - &scene->models[0] == pickedIndex)
+		//	drawBoundingBox();
+	}
+	glBindVertexArray(0);
+}
+
+void icarus3D::renderSceneLightingPass(Scene* scene){
+
+	// Change to default framebuffer
+	glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//drawSkybox();
+	//drawGrid();
+	// Set gBuffer textures uniforms
+	lightingPassShader->use();
+	lightingPassShader->setInt("gPosition", 0);
+	lightingPassShader->setInt("gNormal", 1);
+	lightingPassShader->setInt("gAlbedoSpec", 2);
+	lightingPassShader->setVec3("viewPos", camera.position);
+	// Bind textures into GPU
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, gPosition);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, gNormal);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	// Set lighting uniforms config
+	setLightingUniforms(scene, lightingPassShader);
+	//Binds the vertex array to be drawn
+	glBindVertexArray(VAO);
+	// Renders the triangle geometry
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
+
+void icarus3D::setLightingUniforms(Scene* scene, Shader* shader) {
+	// Set Directional light shader uniforms
+	setDirectionalLightUniform(scene, shader);
+	// Set pointlight shader uniforms
+	setPointlightsUniform(scene, shader);
+}
+
+void icarus3D::setDirectionalLightUniform(Scene* scene, Shader* shader) {
+	shader->setVec3("dirlight.direction", light->properties.direction);
+	shader->setVec3("dirlight.color.ambient", light->properties.color.ambient);
+	shader->setVec3("dirlight.color.diffuse", light->properties.color.diffuse);
+	shader->setVec3("dirlight.color.specular", light->properties.color.specular);
+	shader->setBool("dirlight.lightSwitch", light->lightSwitch);
+	shader->setInt("numOfPointLight", scene->pointlight_index.size());
+}
+
+void icarus3D::setPointlightsUniform(Scene* scene, Shader* shader) {
+	for (ICuint i = 0; i < scene->pointlight_index.size(); i++) {
+		PointLight* pointlight = (PointLight*)scene->models[scene->pointlight_index[i]];
+		std::string index = std::to_string(i);
+		// Set pointlight position
+		shader->setVec3("pointlight[" + index + "].position", pointlight->position);
+		// Set pointlight color
+		shader->setVec3("pointlight[" + index + "].color.ambient", pointlight->properties.color.ambient);
+		shader->setVec3("pointlight[" + index + "].color.diffuse", pointlight->properties.color.diffuse);
+		shader->setVec3("pointlight[" + index + "].color.specular", pointlight->properties.color.specular);
+		// Set pointlight attenuationF
+		shader->setFloat("pointlight[" + index + "].attenuation.constant", pointlight->properties.attenuation.constant);
+		shader->setFloat("pointlight[" + index + "].attenuation.linear", pointlight->properties.attenuation.linear);
+		shader->setFloat("pointlight[" + index + "].attenuation.quadratic", pointlight->properties.attenuation.quadratic);
+		// Set pointlight switch bool
+		shader->setBool("pointlight[" + index + "].lightSwitch", pointlight->lightSwitch);
 	}
 }
 
@@ -527,7 +624,6 @@ void icarus3D::drawGrid() {
 	gridShader->setMat4("model", gridModelMatrix);
 	gridShader->setMat4("view", camera.viewMatrix);
 	gridShader->setMat4("projection", camera.getPerspectiveMatrix());
-	glEnable(GL_DEPTH_TEST);
 
 	glBindVertexArray(gridVAO);
 
@@ -535,7 +631,6 @@ void icarus3D::drawGrid() {
 
 	glBindVertexArray(0);
 
-	glDisable(GL_DEPTH_TEST);
 }
 
 void icarus3D::drawSkybox() {
@@ -565,7 +660,6 @@ void icarus3D::render() {
 
 		//FPS
 		updateFrames();
-		//cout << "FPS: " << getFPS()<< endl;
 
 		processKeyboardInput(window);
 
@@ -575,27 +669,29 @@ void icarus3D::render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+		// Check for collision
+		checkCollision();
+
 		// Skybox
-		drawSkybox();
-		
-		// If there is any instanced scene, then render it
-		if (currentScene != -1) {
+			//drawSkybox();
 
-			if (checkCollision(scene[currentScene])) {
-				cout << "COLLISION!" << endl;
-			}
-
-			//Deferred shading
-			if (DoFBool)
-				renderDOF();
-			else{
-				renderToTexture();
-				forwardRendering();
-			}
-
-		}
 		// Draw grid
-		drawGrid();
+			drawGrid();
+
+		// Depth of field
+			//renderDOF();
+		// Rendering to texture 
+			//renderToTexture();
+			//forwardRendering();
+
+
+		// 2-Pass deferred shading
+		render2PassDeferredShading();
+
+		// Render picked object bounding box
+		renderBoundingBox();
+		// Render light models
+		renderPointlightModels();
 		// Draw interface
 		ui.draw();
 		// Swap the screen buffers
@@ -674,26 +770,25 @@ void icarus3D::updateFrames() {
 	totalTime += deltaTime;
 }
 
-bool icarus3D::checkCollision(Scene *scene) {
+bool icarus3D::checkCollision() {
+	// if there's no scene return
+	if (currentScene == -1) return false;
 
-
-	//cout << "camera pos: " << camera.position.x << ", " << camera.position.y << ", " << camera.position.z << endl;
+	Scene* scene = this->scene[currentScene];
+	collisionBool = false;
 	
 	// Iterate over scene models
 	for (int i = 0; i < scene->models.size(); i++) {
-		//cout << "min model: " << model->mesh->min.x << ", " << model->mesh->min.y << ", " << model->mesh->min.z << endl;
-		//cout << "max model: " << model->mesh->max.x << ", " << model->mesh->max.y << ", " << model->mesh->max.z << endl;
-
-		if (   camera.position.x > scene->models[i]->position.x + scene->models[i]->mesh->min.x
+		if (camera.position.x > scene->models[i]->position.x + scene->models[i]->mesh->min.x
 			&& camera.position.y > scene->models[i]->position.y + scene->models[i]->mesh->min.y
 			&& camera.position.z > scene->models[i]->position.z + scene->models[i]->mesh->min.z
 			&& camera.position.x < scene->models[i]->position.x + scene->models[i]->mesh->max.x
 			&& camera.position.y < scene->models[i]->position.y + scene->models[i]->mesh->max.y
 			&& camera.position.z < scene->models[i]->position.z + scene->models[i]->mesh->max.z){
+			collisionBool = true;
 			return true;
 		}
 	}
-
 	return false;
 }
 
@@ -752,7 +847,6 @@ void icarus3D::pick() {
 		//glfwSwapBuffers(window);
 }
 
-
 unsigned int icarus3D::loadTexture(const char* path)
 {
 	unsigned int id;
@@ -807,6 +901,8 @@ unsigned int icarus3D::loadTexture(const char* path)
 
 void icarus3D::renderToTexture() {
 
+	if (currentScene == -1 || scene[currentScene]->models.size() == 0) return;
+
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 	// Clears the color and depth buffers from the frame buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -819,6 +915,8 @@ void icarus3D::renderToTexture() {
 }
 
 void icarus3D::renderDOF() {
+
+	if (currentScene == -1 || scene[currentScene]->models.size() == 0) return;
 
 	//render image with colors
 	renderToTexture();
@@ -861,8 +959,61 @@ void icarus3D::renderDOF() {
 
 }
 
+void icarus3D::renderPointlightModels() {
+	// if there's no scene created return
+	if (currentScene == -1) return;
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+	glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	for (auto& model : scene[currentScene]->models) {
+		model->shader->use();
+
+		if (model->type == POINTLIGHT) {
+			PointLight* pointlight = (PointLight*)model;
+			model->shader->setVec3("ambient", pointlight->properties.color.ambient);
+			model->shader->setVec3("diffuse", pointlight->properties.color.diffuse);
+			model->shader->setVec3("specular", pointlight->properties.color.specular);
+			model->shader->setBool("lightSwitch", pointlight->lightSwitch);
+
+			// Set model shader uniforms
+			model->shader->setVec3("viewPos", camera.position);
+			model->shader->setMat4("model", model->modelMatrix);
+			model->shader->setMat4("view", camera.viewMatrix);
+			model->shader->setMat4("projection", camera.getPerspectiveMatrix());
+
+			// Render model
+			model->mesh->Draw(model->shader);
+		}
+	}
+}
+
+void icarus3D::renderBoundingBox() {
+	if (currentScene == -1) return;
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+	glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	for (auto& model : scene[currentScene]->models) {
+		if (&model - &scene[currentScene]->models[0] == pickedIndex)
+			drawBoundingBox();
+	}
+}
+
+void icarus3D::render2PassDeferredShading() {
+	if (currentScene == -1 || scene[currentScene]->models.size() == 0) return;
+
+	// Render first pass (Geometry)
+		renderSceneGeometryPass(scene[currentScene]);
+	// Render second pass (Lighting)
+		renderSceneLightingPass(scene[currentScene]);
+}
 
 void icarus3D::forwardRendering() {
+
+	if (currentScene == -1 || scene[currentScene]->models.size() == 0) return;
 	// Forward rendering
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -970,6 +1121,58 @@ bool icarus3D::setFrameBufferDepth(GLuint &texture) {
 		return false;
 	}
 
+	return true;
+}
+
+bool icarus3D::setGeometryBuffer() {
+	// Bind geometry buffer
+	glGenFramebuffers(1, &gBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+
+	// Position color buffer
+	glGenTextures(1, &gPosition);
+	glBindTexture(GL_TEXTURE_2D, gPosition);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, windowWidth, windowHeight, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+
+	// Normal color buffer
+	glGenTextures(1, &gNormal);
+	glBindTexture(GL_TEXTURE_2D, gNormal);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, windowWidth, windowHeight, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+
+	// Mtl color contribution buffer
+	glGenTextures(1, &gAlbedoSpec);
+	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, windowWidth, windowHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
+
+	// Tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
+	GLenum attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(3, attachments);
+
+	// Depth buffer
+	glGenRenderbuffers(1, &gDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, gDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, gDepth);
+
+	// Check if framebuffer is succesfully completed
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		cout << "ERROR::Geometry buffer initialization has failed" << endl;
+		return false;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
 	return true;
 }
 

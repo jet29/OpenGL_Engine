@@ -102,6 +102,10 @@
     <None Include="icarus3D\shaders\material.vert" />
     <None Include="icarus3D\shaders\skyboxShader.frag" />
     <None Include="icarus3D\shaders\skyboxShader.vert" />
+    <None Include="icarus3D\shaders\lightingPassShader.vert" />
+    <None Include="icarus3D\shaders\lightingPassShader.frag" />
+    <None Include="icarus3D\shaders\geometryPassShader.vert" />
+    <None Include="icarus3D\shaders\geometryPassShader.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icarus3D\icarus3D.h">

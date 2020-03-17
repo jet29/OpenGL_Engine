@@ -36,6 +36,7 @@ private:
 	void pickedModelWindow();
 	void directionalLightWindow();
 	void fpsWindow();
+	void collisionAlertWindow();
 	// UI Control variables
 	int dirLight_dir_radioButtons_opt;
 	std::string activateModal = "";

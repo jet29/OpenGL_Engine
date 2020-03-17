@@ -176,7 +176,7 @@ void Mesh::initMesh(Vertex* vertices, int vertSize, int* indices, int indexSize,
 	glBindVertexArray(0);
 }
 
-void Mesh::Draw(Shader *shader) const {
+void Mesh::Draw(Shader *shader) {
 	int numMesh = m_meshdata.size();
 
 	for (int i = 0; i < numMesh; i++){
@@ -190,11 +190,11 @@ void Mesh::Draw(Shader *shader) const {
 			glBindTexture(GL_TEXTURE_2D, m_meshdata[i]->material->indexAlbedo);
 
 		//set mesh material
-
 		shader->setVec3("material.ka", m_meshdata[i]->material->ambient);
 		shader->setVec3("material.kd", m_meshdata[i]->material->diffuse);
 		shader->setVec3("material.ks", m_meshdata[i]->material->specular);
 		shader->setFloat("material.shininess", m_meshdata[i]->material->shininess);
+
 
 		glBindVertexArray(m_meshdata[i]->getVAO());
 		glDrawElements(GL_TRIANGLES, m_meshdata[i]->getSize(), GL_UNSIGNED_INT, 0);
@@ -222,7 +222,6 @@ void Mesh::calcNormals(Vertex* vertices, int vertSize, int* indices, int indexSi
 	for (int i = 0; i < vertSize; i++)
 		vertices[i].normal = glm::normalize(vertices[i].normal);
 }
-
 
 bool Mesh::loadMaterials(string path) {
 

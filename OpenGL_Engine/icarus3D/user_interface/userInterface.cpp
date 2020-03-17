@@ -108,13 +108,13 @@ void UI::directionalLightProperties() {
 	ImGui::RadioButton("Z", &dirLight_dir_radioButtons_opt, 2);
 	switch (dirLight_dir_radioButtons_opt) {
 	case 0:
-		ImGui::SliderFloat("", &instance->light->properties.direction.x, -10.0f, 10.0f, "%.2f");
+		ImGui::DragFloat("", &instance->light->properties.direction.x, 0.005f, -1.0f, 1.0f, "%.3f");
 		break;
 	case 1:
-		ImGui::SliderFloat("", &instance->light->properties.direction.y, -10.0f, 10.0f, "%.2f");
+		ImGui::DragFloat("", &instance->light->properties.direction.y, 0.005f, -1.0f, 1.0f, "%.3f");
 		break;
 	case 2:
-		ImGui::SliderFloat("", &instance->light->properties.direction.z, -10.0f, 10.0f, "%.2f");
+		ImGui::DragFloat("", &instance->light->properties.direction.z, 0.005f, -1.0f, 1.0f, "%.3f");
 		break;
 	}
 
@@ -407,6 +407,19 @@ void UI::fpsWindow() {
 	}
 }
 
+void UI::collisionAlertWindow() {
+	if (instance->collisionBool){
+		ImGui::SetNextWindowSize(ImVec2(100, 30));
+		ImGui::SetNextWindowPos(ImVec2(instance->windowWidth - 100 - 10, 10 + 128 + 40));
+		ImGui::SetNextWindowBgAlpha(0.3f);
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.8f, 0.0f, 0.0f, 0.7f));
+		ImGui::Begin("##collision_modal", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+		ImGui::PopStyleColor();
+		ImGui::Text("COLLISION!");
+		ImGui::End();
+	}
+}
+
 void UI::draw() {
 	// Start new frame
 	ImGui_ImplOpenGL3_NewFrame();
@@ -425,7 +438,11 @@ void UI::draw() {
 	//ImGuizmo::DecomposeMatrixToComponents(&instance->camera.viewMatrix[0][0], &instance->camera.position[0], &instance->camera.viewDirection[0],NULL);
 	showMainMenuBar();
 
+	// Draw fps window
 	fpsWindow();
+
+	// Draw alert window for collision
+	collisionAlertWindow();
 
 	// Main configuration window
 	settingsWindow();

@@ -44,6 +44,7 @@ class icarus3D {
 	UI ui;
 	int currentScene = -1;
 	bool DoFBool = false;
+	bool collisionBool;
 	// Private variables
 	private:
 		//Holds the instance of the class
@@ -66,9 +67,13 @@ class icarus3D {
 		Shader* deferredDepthShader;
 		Shader* gridShader;
 		Shader* skyboxShader;
+		Shader* geometryPassShader;
+		Shader* lightingPassShader;
+		Shader* gBufferDebug;
 		// Deferred Shading
-		GLuint framebuffer, depthBuffer;
-		GLuint DOFframebuffer, depthTexture;
+		GLuint framebuffer, depthBuffer, gBuffer;
+		GLuint gPosition, gNormal, gAlbedoSpec;
+		GLuint DOFframebuffer, depthTexture, gDepth;
 		GLuint dsTexture;
 		GLuint cubemapTexture;
 		GLuint kernel7, kernel11;
@@ -91,7 +96,14 @@ class icarus3D {
 		bool saveScene();
 		bool loadScene(string path);
 		unsigned int loadTexture(const char* path);
-		void renderScene(Scene *scene);
+		void renderScene(Scene* scene);
+		void renderSceneGeometryPass(Scene* scene);
+		void renderSceneLightingPass(Scene *scene);
+		void renderPointlightModels();
+		void renderBoundingBox();
+		void setLightingUniforms(Scene* scene, Shader* shader);
+		void setDirectionalLightUniform(Scene* scene, Shader* shader);
+		void setPointlightsUniform(Scene* scene, Shader* shader);
 		// Private functions
 	private:
 		icarus3D();
@@ -104,6 +116,7 @@ class icarus3D {
 		void renderToTexture();
 		void forwardRendering();
 		void renderDOF();
+		void render2PassDeferredShading();
 		void drawGrid();
 		void drawSkybox();
 		bool initWindow();
@@ -114,10 +127,11 @@ class icarus3D {
 		void loadCubeMap(std::vector<std::string> faces);
 		void processKeyboardInput(ICwindow* window);
 		void updateFrames();
-		bool checkCollision(Scene *scene);
+		bool checkCollision();
 		void buildDeferredPlane();
 		bool setFrameBuffer(GLuint& texture);
 		bool setFrameBufferDepth(GLuint& texture);
+		bool setGeometryBuffer();
 		bool initKernel();
 		void pick();
 

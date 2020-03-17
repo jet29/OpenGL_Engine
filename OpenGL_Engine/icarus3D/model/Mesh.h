@@ -66,7 +66,7 @@ public:
 	Mesh(const string& _path, const string& _mtlPath);
 	Mesh(Vertex* vertices, int vSize, int* indices, int indexSize, int indexMesh, bool calcNormals);
 	~Mesh();
-	void Draw(Shader *shader) const;
+	void Draw(Shader *shader);
 	std::string name;
 	glm::vec3 min;
 	glm::vec3 max;

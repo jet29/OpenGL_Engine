@@ -177,8 +177,12 @@
     <None Include="icarus3D\shaders\deferredDepth.vert" />
     <None Include="icarus3D\shaders\depth.frag" />
     <None Include="icarus3D\shaders\depth.vert" />
+    <None Include="icarus3D\shaders\geometryPassShader.frag" />
+    <None Include="icarus3D\shaders\geometryPassShader.vert" />
     <None Include="icarus3D\shaders\gridShader.frag" />
     <None Include="icarus3D\shaders\gridShader.vert" />
+    <None Include="icarus3D\shaders\lightingPassShader.frag" />
+    <None Include="icarus3D\shaders\lightingPassShader.vert" />
     <None Include="icarus3D\shaders\material.frag" />
     <None Include="icarus3D\shaders\material.vert" />
     <None Include="icarus3D\shaders\modelShader.frag" />
