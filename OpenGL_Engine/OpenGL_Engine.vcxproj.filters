@@ -106,6 +106,16 @@
     <None Include="icarus3D\shaders\lightingPassShader.frag" />
     <None Include="icarus3D\shaders\geometryPassShader.vert" />
     <None Include="icarus3D\shaders\geometryPassShader.frag" />
+    <None Include="icarus3D\shaders\ssao\ssao_geometry.frag" />
+    <None Include="icarus3D\shaders\ssao\ssao_geometry.vert" />
+    <None Include="icarus3D\shaders\ssao\ssao.frag" />
+    <None Include="icarus3D\shaders\ssao\ssao.vert" />
+    <None Include="icarus3D\shaders\ssao\ssao_blur.frag" />
+    <None Include="icarus3D\shaders\ssao\ssao_blur.vert" />
+    <None Include="icarus3D\shaders\ssao\ssao_lighting.vert" />
+    <None Include="icarus3D\shaders\ssao\ssao_lighting.frag" />
+    <None Include="icarus3D\shaders\ssao\ssao_debug.vert" />
+    <None Include="icarus3D\shaders\ssao\ssao_debug.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icarus3D\icarus3D.h">

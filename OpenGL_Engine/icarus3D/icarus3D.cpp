@@ -86,7 +86,7 @@ unsigned int icarus3D::loadTexture(const char* path, int &texWidth, int &texHeig
 void icarus3D::init() {
 	// Initialize window and glad components
 	if (!initWindow() || !initGlad() || !setFrameBuffer(dsTexture) || !setFrameBufferDepth(depthTexture)
-	|| !setGeometryBuffer()) {
+	|| !setGeometryBuffer() || !setSSAOFramebuffer()) {
 		std::cout << "ERROR::Couldn't initialize window or GLAD components" << std::endl;
 		return;
 	}
@@ -101,6 +101,9 @@ void icarus3D::init() {
 	// Init DIP kernels
 	initKernel();
 
+	// Init SSAO kernel and noise texture
+	initSSAO();
+
 	// init skybox
 	initSkybox();
 
@@ -113,7 +116,11 @@ void icarus3D::init() {
 	skyboxShader = new	Shader("icarus3D/shaders/skyboxShader.vert","icarus3D/shaders/skyboxShader.frag");
 	geometryPassShader = new Shader("icarus3D/shaders/geometryPassShader.vert", "icarus3D/shaders/geometryPassShader.frag");
 	lightingPassShader = new Shader("icarus3D/shaders/lightingPassShader.vert", "icarus3D/shaders/lightingPassShader.frag");
-
+	ssaoGeometryShader = new Shader("icarus3D/shaders/ssao/ssao_geometry.vert", "icarus3D/shaders/ssao/ssao_geometry.frag");
+	ssaoShader = new Shader("icarus3D/shaders/ssao/ssao.vert", "icarus3D/shaders/ssao/ssao.frag");
+	ssaoLightingPass = new Shader("icarus3D/shaders/ssao/ssao_lighting.vert", "icarus3D/shaders/ssao/ssao_lighting.frag");
+	shaderSSAOBlur = new Shader("icarus3D/shaders/ssao/ssao_blur.vert", "icarus3D/shaders/ssao/ssao_blur.frag");
+	ssaoDebug = new Shader("icarus3D/shaders/ssao/ssao_debug.vert", "icarus3D/shaders/ssao/ssao_debug.frag");
 	// Load default textures
 	whiteTexture = loadTexture("assets/textures/white_bg.png");
 	blackTexture = loadTexture("assets/textures/black_bg.png");
@@ -405,6 +412,11 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 			delete instance->gridShader;
 			delete instance->geometryPassShader;
 			delete instance->lightingPassShader;
+			delete instance->ssaoGeometryShader;
+			delete instance->ssaoLightingPass;
+			delete instance->ssaoShader;
+			delete instance->ssaoDebug;
+			delete instance->shaderSSAOBlur;
 
 			instance->gridShader = new Shader("icarus3D/shaders/gridShader.vert", "icarus3D/shaders/gridShader.frag");
 			instance->pickingShader = new Shader("icarus3D/shaders/picking.vert", "icarus3D/shaders/picking.frag");
@@ -413,6 +425,11 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 			instance->deferredDepthShader = new Shader("icarus3D/shaders/deferredDepth.vert", "icarus3D/shaders/deferredDepth.frag");
 			instance->geometryPassShader = new Shader("icarus3D/shaders/geometryPassShader.vert", "icarus3D/shaders/geometryPassShader.frag");
 			instance->lightingPassShader = new Shader("icarus3D/shaders/lightingPassShader.vert", "icarus3D/shaders/lightingPassShader.frag");
+			instance->ssaoGeometryShader = new Shader("icarus3D/shaders/ssao/ssao_geometry.vert", "icarus3D/shaders/ssao/ssao_geometry.frag");
+			instance->ssaoLightingPass = new Shader("icarus3D/shaders/ssao/ssao_lighting.vert", "icarus3D/shaders/ssao/ssao_lighting.frag");
+			instance->ssaoShader = new Shader("icarus3D/shaders/ssao/ssao.vert", "icarus3D/shaders/ssao/ssao.frag");
+			instance->ssaoDebug = new Shader("icarus3D/shaders/ssao/ssao_debug.vert", "icarus3D/shaders/ssao/ssao_debug.frag");
+			instance->shaderSSAOBlur = new Shader("icarus3D/shaders/ssao/ssao_blur.vert", "icarus3D/shaders/ssao/ssao_blur.frag");
 			break;
 		}
 	}
@@ -461,6 +478,7 @@ void icarus3D::resize(ICwindow* window, int width, int height){
 	//camera.resize(windowWidth, windowHeight);
 	instance->setFrameBuffer(instance->dsTexture);
 	instance->setFrameBufferDepth(instance->depthTexture);
+	instance->setSSAOFramebuffer();
 }
 
 void icarus3D::renderScene(Scene *scene) {
@@ -517,29 +535,29 @@ void icarus3D::renderScene(Scene *scene) {
 	}
 }
 
-void icarus3D::renderSceneGeometryPass(Scene* scene) {
+void icarus3D::renderSceneGeometryPass(Scene* scene, Shader* shader) {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Render geometry only first into MRT
-	geometryPassShader->use();
+	shader->use();
 	// Iterate over scene models
 	for (auto& model : scene->models) {
 		// Ignore pointlight models
 		if (model->type == POINTLIGHT ) continue;
 
 		// Set model shader general uniform
-		geometryPassShader->setMat4("model", model->modelMatrix);
-		geometryPassShader->setMat4("view", camera.viewMatrix);
-		geometryPassShader->setMat4("projection", camera.getPerspectiveMatrix());
-
+		shader->setMat4("model", model->modelMatrix);
+		shader->setMat4("view", camera.viewMatrix);
+		shader->setMat4("projection", camera.getPerspectiveMatrix());
 		// Render model
-		model->mesh->Draw(geometryPassShader);
+		model->mesh->Draw(shader);
 		//if (&model - &scene->models[0] == pickedIndex)
 		//	drawBoundingBox();
 	}
 	glBindVertexArray(0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void icarus3D::renderSceneLightingPass(Scene* scene){
@@ -563,6 +581,38 @@ void icarus3D::renderSceneLightingPass(Scene* scene){
 	glBindTexture(GL_TEXTURE_2D, gNormal);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	// Set lighting uniforms config
+	setLightingUniforms(scene, lightingPassShader);
+	//Binds the vertex array to be drawn
+	glBindVertexArray(VAO);
+	// Renders the triangle geometry
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
+
+void icarus3D::renderSceneLightingPass(Scene* scene, Shader* shader) {
+	// Change to default framebuffer
+	glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//drawSkybox();
+	//drawGrid();
+	// Set gBuffer textures uniforms
+	shader->use();
+	shader->setInt("gPosition", 0);
+	shader->setInt("gNormal", 1);
+	shader->setInt("gAlbedoSpec", 2);
+	shader->setInt("ssao", 3);
+	shader->setVec3("viewPos", camera.position);
+	// Bind textures into GPU
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, gPosition);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, gNormal);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
 	// Set lighting uniforms config
 	setLightingUniforms(scene, lightingPassShader);
 	//Binds the vertex array to be drawn
@@ -676,7 +726,7 @@ void icarus3D::render() {
 			//drawSkybox();
 
 		// Draw grid
-			drawGrid();
+			//drawGrid();
 
 		// Depth of field
 			//renderDOF();
@@ -686,7 +736,10 @@ void icarus3D::render() {
 
 
 		// 2-Pass deferred shading
-		render2PassDeferredShading();
+		//render2PassDeferredShading();
+
+		// Render SSAO
+		renderSSAO();
 
 		// Render picked object bounding box
 		renderBoundingBox();
@@ -1006,9 +1059,74 @@ void icarus3D::render2PassDeferredShading() {
 	if (currentScene == -1 || scene[currentScene]->models.size() == 0) return;
 
 	// Render first pass (Geometry)
-		renderSceneGeometryPass(scene[currentScene]);
+		renderSceneGeometryPass(scene[currentScene], geometryPassShader);
 	// Render second pass (Lighting)
 		renderSceneLightingPass(scene[currentScene]);
+}
+
+void icarus3D::renderSSAO() {
+	if (currentScene == -1 || scene[currentScene]->models.size() == 0) return;
+
+	// Render first pass (Geometry)
+	renderSceneGeometryPass(scene[currentScene], ssaoGeometryShader);
+
+	// Use G-buffer to render SSAO Texture
+	glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
+	glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
+	glClear(GL_COLOR_BUFFER_BIT);
+		ssaoShader->use();
+		// Send kernel + rotation
+		for (unsigned int i = 0; i < 64; ++i)
+			ssaoShader->setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
+		ssaoShader->setMat4("projection", camera.perspectiveMatrix);
+		ssaoShader->setInt("gPosition", 0);
+		ssaoShader->setInt("gNormal", 1);
+		ssaoShader->setInt("noiseTexture", 2);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, gPosition);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, gNormal);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, noiseTexture);
+		//Binds the vertex array to be drawn
+		glBindVertexArray(VAO);
+		// Renders the triangle geometry
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+	//DEBUG
+	//glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//ssaoDebug->use();
+	//ssaoDebug->setInt("ssao1", 0);
+	//ssaoDebug->setInt("ssao2", 1);
+	//ssaoDebug->setMat4("projection", camera.perspectiveMatrix);
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, gPosition);
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, gNormal);
+	////Binds the vertex array to be drawn
+
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+	// Missing: BLUR SSAO Texture
+	glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
+	glClear(GL_COLOR_BUFFER_BIT);
+	shaderSSAOBlur->use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+	glBindVertexArray(VAO);
+	// Renders the triangle geometry
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// Render second pass (Lighting)
+	renderSceneLightingPass(scene[currentScene], ssaoLightingPass);
 }
 
 void icarus3D::forwardRendering() {
@@ -1124,7 +1242,35 @@ bool icarus3D::setFrameBufferDepth(GLuint &texture) {
 	return true;
 }
 
-bool icarus3D::setGeometryBuffer() {
+bool icarus3D::setSSAOFramebuffer() {
+	// Generate SSAO FBO 
+	glGenFramebuffers(1, &ssaoFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
+
+	// Generate SSAO color buffer which will hold occlusion value for each generated fragment
+	glGenTextures(1, &ssaoColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+	// Only red channel because output will be in grayscale
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, windowWidth, windowHeight, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBuffer, 0);
+
+	// Generate SSAO FBO BLUR
+	glGenFramebuffers(1, &ssaoBlurFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
+	glGenTextures(1, &ssaoColorBufferBlur);
+	glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, windowWidth, windowHeight, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBufferBlur, 0);
+
+	return true;
+}
+
+bool icarus3D::setGeometryBuffer(IC_FLAG flag) {
 	// Bind geometry buffer
 	glGenFramebuffers(1, &gBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
@@ -1133,8 +1279,10 @@ bool icarus3D::setGeometryBuffer() {
 	glGenTextures(1, &gPosition);
 	glBindTexture(GL_TEXTURE_2D, gPosition);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, windowWidth, windowHeight, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//if (flag == SSAO) {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//}
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
@@ -1150,7 +1298,7 @@ bool icarus3D::setGeometryBuffer() {
 	// Mtl color contribution buffer
 	glGenTextures(1, &gAlbedoSpec);
 	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, windowWidth, windowHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
@@ -1204,7 +1352,57 @@ bool icarus3D::initKernel() {
 
 	glBindTexture(GL_TEXTURE_1D, 0);
 
+
 	return true;
 
+}
+
+bool icarus3D::initSSAO() {
+	// Compute SSAO kernel
+	std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between 0.0 - 1.0
+	std::default_random_engine generator;
+	for (unsigned int i = 0; i < 64; i++) {
+		glm::vec3 sample(
+			// Vary x and y direction between -1.0 and 1.0
+			randomFloats(generator) * 2.0 - 1.0,
+			randomFloats(generator) * 2.0 - 1.0,
+			// Vary z between 0.0 - 1.0f 
+			// If we vary between -1.0 and 1.0 we'd have a sphere sample instead of hemisphere
+			randomFloats(generator)
+		);
+		sample = glm::normalize(sample);
+		sample *= randomFloats(generator);
+		float scale = float(i) / 64.0;
+
+		// scale samples so they're more aligned to center of kernel
+		scale = lerp(0.1f, 1.0f, scale * scale);
+		sample *= scale;
+		ssaoKernel.push_back(sample);
+	}
+
+	// 4x4 array of random rotation vectors oriented around tangent-space surface normal
+	std::vector<glm::vec3> ssaoNoise;
+	for (unsigned int i = 0; i < 16; i++){
+		// rotate around z-axis (in tangent space)
+		glm::vec3 noise(
+			randomFloats(generator) * 2.0 - 1.0,
+			randomFloats(generator) * 2.0 - 1.0,
+			// Since sample kernel is oriented along positive z direction in tangent space leave component z at 0.0
+			// So we rotate around z-axis
+			0.0f); 
+		ssaoNoise.push_back(noise);
+	}
+
+	// Generate noise texture
+	glGenTextures(1, &noiseTexture);
+	glBindTexture(GL_TEXTURE_2D, noiseTexture);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	return true;
 }
 

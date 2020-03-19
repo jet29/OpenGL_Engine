@@ -212,6 +212,10 @@ void UI::pickedModelWindow() {
 				if (ImGui::CollapsingHeader("Specular")) {
 					ImGui::ColorPicker3("Ks", &pointlight->properties.color.specular[0]);
 				}
+
+				ImGui::DragFloat("Constant", &pointlight->properties.attenuation.constant, 0.005f, 0.0f, 3.0f);
+				ImGui::DragFloat("Linear", &pointlight->properties.attenuation.linear, 0.005f, 0.0f, 3.0f);
+				ImGui::DragFloat("Quadratic", &pointlight->properties.attenuation.quadratic, 0.005f, 0.0f, 3.0f);
 			}
 		}
 
@@ -262,9 +266,11 @@ void UI::showMenuFile() {
 		activateModal = "Create Scene##modal";
 	}
 	if (ImGui::MenuItem("Open Scene")) {
+		instance->loadScene("scene.json");
 	}
 
 	if (ImGui::MenuItem("Save Scene",NULL,false, instance->currentScene != -1)) {
+		instance->saveScene();
 	}
 
 }
