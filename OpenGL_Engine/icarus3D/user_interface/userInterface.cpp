@@ -284,7 +284,7 @@ void UI::drawModals() {
 	if (ImGui::BeginPopupModal("Add a new model"))
 	{
 		ImGui::Text("Please write model's path");
-		static char buffer[1024] = "assets/models/catscaled.obj";
+		static char buffer[1024] = "assets/models/texturedcube/texturedcube.obj";
 		ImGui::InputText("##model_path", buffer, IM_ARRAYSIZE(buffer));
 
 		ImGui::Text("Name your model");

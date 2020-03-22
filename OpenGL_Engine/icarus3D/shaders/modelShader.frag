@@ -49,6 +49,7 @@ uniform int numOfPointLight;
 uniform PointLight pointlight[MAX_LIGHTS];
 uniform vec3 viewPos;
 uniform sampler2D albedo; // Diffuse map
+uniform vec3 colorFilter;
 
 // Light casters functions
 vec3 calcDirLight(DirectionalLight light,vec3 normal, vec3 viewDir);
@@ -56,6 +57,14 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir);
 // Illumination  Techniques functions
 float calcDiffLighting(vec3 normal,vec3 lightDir);
 float calcSpecLighting(vec3 normal,vec3 lightDir, vec3 viewDir);
+
+vec3 colorize(vec3 targetTexture,vec3 color){
+	// turn color into grayscale
+	float grayScale = dot(targetTexture, vec3(0.2989,0.5870,0.1140));
+	// Now colorize frag color
+	return (vec3(grayScale) * color);
+}
+
 
 void main()
 {

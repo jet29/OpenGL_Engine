@@ -28,6 +28,11 @@ typedef enum { REGULAR_DEFERRED, SSAO } IC_FLAG;
 typedef GLFWwindow ICwindow;
 typedef unsigned int ICuint;
 
+struct Stereoscopic {
+	Camera* left_eye;
+	Camera* right_eye;
+};
+
 
 
 class icarus3D {
@@ -36,6 +41,7 @@ class icarus3D {
 	vector<Scene *> scene;
 	DirectionalLight *light;
 	static Camera camera;
+	static Stereoscopic stereoscopic;
 	static bool cameraMode;
 	static bool shiftBool;
 	// Window current width
@@ -47,6 +53,7 @@ class icarus3D {
 	int currentScene = -1;
 	bool DoFBool = false;
 	bool collisionBool;
+	float incremental = 1.0f;
 	// Private variables
 	private:
 		//Holds the instance of the class
@@ -75,15 +82,18 @@ class icarus3D {
 		Shader* ssaoGeometryShader;
 		Shader* ssaoLightingPass;
 		Shader* ssaoShader;
-		Shader* ssaoDebug;
+		Shader* debugTextureShader;
 		Shader* shaderSSAOBlur;
+		Shader* stereoscopicShader;
 
 		// Deferred Shading
 		GLuint framebuffer, depthBuffer, gBuffer;
+		GLuint stereoscopic_left_eye_framebuffer, stereoscopic_right_eye_framebuffer;
 		GLuint ssaoFBO, ssaoColorBuffer, ssaoBlurFBO, ssaoColorBufferBlur;
 		GLuint gPosition, gNormal, gAlbedoSpec;
 		GLuint DOFframebuffer, depthTexture, gDepth;
 		GLuint dsTexture, noiseTexture;
+		GLuint leftEyeTexture, rightEyeTexture;
 		GLuint cubemapTexture;
 		GLuint kernel7, kernel11;
 		unsigned int VBO, gridVBO;
@@ -130,6 +140,7 @@ class icarus3D {
 		void renderSceneLightingPass(Scene* scene, Shader* shader);
 		void renderPointlightModels();
 		void renderBoundingBox();
+		void renderStereoscopicViews();
 		void drawGrid();
 		void drawSkybox();
 		bool initWindow();
@@ -139,12 +150,13 @@ class icarus3D {
 		void initSkybox();
 		bool initKernel();
 		bool initSSAO();
+		void initStereoscopicCameras();
 		void loadCubeMap(std::vector<std::string> faces);
 		void processKeyboardInput(ICwindow* window);
 		void updateFrames();
 		bool checkCollision();
 		void buildDeferredPlane();
-		bool setFrameBuffer(GLuint& texture);
+		bool setFrameBuffer(GLuint& framebuffer, GLuint& texture);
 		bool setSSAOFramebuffer();
 		bool setFrameBufferDepth(GLuint& texture);
 		bool setGeometryBuffer(IC_FLAG flag = REGULAR_DEFERRED);

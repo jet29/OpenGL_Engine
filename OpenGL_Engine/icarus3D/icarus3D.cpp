@@ -9,6 +9,7 @@ ICuint icarus3D::windowHeight = 600;
 // Global static pointer used to ensure a single instance of the class.
 icarus3D* icarus3D::instance = NULL;
 Camera icarus3D::camera(windowWidth, windowHeight);
+Stereoscopic icarus3D::stereoscopic;
 bool icarus3D::cameraMode = false;
 bool icarus3D::shiftBool = false;
 
@@ -85,15 +86,20 @@ unsigned int icarus3D::loadTexture(const char* path, int &texWidth, int &texHeig
 
 void icarus3D::init() {
 	// Initialize window and glad components
-	if (!initWindow() || !initGlad() || !setFrameBuffer(dsTexture) || !setFrameBufferDepth(depthTexture)
-	|| !setGeometryBuffer() || !setSSAOFramebuffer()) {
+	if (!initWindow() || !initGlad() || !setFrameBuffer(framebuffer,dsTexture) || !setFrameBufferDepth(depthTexture)
+	|| !setGeometryBuffer() || !setSSAOFramebuffer() || !setFrameBuffer(stereoscopic_left_eye_framebuffer, leftEyeTexture) ||
+		!setFrameBuffer(stereoscopic_right_eye_framebuffer, rightEyeTexture)) {
 		std::cout << "ERROR::Couldn't initialize window or GLAD components" << std::endl;
 		return;
 	}
 	// Initialize OpenGL context
 	initGL();
+
 	// Initialize user interface context
 	ui.init(window);
+
+	// Initialize stereoscopic cameras
+	initStereoscopicCameras();
 	
 	// Initialize grid data
 	initGrid();
@@ -116,11 +122,12 @@ void icarus3D::init() {
 	skyboxShader = new	Shader("icarus3D/shaders/skyboxShader.vert","icarus3D/shaders/skyboxShader.frag");
 	geometryPassShader = new Shader("icarus3D/shaders/geometryPassShader.vert", "icarus3D/shaders/geometryPassShader.frag");
 	lightingPassShader = new Shader("icarus3D/shaders/lightingPassShader.vert", "icarus3D/shaders/lightingPassShader.frag");
+	debugTextureShader = new Shader("icarus3D/shaders/texture_debug.vert", "icarus3D/shaders/texture_debug.frag");
 	ssaoGeometryShader = new Shader("icarus3D/shaders/ssao/ssao_geometry.vert", "icarus3D/shaders/ssao/ssao_geometry.frag");
 	ssaoShader = new Shader("icarus3D/shaders/ssao/ssao.vert", "icarus3D/shaders/ssao/ssao.frag");
 	ssaoLightingPass = new Shader("icarus3D/shaders/ssao/ssao_lighting.vert", "icarus3D/shaders/ssao/ssao_lighting.frag");
 	shaderSSAOBlur = new Shader("icarus3D/shaders/ssao/ssao_blur.vert", "icarus3D/shaders/ssao/ssao_blur.frag");
-	ssaoDebug = new Shader("icarus3D/shaders/ssao/ssao_debug.vert", "icarus3D/shaders/ssao/ssao_debug.frag");
+	stereoscopicShader = new Shader("icarus3D/shaders/stereoscopic_shader.vert", "icarus3D/shaders/stereoscopic_shader.frag");
 	// Load default textures
 	whiteTexture = loadTexture("assets/textures/white_bg.png");
 	blackTexture = loadTexture("assets/textures/black_bg.png");
@@ -259,6 +266,98 @@ void icarus3D::initGrid() {
 	gridLength = (GLuint)indices.size() * 4;
 }
 
+void icarus3D::initStereoscopicCameras() {
+	stereoscopic.left_eye = new Camera(windowWidth, windowHeight);
+	stereoscopic.right_eye = new Camera(windowWidth, windowHeight);
+	//glm::vec3 moveDirection;
+	//glm::vec3 left_eye_view_direction(0.258558f, 0.0f, -0.965920f);
+	//glm::vec3 right_eye_view_direction(-0.258558f, 0.0f, -0.965920f);
+
+	// intraocular distance
+	//float IOD = 2.0f;
+	//float aspect_ratio = (float)windowWidth / (float)windowHeight;
+	//float nearZ = 1.0f;
+	//float farZ = 100.0f;
+	//// Field of view
+	//float fov = glm::radians(45.0f);
+	//// Set left eye parameters
+	//float left_direction = -1.0f;
+	//double frustumshift = (IOD / 2) * nearZ / farZ;
+	//float top = glm::tan(fov / 2) * nearZ;
+	//float right = aspect_ratio * top + frustumshift * left_direction;
+	//// Half screen
+	//float left = -aspect_ratio * top + frustumshift* left_direction;
+	//float bottom = -top;
+
+	// R = ratio * tan(FoV / 2) * N;
+	
+	// Move and rotate left eye
+	//moveDirection = glm::cross(stereoscopic.left_eye->viewDirection, stereoscopic.left_eye->UP);
+	//stereoscopic.left_eye->position += -IOD * moveDirection;
+	//stereoscopic.left_eye->viewDirection = vec3(0, 0, -1);
+	//stereoscopic.left_eye->viewMatrix = glm::lookAt(stereoscopic.left_eye->position, stereoscopic.left_eye->position + stereoscopic.left_eye->viewDirection, stereoscopic.left_eye->UP);
+	////stereoscopic.left_eye->perspectiveMatrix = glm::perspective(glm::radians(60.0f), (float)windowWidth / (float)windowHeight, stereoscopic.left_eye->nearPlane, stereoscopic.left_eye->farPlane);
+	//stereoscopic.left_eye->perspectiveMatrix = glm::frustum(left,right,bottom,top,nearZ,farZ);
+
+	// Set right eye parameters
+	//float right_direction = 1.0f;
+	//top = glm::tan(fov / 2) * nearZ;
+	//right = - (aspect_ratio * top + frustumshift * right_direction);
+	//// Half screen
+	//left = - (-aspect_ratio * top + frustumshift * right_direction);
+	//bottom = -top;
+	
+	// Move and rotate right eye
+	//moveDirection = glm::cross(stereoscopic.right_eye->viewDirection, stereoscopic.right_eye->UP);
+	//stereoscopic.right_eye->position += IOD * moveDirection;
+	//stereoscopic.right_eye->viewDirection = vec3(0, 0, -1);
+	//stereoscopic.right_eye->viewMatrix = glm::lookAt(stereoscopic.right_eye->position, stereoscopic.right_eye->position + stereoscopic.right_eye->viewDirection, stereoscopic.right_eye->UP);
+	////stereoscopic.right_eye->perspectiveMatrix = glm::perspective(glm::radians(60.0f), (float)windowWidth / (float)windowHeight, stereoscopic.right_eye->nearPlane, stereoscopic.right_eye->farPlane);
+	//stereoscopic.right_eye->perspectiveMatrix = glm::frustum(left,right,bottom,top,nearZ,farZ);
+
+
+	// Attempt 2 - Code based on paper: https://cgvr.cs.uni-bremen.de/teaching/vr_literatur/Rendering%203D%20Anaglyph%20in%20OpenGL.pdf
+	// Left Eye
+	float convergence = 7.0f;
+	// Intraocular distance
+	float IOD = 1.0f;
+	float aspectRatio = (float)windowWidth / (float)windowHeight;
+	float nearClippingDistance = 1.0f;
+	float farClippingDistance = 100.0f;
+	float fov = glm::radians(45.0f);
+
+	float top, bottom, left, right;
+	top = nearClippingDistance * glm::tan(fov / 2);
+	bottom = -top;
+	float a = aspectRatio * tan(fov / 2) * convergence;
+	float b = a - IOD / 2;
+	float c = a + IOD / 2;
+	left = -b * nearClippingDistance / convergence;
+	right = c * nearClippingDistance / convergence;
+
+	stereoscopic.left_eye->viewDirection = vec3(0, 0, -1);
+	glm::vec3 moveDirection = glm::cross(stereoscopic.left_eye->viewDirection, stereoscopic.left_eye->UP);
+	stereoscopic.left_eye->position += -IOD * moveDirection;
+	stereoscopic.left_eye->viewMatrix = glm::lookAt(stereoscopic.left_eye->position, stereoscopic.left_eye->position + stereoscopic.left_eye->viewDirection, stereoscopic.left_eye->UP);
+	stereoscopic.left_eye->perspectiveMatrix = glm::frustum(left,right,bottom,top,nearClippingDistance,farClippingDistance);
+
+	// Right eye
+	top = nearClippingDistance * glm::tan(fov / 2);
+	bottom = -top;
+	a = aspectRatio * tan(fov / 2) * convergence;
+	b = a - IOD / 2;
+	c = a + IOD / 2;
+	left = -c * nearClippingDistance / convergence;
+	right = b * nearClippingDistance / convergence;
+
+	stereoscopic.right_eye->viewDirection = vec3(0, 0, -1);
+	moveDirection = glm::cross(stereoscopic.right_eye->viewDirection, stereoscopic.right_eye->UP);
+	stereoscopic.right_eye->position += IOD * moveDirection;
+	stereoscopic.right_eye->viewMatrix = glm::lookAt(stereoscopic.right_eye->position, stereoscopic.right_eye->position + stereoscopic.right_eye->viewDirection, stereoscopic.right_eye->UP);
+	stereoscopic.right_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearClippingDistance, farClippingDistance);
+
+} 
+
 // Private Functions
 bool icarus3D::initWindow(){
 	// Initialize glfw
@@ -348,6 +447,8 @@ void icarus3D::loadCubeMap(std::vector<std::string> faces) {
 
 void icarus3D::processKeyboardInput(ICwindow* window)
 {
+	float MOVEMENT_SPEED = 10.0f;
+	float speed = MOVEMENT_SPEED * deltaTime;
 	// Checks if the escape key is pressed
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		// Tells glfw to close the window as soon as possible
@@ -358,27 +459,40 @@ void icarus3D::processKeyboardInput(ICwindow* window)
 		// Move Forward
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 			camera.moveForward(deltaTime);
+			stereoscopic.left_eye->moveForward(deltaTime);
+			stereoscopic.right_eye->moveForward(deltaTime);
 		}
 		// Move Backward
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 			camera.moveBackward(deltaTime);
+			stereoscopic.left_eye->moveBackward(deltaTime);
+			stereoscopic.right_eye->moveBackward(deltaTime);
 		}
 		// Move right
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 			camera.moveRight(deltaTime);
+			stereoscopic.left_eye->moveRight(deltaTime);
+			stereoscopic.right_eye->moveRight(deltaTime);
 		}
 		// Move left
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 			camera.moveLeft(deltaTime);
+			stereoscopic.left_eye->moveLeft(deltaTime);
+			stereoscopic.right_eye->moveLeft(deltaTime);
 		}
 
 		// Move Up
 		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			camera.moveUp(deltaTime);
+			stereoscopic.right_eye->moveUp(deltaTime);
+			stereoscopic.left_eye->moveUp(deltaTime);
 		}
+
 		// Move Down
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			camera.moveDown(deltaTime);
+			stereoscopic.right_eye->moveDown(deltaTime);
+			stereoscopic.left_eye->moveDown(deltaTime);
 		}
 	}
 
@@ -386,6 +500,18 @@ void icarus3D::processKeyboardInput(ICwindow* window)
 }
 
 void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, int mods) {
+	float IOD;
+	float aspect_ratio;
+	float nearZ;
+	float farZ;
+	float fov;
+	float left_direction;
+	double frustumshift;
+	float top;
+	float right;
+	float left;
+	float bottom;
+
 	// Actions when camera mode is disabled
 	if (action == GLFW_PRESS && !cameraMode) {
 
@@ -415,8 +541,9 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 			delete instance->ssaoGeometryShader;
 			delete instance->ssaoLightingPass;
 			delete instance->ssaoShader;
-			delete instance->ssaoDebug;
+			delete instance->debugTextureShader;
 			delete instance->shaderSSAOBlur;
+			delete instance->stereoscopicShader;
 
 			instance->gridShader = new Shader("icarus3D/shaders/gridShader.vert", "icarus3D/shaders/gridShader.frag");
 			instance->pickingShader = new Shader("icarus3D/shaders/picking.vert", "icarus3D/shaders/picking.frag");
@@ -425,11 +552,58 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 			instance->deferredDepthShader = new Shader("icarus3D/shaders/deferredDepth.vert", "icarus3D/shaders/deferredDepth.frag");
 			instance->geometryPassShader = new Shader("icarus3D/shaders/geometryPassShader.vert", "icarus3D/shaders/geometryPassShader.frag");
 			instance->lightingPassShader = new Shader("icarus3D/shaders/lightingPassShader.vert", "icarus3D/shaders/lightingPassShader.frag");
+			instance->debugTextureShader = new Shader("icarus3D/shaders/texture_debug.vert", "icarus3D/shaders/texture_debug.frag");
 			instance->ssaoGeometryShader = new Shader("icarus3D/shaders/ssao/ssao_geometry.vert", "icarus3D/shaders/ssao/ssao_geometry.frag");
 			instance->ssaoLightingPass = new Shader("icarus3D/shaders/ssao/ssao_lighting.vert", "icarus3D/shaders/ssao/ssao_lighting.frag");
 			instance->ssaoShader = new Shader("icarus3D/shaders/ssao/ssao.vert", "icarus3D/shaders/ssao/ssao.frag");
-			instance->ssaoDebug = new Shader("icarus3D/shaders/ssao/ssao_debug.vert", "icarus3D/shaders/ssao/ssao_debug.frag");
 			instance->shaderSSAOBlur = new Shader("icarus3D/shaders/ssao/ssao_blur.vert", "icarus3D/shaders/ssao/ssao_blur.frag");
+			instance->stereoscopicShader = new Shader("icarus3D/shaders/stereoscopic_shader.vert", "icarus3D/shaders/stereoscopic_shader.frag");
+
+			break;
+		case GLFW_KEY_2: // incremental
+			//instance->incremental += 0.5f;
+			//cout << "IOD: " << instance->incremental << endl;
+			//// intraocular distance
+			//IOD = instance->incremental;
+			//aspect_ratio = (float)windowWidth / (float)windowHeight;
+			//nearZ = 1.0f;
+			//farZ = 100.0f;
+			//// Field of view
+			//fov = glm::radians(45.0f);
+			//// Set left eye parameters
+			//left_direction = -1.0f;
+			//frustumshift = (IOD / 2) * nearZ / farZ;
+			//top = glm::tan(fov / 2) * nearZ;
+			//right = aspect_ratio * top + frustumshift * left_direction;
+			//// Half screen
+			//left = -aspect_ratio * top + frustumshift * left_direction;
+			//bottom = -top;
+			//stereoscopic.left_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearZ, farZ);
+			//stereoscopic.right_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearZ, farZ);
+
+			//stereoscopic.right_eye->perspectiveMatrix = glm::perspective(glm::radians(instance->incremental), (float)windowWidth / (float)windowHeight, stereoscopic.right_eye->nearPlane, stereoscopic.right_eye->farPlane);
+			//stereoscopic.left_eye->perspectiveMatrix = glm::perspective(glm::radians(instance->incremental), (float)windowWidth / (float)windowHeight, stereoscopic.left_eye->nearPlane, stereoscopic.left_eye->farPlane);
+			break;
+		case GLFW_KEY_3: // decremental
+			//instance->incremental -= 0.5f;
+			//cout << "IOD: " << instance->incremental << endl;
+			//// intraocular distance
+			//IOD = instance->incremental;
+			//aspect_ratio = (float)windowWidth / (float)windowHeight;
+			//nearZ = 1.0f;
+			//farZ = 100.0f;
+			//// Field of view
+			//fov = glm::radians(45.0f);
+			//// Set left eye parameters
+			//left_direction = -1.0f;
+			//frustumshift = (IOD / 2) * nearZ / farZ;
+			//top = glm::tan(fov / 2) * nearZ;
+			//right = aspect_ratio * top + frustumshift * left_direction;
+			//// Half screen
+			//left = -aspect_ratio * top + frustumshift * left_direction;
+			//bottom = -top;
+			//stereoscopic.left_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearZ, farZ);
+			//stereoscopic.right_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearZ, farZ);
 			break;
 		}
 	}
@@ -459,6 +633,9 @@ void icarus3D::onMouseMotion(ICwindow* window, double xpos, double ypos)
 		double yoffset = ((instance->windowHeight / 2.0) - ypos) * camera.mouseSpeed * instance->deltaTime;
 
 		camera.mouseUpdate(glm::vec2(xoffset, yoffset));
+
+		stereoscopic.left_eye->mouseUpdate(glm::vec2(xoffset, yoffset));
+		stereoscopic.right_eye->mouseUpdate(glm::vec2(xoffset, yoffset));
 	}
 }
 
@@ -476,7 +653,7 @@ void icarus3D::resize(ICwindow* window, int width, int height){
 	glViewport(0, 0, windowWidth, windowHeight);
 
 	//camera.resize(windowWidth, windowHeight);
-	instance->setFrameBuffer(instance->dsTexture);
+	//instance->setFrameBuffer(instance->dsTexture);
 	instance->setFrameBufferDepth(instance->depthTexture);
 	instance->setSSAOFramebuffer();
 }
@@ -564,7 +741,7 @@ void icarus3D::renderSceneLightingPass(Scene* scene){
 
 	// Change to default framebuffer
 	glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, dsTexture);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//drawSkybox();
 	//drawGrid();
@@ -620,6 +797,338 @@ void icarus3D::renderSceneLightingPass(Scene* scene, Shader* shader) {
 	// Renders the triangle geometry
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
+}
+
+void icarus3D::renderStereoscopicViews() {
+	if (currentScene == -1 || scene[currentScene]->models.size() == 0) return;
+
+	// Instance current scene
+	Scene* scene = this->scene[currentScene];
+	glEnable(GL_BLEND);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// Working with framebuffer 0 and modified viewport
+		// Left Eye render
+		glColorMask(true, false, false, false);
+		// Iterate over scene models
+		for (auto& model : scene->models) {
+
+			// Use a single shader per model
+			model->shader->use();
+
+			if (model->type == MODEL) {
+				// Set Directional light shader uniforms
+				model->shader->setVec3("dirlight.direction", light->properties.direction);
+				model->shader->setVec3("dirlight.color.ambient", light->properties.color.ambient);
+				model->shader->setVec3("dirlight.color.diffuse", light->properties.color.diffuse);
+				model->shader->setVec3("dirlight.color.specular", light->properties.color.specular);
+				model->shader->setBool("dirlight.lightSwitch", light->lightSwitch);
+				// Set Point lights shader uniforms
+				model->shader->setInt("numOfPointLight", scene->pointlight_index.size());
+				for (ICuint i = 0; i < scene->pointlight_index.size(); i++) {
+					PointLight* pointlight = (PointLight*)scene->models[scene->pointlight_index[i]];
+					std::string index = std::to_string(i);
+					// Set pointlight position
+					model->shader->setVec3("pointlight[" + index + "].position", pointlight->position);
+					// Set pointlight color
+					model->shader->setVec3("pointlight[" + index + "].color.ambient", pointlight->properties.color.ambient);
+					model->shader->setVec3("pointlight[" + index + "].color.diffuse", pointlight->properties.color.diffuse);
+					model->shader->setVec3("pointlight[" + index + "].color.specular", pointlight->properties.color.specular);
+					// Set pointlight attenuationF
+					model->shader->setFloat("pointlight[" + index + "].attenuation.constant", pointlight->properties.attenuation.constant);
+					model->shader->setFloat("pointlight[" + index + "].attenuation.linear", pointlight->properties.attenuation.linear);
+					model->shader->setFloat("pointlight[" + index + "].attenuation.quadratic", pointlight->properties.attenuation.quadratic);
+					// Set pointlight switch bool
+					model->shader->setBool("pointlight[" + index + "].lightSwitch", pointlight->lightSwitch);
+					// Set directional light switch bool
+				}
+			}
+			else if (model->type == POINTLIGHT) {
+				PointLight* pointlight = (PointLight*)model;
+				model->shader->setVec3("ambient", pointlight->properties.color.ambient);
+				model->shader->setVec3("diffuse", pointlight->properties.color.diffuse);
+				model->shader->setVec3("specular", pointlight->properties.color.specular);
+				model->shader->setBool("lightSwitch", pointlight->lightSwitch);
+			}
+
+			// Set model shader uniforms
+			model->shader->setVec3("viewPos", stereoscopic.left_eye->position);
+			model->shader->setMat4("model", model->modelMatrix);
+			model->shader->setMat4("view", stereoscopic.left_eye->viewMatrix);
+			model->shader->setMat4("projection", stereoscopic.left_eye->perspectiveMatrix);
+			model->shader->setVec3("colorFilter", vec3(1.0f, 0.0f, 0.0f));
+			// Render model
+			model->mesh->Draw(model->shader);
+
+		}
+
+		glBindVertexArray(0);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glColorMask(false, true, true, false);
+		// Right Eye render
+		// Iterate over scene models
+		for (auto& model : scene->models) {
+
+			// Use a single shader per model
+			model->shader->use();
+
+			if (model->type == MODEL) {
+				// Set Directional light shader uniforms
+				model->shader->setVec3("dirlight.direction", light->properties.direction);
+				model->shader->setVec3("dirlight.color.ambient", light->properties.color.ambient);
+				model->shader->setVec3("dirlight.color.diffuse", light->properties.color.diffuse);
+				model->shader->setVec3("dirlight.color.specular", light->properties.color.specular);
+				model->shader->setBool("dirlight.lightSwitch", light->lightSwitch);
+				// Set Point lights shader uniforms
+				model->shader->setInt("numOfPointLight", scene->pointlight_index.size());
+				for (ICuint i = 0; i < scene->pointlight_index.size(); i++) {
+					PointLight* pointlight = (PointLight*)scene->models[scene->pointlight_index[i]];
+					std::string index = std::to_string(i);
+					// Set pointlight position
+					model->shader->setVec3("pointlight[" + index + "].position", pointlight->position);
+					// Set pointlight color
+					model->shader->setVec3("pointlight[" + index + "].color.ambient", pointlight->properties.color.ambient);
+					model->shader->setVec3("pointlight[" + index + "].color.diffuse", pointlight->properties.color.diffuse);
+					model->shader->setVec3("pointlight[" + index + "].color.specular", pointlight->properties.color.specular);
+					// Set pointlight attenuationF
+					model->shader->setFloat("pointlight[" + index + "].attenuation.constant", pointlight->properties.attenuation.constant);
+					model->shader->setFloat("pointlight[" + index + "].attenuation.linear", pointlight->properties.attenuation.linear);
+					model->shader->setFloat("pointlight[" + index + "].attenuation.quadratic", pointlight->properties.attenuation.quadratic);
+					// Set pointlight switch bool
+					model->shader->setBool("pointlight[" + index + "].lightSwitch", pointlight->lightSwitch);
+					// Set directional light switch bool
+				}
+			}
+			else if (model->type == POINTLIGHT) {
+				PointLight* pointlight = (PointLight*)model;
+				model->shader->setVec3("ambient", pointlight->properties.color.ambient);
+				model->shader->setVec3("diffuse", pointlight->properties.color.diffuse);
+				model->shader->setVec3("specular", pointlight->properties.color.specular);
+				model->shader->setBool("lightSwitch", pointlight->lightSwitch);
+			}
+
+			// Set model shader uniforms
+			model->shader->setVec3("viewPos", stereoscopic.right_eye->position);
+			model->shader->setMat4("model", model->modelMatrix);
+			model->shader->setMat4("view", stereoscopic.right_eye->viewMatrix);
+			model->shader->setMat4("projection", stereoscopic.right_eye->perspectiveMatrix);
+			model->shader->setVec3("colorFilter", vec3(0.0f, 0.0f, 1.0f));
+
+			// Render model
+			model->mesh->Draw(model->shader);
+
+		}
+
+		glBindVertexArray(0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glColorMask(true, true, true, true);
+
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//	glViewport(0, 0, windowWidth / 2, windowHeight);
+	//	stereoscopicShader->use();
+	//	stereoscopicShader->setInt("eyeTexture", 0);
+	//	stereoscopicShader->setVec3("colorFilter", glm::vec3(1.0f,0.0f,0.0f));
+	//	glActiveTexture(GL_TEXTURE0);
+	//	glBindTexture(GL_TEXTURE_2D, leftEyeTexture);
+	//	//Binds the vertex array to be drawn
+	//	glBindVertexArray(VAO);
+	//	// Renders the triangle geometry
+	//	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	//	glBindVertexArray(0);
+
+		//glViewport(windowWidth / 2, 0, windowWidth / 2, windowHeight);
+		//stereoscopicShader->setInt("eyeTexture", 0);
+		//stereoscopicShader->setVec3("colorFilter", glm::vec3(0.0f, 0.0f, 1.0f));
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, rightEyeTexture);
+		////Binds the vertex array to be drawn
+		//glBindVertexArray(VAO);
+		//// Renders the triangle geometry
+		//glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		//glBindVertexArray(0);
+
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	stereoscopicShader->use();
+//	stereoscopicShader->setInt("left_eye_texture", 0);
+//	stereoscopicShader->setInt("right_eye_texture", 1);
+//	stereoscopicShader->setInt("camera_view_texture",2);
+//	glActiveTexture(GL_TEXTURE0);
+//	glBindTexture(GL_TEXTURE_2D, leftEyeTexture);
+//	glActiveTexture(GL_TEXTURE1);
+//	glBindTexture(GL_TEXTURE_2D, rightEyeTexture);
+//	glActiveTexture(GL_TEXTURE2);
+//	glBindTexture(GL_TEXTURE_2D,dsTexture);
+//	//Binds the vertex array to be drawn
+//	glBindVertexArray(VAO);
+//	// Renders the triangle geometry
+//	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+//	glBindVertexArray(0);
+//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//// Render from left eye perspective and save into texture
+	//glBindFramebuffer(GL_FRAMEBUFFER, stereoscopic_left_eye_framebuffer); {
+	//	// Clears the color and depth buffers from the frame buffer
+	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+
+	//	// Render scene
+	//		// Iterate over scene models
+	//	for (auto& model : scene->models) {
+
+	//		// Use a single shader per model
+	//		model->shader->use();
+
+	//		if (model->type == MODEL) {
+	//			// Set Directional light shader uniforms
+	//			model->shader->setVec3("dirlight.direction", light->properties.direction);
+	//			model->shader->setVec3("dirlight.color.ambient", light->properties.color.ambient);
+	//			model->shader->setVec3("dirlight.color.diffuse", light->properties.color.diffuse);
+	//			model->shader->setVec3("dirlight.color.specular", light->properties.color.specular);
+	//			model->shader->setBool("dirlight.lightSwitch", light->lightSwitch);
+	//			// Set Point lights shader uniforms
+	//			model->shader->setInt("numOfPointLight", scene->pointlight_index.size());
+	//			for (ICuint i = 0; i < scene->pointlight_index.size(); i++) {
+	//				PointLight* pointlight = (PointLight*)scene->models[scene->pointlight_index[i]];
+	//				std::string index = std::to_string(i);
+	//				// Set pointlight position
+	//				model->shader->setVec3("pointlight[" + index + "].position", pointlight->position);
+	//				// Set pointlight color
+	//				model->shader->setVec3("pointlight[" + index + "].color.ambient", pointlight->properties.color.ambient);
+	//				model->shader->setVec3("pointlight[" + index + "].color.diffuse", pointlight->properties.color.diffuse);
+	//				model->shader->setVec3("pointlight[" + index + "].color.specular", pointlight->properties.color.specular);
+	//				// Set pointlight attenuationF
+	//				model->shader->setFloat("pointlight[" + index + "].attenuation.constant", pointlight->properties.attenuation.constant);
+	//				model->shader->setFloat("pointlight[" + index + "].attenuation.linear", pointlight->properties.attenuation.linear);
+	//				model->shader->setFloat("pointlight[" + index + "].attenuation.quadratic", pointlight->properties.attenuation.quadratic);
+	//				// Set pointlight switch bool
+	//				model->shader->setBool("pointlight[" + index + "].lightSwitch", pointlight->lightSwitch);
+	//				// Set directional light switch bool
+	//			}
+	//		}
+	//		else if (model->type == POINTLIGHT) {
+	//			PointLight* pointlight = (PointLight*)model;
+	//			model->shader->setVec3("ambient", pointlight->properties.color.ambient);
+	//			model->shader->setVec3("diffuse", pointlight->properties.color.diffuse);
+	//			model->shader->setVec3("specular", pointlight->properties.color.specular);
+	//			model->shader->setBool("lightSwitch", pointlight->lightSwitch);
+	//		}
+
+	//		// Set model shader uniforms
+	//		model->shader->setVec3("viewPos", stereoscopic.left_eye->position);
+	//		model->shader->setMat4("model", model->modelMatrix);
+	//		model->shader->setMat4("view", stereoscopic.left_eye->viewMatrix);
+	//		model->shader->setMat4("projection", stereoscopic.left_eye->perspectiveMatrix);
+
+	//		// Render model
+	//		model->mesh->Draw(model->shader);
+
+	//	}
+
+	//	glBindVertexArray(0);
+	//}
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//// Render from right eye perspective and save into texture
+	//glBindFramebuffer(GL_FRAMEBUFFER, stereoscopic_right_eye_framebuffer); {
+	//	// Clears the color and depth buffers from the frame buffer
+	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//	// Render scene
+	//		// Iterate over scene models
+	//	for (auto& model : scene->models) {
+
+	//		// Use a single shader per model
+	//		model->shader->use();
+
+	//		if (model->type == MODEL) {
+	//			// Set Directional light shader uniforms
+	//			model->shader->setVec3("dirlight.direction", light->properties.direction);
+	//			model->shader->setVec3("dirlight.color.ambient", light->properties.color.ambient);
+	//			model->shader->setVec3("dirlight.color.diffuse", light->properties.color.diffuse);
+	//			model->shader->setVec3("dirlight.color.specular", light->properties.color.specular);
+	//			model->shader->setBool("dirlight.lightSwitch", light->lightSwitch);
+	//			// Set Point lights shader uniforms
+	//			model->shader->setInt("numOfPointLight", scene->pointlight_index.size());
+	//			for (ICuint i = 0; i < scene->pointlight_index.size(); i++) {
+	//				PointLight* pointlight = (PointLight*)scene->models[scene->pointlight_index[i]];
+	//				std::string index = std::to_string(i);
+	//				// Set pointlight position
+	//				model->shader->setVec3("pointlight[" + index + "].position", pointlight->position);
+	//				// Set pointlight color
+	//				model->shader->setVec3("pointlight[" + index + "].color.ambient", pointlight->properties.color.ambient);
+	//				model->shader->setVec3("pointlight[" + index + "].color.diffuse", pointlight->properties.color.diffuse);
+	//				model->shader->setVec3("pointlight[" + index + "].color.specular", pointlight->properties.color.specular);
+	//				// Set pointlight attenuationF
+	//				model->shader->setFloat("pointlight[" + index + "].attenuation.constant", pointlight->properties.attenuation.constant);
+	//				model->shader->setFloat("pointlight[" + index + "].attenuation.linear", pointlight->properties.attenuation.linear);
+	//				model->shader->setFloat("pointlight[" + index + "].attenuation.quadratic", pointlight->properties.attenuation.quadratic);
+	//				// Set pointlight switch bool
+	//				model->shader->setBool("pointlight[" + index + "].lightSwitch", pointlight->lightSwitch);
+	//				// Set directional light switch bool
+	//			}
+	//		}
+	//		else if (model->type == POINTLIGHT) {
+	//			PointLight* pointlight = (PointLight*)model;
+	//			model->shader->setVec3("ambient", pointlight->properties.color.ambient);
+	//			model->shader->setVec3("diffuse", pointlight->properties.color.diffuse);
+	//			model->shader->setVec3("specular", pointlight->properties.color.specular);
+	//			model->shader->setBool("lightSwitch", pointlight->lightSwitch);
+	//		}
+
+	//		// Set model shader uniforms
+	//		model->shader->setVec3("viewPos", stereoscopic.right_eye->position);
+	//		model->shader->setMat4("model", model->modelMatrix);
+	//		model->shader->setMat4("view", stereoscopic.right_eye->viewMatrix);
+	//		model->shader->setMat4("projection", stereoscopic.right_eye->perspectiveMatrix);
+
+	//		// Render model
+	//		model->mesh->Draw(model->shader);
+
+	//	}
+
+	//	glBindVertexArray(0);
+	//}
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//
+
+	// //Combine both sights and original sight into single shader
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//	stereoscopicShader->use();
+	//	stereoscopicShader->setInt("left_eye_texture", 0);
+	//	stereoscopicShader->setInt("right_eye_texture", 1);
+	//	stereoscopicShader->setInt("camera_view_texture",2);
+	//	glActiveTexture(GL_TEXTURE0);
+	//	glBindTexture(GL_TEXTURE_2D, leftEyeTexture);
+	//	glActiveTexture(GL_TEXTURE1);
+	//	glBindTexture(GL_TEXTURE_2D, rightEyeTexture);
+	//	glActiveTexture(GL_TEXTURE2);
+	//	glBindTexture(GL_TEXTURE_2D,dsTexture);
+	//	//Binds the vertex array to be drawn
+	//	glBindVertexArray(VAO);
+	//	// Renders the triangle geometry
+	//	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	//	glBindVertexArray(0);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+	// For DEBUG purposes
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);{
+	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//	debugTextureShader->use();
+	//	debugTextureShader->setInt("texImage", 0);
+	//	glActiveTexture(GL_TEXTURE0);
+	//	glBindTexture(GL_TEXTURE_2D, dsTexture);
+	//	//Binds the vertex array to be drawn
+	//	glBindVertexArray(VAO);
+	//	// Renders the triangle geometry
+	//	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	//	glBindVertexArray(0);
+	//}
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void icarus3D::setLightingUniforms(Scene* scene, Shader* shader) {
@@ -736,15 +1245,18 @@ void icarus3D::render() {
 
 
 		// 2-Pass deferred shading
-		//render2PassDeferredShading();
+		render2PassDeferredShading();
 
+		// Stereoscopic view pass
+		renderStereoscopicViews();
+			
 		// Render SSAO
-		renderSSAO();
+		///renderSSAO();
 
 		// Render picked object bounding box
-		renderBoundingBox();
+		//renderBoundingBox();
 		// Render light models
-		renderPointlightModels();
+		//renderPointlightModels();
 		// Draw interface
 		ui.draw();
 		// Swap the screen buffers
@@ -1113,7 +1625,7 @@ void icarus3D::renderSSAO() {
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
-	// Missing: BLUR SSAO Texture
+	// BLUR SSAO Texture
 	glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
 	glClear(GL_COLOR_BUFFER_BIT);
 	shaderSSAOBlur->use();
@@ -1175,7 +1687,7 @@ void icarus3D::buildDeferredPlane() {
 
 }
 
-bool icarus3D::setFrameBuffer(GLuint& texture) {
+bool icarus3D::setFrameBuffer(GLuint &framebuffer, GLuint& texture) {
 
 	glGenFramebuffers(1, &framebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
