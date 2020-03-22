@@ -1248,13 +1248,13 @@ void icarus3D::render() {
 		//render2PassDeferredShading();
 
 		// Stereoscopic view pass
-		//renderStereoscopicViews();
+		renderStereoscopicViews();
 			
 		// Render SSAO
-		renderSSAO();
+		//renderSSAO();
 
 		// Render picked object bounding box
-		//renderBoundingBox();
+		renderBoundingBox();
 		// Render light models
 		//renderPointlightModels();
 		// Draw interface
@@ -1344,12 +1344,13 @@ bool icarus3D::checkCollision() {
 	
 	// Iterate over scene models
 	for (int i = 0; i < scene->models.size(); i++) {
-		if (camera.position.x > scene->models[i]->position.x + scene->models[i]->mesh->min.x
-			&& camera.position.y > scene->models[i]->position.y + scene->models[i]->mesh->min.y
-			&& camera.position.z > scene->models[i]->position.z + scene->models[i]->mesh->min.z
-			&& camera.position.x < scene->models[i]->position.x + scene->models[i]->mesh->max.x
-			&& camera.position.y < scene->models[i]->position.y + scene->models[i]->mesh->max.y
-			&& camera.position.z < scene->models[i]->position.z + scene->models[i]->mesh->max.z){
+
+		if (camera.position.x + camera.nearPlane > scene->models[i]->position.x + scene->models[i]->mesh->min.x
+			&& camera.position.y + camera.nearPlane  > scene->models[i]->position.y + scene->models[i]->mesh->min.y
+			&& camera.position.z + camera.nearPlane  > scene->models[i]->position.z + scene->models[i]->mesh->min.z
+			&& camera.position.x - camera.nearPlane  < scene->models[i]->position.x + scene->models[i]->mesh->max.x
+			&& camera.position.y - camera.nearPlane  < scene->models[i]->position.y + scene->models[i]->mesh->max.y
+			&& camera.position.z - camera.nearPlane  < scene->models[i]->position.z + scene->models[i]->mesh->max.z){
 			collisionBool = true;
 			return true;
 		}
