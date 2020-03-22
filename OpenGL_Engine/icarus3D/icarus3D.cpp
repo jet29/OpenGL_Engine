@@ -128,14 +128,20 @@ void icarus3D::init() {
 	ssaoLightingPass = new Shader("icarus3D/shaders/ssao/ssao_lighting.vert", "icarus3D/shaders/ssao/ssao_lighting.frag");
 	shaderSSAOBlur = new Shader("icarus3D/shaders/ssao/ssao_blur.vert", "icarus3D/shaders/ssao/ssao_blur.frag");
 	stereoscopicShader = new Shader("icarus3D/shaders/stereoscopic_shader.vert", "icarus3D/shaders/stereoscopic_shader.frag");
+	particleSystemShader = new Shader("icarus3D/shaders/particleSystem.vert", "icarus3D/shaders/particleSystem.frag");
+	
 	// Load default textures
 	whiteTexture = loadTexture("assets/textures/white_bg.png");
 	blackTexture = loadTexture("assets/textures/black_bg.png");
+	particleSystemTexture = loadTexture("assets/textures/bubble.png");
 
 	buildDeferredPlane();
 
 	// Create Mandatory Dir Light
 	light = new DirectionalLight();
+
+	// Create Particle System
+	particleSystem = new ParticleSystem(VAO, VBO, glm::vec3(0, 0, 0), 16.0f);
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -1248,10 +1254,12 @@ void icarus3D::render() {
 		//render2PassDeferredShading();
 
 		// Stereoscopic view pass
-		renderStereoscopicViews();
+		//renderStereoscopicViews();
 			
 		// Render SSAO
-		//renderSSAO();
+		renderSSAO();
+
+		renderParticleSystem();
 
 		// Render picked object bounding box
 		renderBoundingBox();
@@ -1917,5 +1925,10 @@ bool icarus3D::initSSAO() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	return true;
+}
+
+void icarus3D::renderParticleSystem() {
+	particleSystem->update(deltaTime);
+	particleSystem->draw(particleSystemShader, particleSystemTexture, camera.viewMatrix, camera.perspectiveMatrix);
 }
 

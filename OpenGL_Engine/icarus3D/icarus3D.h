@@ -19,8 +19,9 @@
 #include "light/PointLight.h"
 #include "light/SpotLight.h"
 #include <ImGuizmo.h>
-
-//#include ""
+// Particle System
+#include "particle_system/particleSystem.h"
+#include "particle_system/particle.h"
 
 //typedef sceneStruct icarusScene;
 typedef enum { REGULAR_DEFERRED, SSAO } IC_FLAG;
@@ -40,6 +41,7 @@ class icarus3D {
 	public:
 	vector<Scene *> scene;
 	DirectionalLight *light;
+	ParticleSystem* particleSystem;
 	static Camera camera;
 	static Stereoscopic stereoscopic;
 	static bool cameraMode;
@@ -85,6 +87,7 @@ class icarus3D {
 		Shader* debugTextureShader;
 		Shader* shaderSSAOBlur;
 		Shader* stereoscopicShader;
+		Shader* particleSystemShader;
 
 		// Deferred Shading
 		GLuint framebuffer, depthBuffer, gBuffer;
@@ -95,6 +98,7 @@ class icarus3D {
 		GLuint dsTexture, noiseTexture;
 		GLuint leftEyeTexture, rightEyeTexture;
 		GLuint cubemapTexture;
+		GLuint particleSystemTexture;
 		GLuint kernel7, kernel11;
 		unsigned int VBO, gridVBO;
 		unsigned int VAO, gridVAO, skyboxVAO;
@@ -141,6 +145,7 @@ class icarus3D {
 		void renderPointlightModels();
 		void renderBoundingBox();
 		void renderStereoscopicViews();
+		void renderParticleSystem();
 		void drawGrid();
 		void drawSkybox();
 		bool initWindow();

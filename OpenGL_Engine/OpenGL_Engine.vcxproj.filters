@@ -78,6 +78,12 @@
     <ClCompile Include="icarus3D\ImGuizmo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="icarus3D\particle_system\particle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="icarus3D\particle_system\particleSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="icarus3D\shaders\basic.frag" />
@@ -184,6 +190,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="icarus3D\light\DirectionalLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="icarus3D\particle_system\particle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="icarus3D\particle_system\particleSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
