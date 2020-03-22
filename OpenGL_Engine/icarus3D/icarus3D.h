@@ -53,6 +53,7 @@ class icarus3D {
 	// Interface instance
 	UI ui;
 	int currentScene = -1;
+	int particleSystemSeed = 20;
 	bool DoFBool = false;
 	bool collisionBool;
 	float incremental = 1.0f;

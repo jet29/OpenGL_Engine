@@ -133,7 +133,7 @@ void icarus3D::init() {
 	// Load default textures
 	whiteTexture = loadTexture("assets/textures/white_bg.png");
 	blackTexture = loadTexture("assets/textures/black_bg.png");
-	particleSystemTexture = loadTexture("assets/textures/bubble.png");
+	particleSystemTexture = loadTexture("assets/textures/rain2.png");
 
 	buildDeferredPlane();
 
@@ -141,7 +141,7 @@ void icarus3D::init() {
 	light = new DirectionalLight();
 
 	// Create Particle System
-	particleSystem = new ParticleSystem(VAO, VBO, glm::vec3(0, 0, 0), 16.0f);
+	particleSystem = new ParticleSystem(VAO, VBO, particleSystemSeed);
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -460,7 +460,6 @@ void icarus3D::processKeyboardInput(ICwindow* window)
 		// Tells glfw to close the window as soon as possible
 		glfwSetWindowShouldClose(window, true);
 
-	float deltaTime = currentTime - lastTime;
 	if (cameraMode) {
 		// Move Forward
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {

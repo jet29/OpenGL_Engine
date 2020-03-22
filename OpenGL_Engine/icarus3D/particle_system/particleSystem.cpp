@@ -3,50 +3,41 @@
 
 using namespace std;
 
-ParticleSystem::ParticleSystem(unsigned int _VAO, unsigned int _VBO, glm::vec3 _position, float _spawnRadius) {
+ParticleSystem::ParticleSystem(unsigned int _VAO, unsigned int _VBO, unsigned int seed) {
 
 	VAO = _VAO;
 	VBO = _VBO;
 
-	particles.resize(maxParticles);
-
-	spawnRadius = _spawnRadius;
-	positionStart = _position;
-	position = positionStart;
-
-	lastParticlePos = -1;
-
-	timeLeftSpawn = timeBetweenSpawn;
-
-	//initialize Seed
-	srand(time(NULL));
+	particles.resize(max_particles);
+	position = initial_position;
+	time_left_to_spawn = time_between_spawn;
+	
+	//initialize random generator with seed
+	srand(seed);
 }
 
 
 void ParticleSystem::createParticle() {
 
-	int index = (lastParticlePos + 1) % maxParticles;
+	int index = (last_particle_index + 1) % max_particles;
+
+	//randomize position start for particle
+	float deltaPos_x = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / spawn_radius * 2) - spawn_radius);
+	float deltaPos_y = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / spawn_radius * 2) - spawn_radius);
+	float deltaPos_z = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / spawn_radius * 2) - spawn_radius);
+	glm::vec3 deltaPos = glm::vec3(deltaPos_x, deltaPos_y, deltaPos_z);
 	
-	if (activeParticles < maxParticles) {
-		cout << "Creating a new particle number: " <<index<< endl;
-
-
-		//randomize position start for particle
-		float deltaPos_x = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / spawnRadius * 2) - spawnRadius);
-		float deltaPos_y = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / spawnRadius * 2) - spawnRadius);
-		float deltaPos_z = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / spawnRadius * 2) - spawnRadius);
-		glm::vec3 deltaPos = glm::vec3(deltaPos_x, deltaPos_y, deltaPos_z);
-
+	if (active_particles < max_particles) {
 		Particle* particle;
-		particle = new Particle(position + deltaPos, glm::vec3(0,1,0));
+		particle = new Particle(position + deltaPos, particle_direction, particle_speed, 3.0f);
 		particles[index] = particle;
-		activeParticles++;
+		active_particles++;
 	}
 	else {
-		particles[index]->reset(position);
+		particles[index]->reset(position + deltaPos, particle_direction, particle_speed);
 	}
 
-	lastParticlePos = index;
+	last_particle_index = index;
 }
 
 
@@ -68,15 +59,11 @@ void ParticleSystem::draw(Shader* shader, GLuint texture, glm::mat4 view, glm::m
 	CameraRight_worldspace = glm::vec3(view[0][0], view[1][0], view[2][0]);
 	CameraUp_worldspace = glm::vec3(view[0][1], view[1][1], view[2][1]);
 
-
-	// Binds the vertex array to be drawn
 	glBindVertexArray(VAO);
 
-	for (int i = 0; i < activeParticles; i++) {
+	for (int i = 0; i < active_particles; i++) {
 
-
-		glm::mat4 model = particles[i]->calculateBillboardMatrix();
-		glm::vec2 billboardSize = glm::vec2(1, 1);
+		glm::vec2 billboardSize = particles[i]->scale;
 		glm::vec3 particleCenter_wordspace = particles[i]->position;
 
 		shader->setVec3("CameraRight_worldspace", CameraRight_worldspace);
@@ -84,8 +71,7 @@ void ParticleSystem::draw(Shader* shader, GLuint texture, glm::mat4 view, glm::m
 		shader->setVec3("particleCenter_wordspace", particleCenter_wordspace);
 		shader->setVec2("BillboardSize", billboardSize);
 
-		//glm::mat4 model = glm::mat4(1.0f);
-		shader->setMat4("model", model);
+		//shader->setMat4("model", model); //is not used
 		particles[i]->draw();
 	}
 
@@ -96,24 +82,26 @@ void ParticleSystem::update(float deltaTime){
 
 	spawnParticles(deltaTime);
 
-	for (int i = 0; i < activeParticles; i++) {
-		
+	for (int i = 0; i < active_particles; i++) {
+		//UPDATE PARTICLE SPEED
+		particles[i]->speed = particle_speed;
+		particles[i]->direction = particle_direction;
+		particles[i]->scale = particle_scale;
 		particles[i]->update(deltaTime);
 	}
+		
 }
 
 
 void ParticleSystem::spawnParticles(float deltaTime) {
 
-	timeLeftSpawn -= deltaTime;
+	time_left_to_spawn -= deltaTime;
 
-	if (timeLeftSpawn <= 0) {
+	if (time_left_to_spawn <= 0) { //time to spawn
 
-		for (int i = 0; i < particlesPerSpawn; i++) {
-
+		for (int i = 0; i < particles_per_spawn; i++) 
 			createParticle();
-		}
 
-		timeLeftSpawn = timeBetweenSpawn;
+		time_left_to_spawn = time_between_spawn; //reset spawn counter
 	}
 }

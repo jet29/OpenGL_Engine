@@ -1,37 +1,16 @@
-﻿  icarus3D.cpp
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(519,8): warning C4101: 'bottom': unreferenced local variable
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(511,8): warning C4101: 'nearZ': unreferenced local variable
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(518,8): warning C4101: 'left': unreferenced local variable
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(514,8): warning C4101: 'left_direction': unreferenced local variable
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(516,8): warning C4101: 'top': unreferenced local variable
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(513,8): warning C4101: 'fov': unreferenced local variable
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(512,8): warning C4101: 'farZ': unreferenced local variable
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(517,8): warning C4101: 'right': unreferenced local variable
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(515,9): warning C4101: 'frustumshift': unreferenced local variable
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(510,8): warning C4101: 'aspect_ratio': unreferenced local variable
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(509,8): warning C4101: 'IOD': unreferenced local variable
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(682,75): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(833,76): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(889,76): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(1153,66): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(1303,53): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(1318,25): warning C4806: '==': unsafe operation: no value of type 'bool' promoted to type 'int' can equal the given constant
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(1330,27): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(1336,9): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(1415,26): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\icarus3D.cpp(1896,15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  userInterface.cpp
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(232,48): warning C4305: 'argument': truncation from 'double' to 'const _Ty'
+﻿  userInterface.cpp
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(51,89): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(52,103): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(53,92): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(277,48): warning C4305: 'argument': truncation from 'double' to 'const _Ty'
           with
           [
               _Ty=float
           ]
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(408,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(419,62): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(439,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(439,36): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(443,96): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(440,12): warning C4101: 'matrix': unreferenced local variable
-  main.cpp
-  Generating Code...
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(472,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(483,62): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(503,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(503,36): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(507,96): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(504,12): warning C4101: 'matrix': unreferenced local variable
   OpenGL_Engine.vcxproj -> C:\Users\AlchenTheCat\Documents\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe
