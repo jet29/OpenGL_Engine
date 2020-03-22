@@ -1245,13 +1245,13 @@ void icarus3D::render() {
 
 
 		// 2-Pass deferred shading
-		render2PassDeferredShading();
+		//render2PassDeferredShading();
 
 		// Stereoscopic view pass
-		renderStereoscopicViews();
+		//renderStereoscopicViews();
 			
 		// Render SSAO
-		///renderSSAO();
+		renderSSAO();
 
 		// Render picked object bounding box
 		//renderBoundingBox();
