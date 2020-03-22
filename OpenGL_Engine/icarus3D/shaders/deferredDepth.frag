@@ -15,7 +15,7 @@ uniform float far_plane;
 uniform float DOFThreshold = 0.5;
 
 // Fragment Color
-out vec4 color;
+out vec4 fragColor;
 
 // required when using a perspective projection matrix
 float LinearizeDepth(float depth)
@@ -49,7 +49,7 @@ void main(){
         }
         mean /= 121;
 
-        color = vec4(mean,1.0);
+        fragColor = vec4(mean,1.0);
     }
     else if(linearizedValue > 0.30f && linearizedValue < 0.50f){
 
@@ -63,10 +63,11 @@ void main(){
         }
         mean /= 49;
 
-        color = vec4(mean,1.0);
+        fragColor = vec4(mean,1.0);
     }
     else if(linearizedValue <= 0.30 || linearizedValue >= 1){
-        color =  vec4(texColor,1.0);
+        fragColor =  vec4(texColor,1.0);
     }
+    //fragColor = vec4(texture(image,vTexPos).rgb,1.0f);
 
 }

@@ -103,6 +103,7 @@ vec3 calcDirLight(DirectionalLight light,vec3 normal, vec3 viewDir, vec3 albedo,
 	return (ambient + diffuse + specular) * albedo;
 }
 
+
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec3 albedo, vec3 fragPos, float ambientOcclusion){
     // Compute light direction vector
     vec3 lightDir = normalize(light.position - fragPos);

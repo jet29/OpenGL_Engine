@@ -9,6 +9,8 @@ in Data{
     vec2 uv;
 }dataIn;
 
+uniform sampler2D albedo;
+
 void main()
 {    
     // store the fragment position vector in the first gbuffer texture
@@ -16,5 +18,5 @@ void main()
     // also store the per-fragment normals into the gbuffer
     gNormal = normalize(dataIn.normal);
     // and the diffuse per-fragment color
-    gAlbedo.rgb = vec3(0.95);
+    gAlbedo.rgb = texture(albedo,dataIn.uv).rgb;
 }

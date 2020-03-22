@@ -47,12 +47,19 @@ void UI::settingsWindow() {
 		ImGui::Begin("Settings");
 
 		// Show fps settings
-		ImGui::Text("Show FPS");
 		ImGui::Checkbox("##fps_checkbox", &fps_bool_checkbox);
+		ImGui::SameLine();
+		ImGui::Text("Show FPS");
 
-		// DoF render selector
+		// DoF technique selector
+		ImGui::Checkbox("##dof_checkbox", &instance->depthOfFieldBool);
+		ImGui::SameLine();
 		ImGui::Text("Depth of Field");
-		ImGui::Checkbox("##dof_checkbox", &instance->DoFBool);
+
+		// SSAO  technique selector
+		ImGui::Checkbox("##ssao_checkbox", &instance->ssaoBool);
+		ImGui::SameLine();
+		ImGui::Text("SSAO"); 
 
 		// Scene selector
 		if (instance->currentScene != -1) {

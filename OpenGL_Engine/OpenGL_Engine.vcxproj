@@ -203,8 +203,6 @@
     <None Include="icarus3D\shaders\texture_debug.vert" />
     <None Include="icarus3D\shaders\ssao\ssao_geometry.frag" />
     <None Include="icarus3D\shaders\ssao\ssao_geometry.vert" />
-    <None Include="icarus3D\shaders\ssao\ssao_lighting.frag" />
-    <None Include="icarus3D\shaders\ssao\ssao_lighting.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icarus3D\camera\Camera.h" />

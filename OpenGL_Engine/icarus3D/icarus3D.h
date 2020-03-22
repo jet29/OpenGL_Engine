@@ -51,8 +51,9 @@ class icarus3D {
 	// Interface instance
 	UI ui;
 	int currentScene = -1;
-	bool DoFBool = false;
+	bool depthOfFieldBool = true;
 	bool collisionBool;
+	bool ssaoBool = true;
 	float incremental = 1.0f;
 	// Private variables
 	private:
@@ -87,12 +88,12 @@ class icarus3D {
 		Shader* stereoscopicShader;
 
 		// Deferred Shading
-		GLuint framebuffer, depthBuffer, gBuffer;
-		GLuint stereoscopic_left_eye_framebuffer, stereoscopic_right_eye_framebuffer;
+		GLuint framebuffer, depthBuffer, gBuffer, pingPongFramebuffer;
+		GLuint stereoscopic_left_eye_framebuffer, stereoscopic_right_eye_framebuffer, pingPongTexture;
 		GLuint ssaoFBO, ssaoColorBuffer, ssaoBlurFBO, ssaoColorBufferBlur;
 		GLuint gPosition, gNormal, gAlbedoSpec;
 		GLuint DOFframebuffer, depthTexture, gDepth;
-		GLuint dsTexture, noiseTexture;
+		GLuint fTexture, noiseTexture;
 		GLuint leftEyeTexture, rightEyeTexture;
 		GLuint cubemapTexture;
 		GLuint kernel7, kernel11;
@@ -128,10 +129,11 @@ class icarus3D {
 		static void onMouseButton(ICwindow* window, int button, int action, int mods);
 		static void onKeyPress(ICwindow* window, int key, int scancode, int action, int mods);
 		void render();
+		void deferredShading();
 		void drawBoundingBox();
 		void renderToTexture();
 		void forwardRendering();
-		void renderDOF();
+		void depthOfField();
 		void render2PassDeferredShading();
 		void renderSSAO();
 		void renderScene(Scene* scene);
@@ -151,6 +153,8 @@ class icarus3D {
 		bool initKernel();
 		bool initSSAO();
 		void initStereoscopicCameras();
+		void duplicateTexture(GLuint target);
+		void renderTexture(GLuint texture);
 		void loadCubeMap(std::vector<std::string> faces);
 		void processKeyboardInput(ICwindow* window);
 		void updateFrames();
