@@ -162,6 +162,8 @@
     <ClCompile Include="icarus3D\model\Mesh.cpp" />
     <ClCompile Include="icarus3D\model\Model.cpp" />
     <ClCompile Include="icarus3D\model\Scene.cpp" />
+    <ClCompile Include="icarus3D\particle_system\particle.cpp" />
+    <ClCompile Include="icarus3D\particle_system\particleSystem.cpp" />
     <ClCompile Include="icarus3D\Shader.cpp" />
     <ClCompile Include="icarus3D\user_interface\userInterface.cpp" />
     <ClCompile Include="main.cpp" />
@@ -187,6 +189,8 @@
     <None Include="icarus3D\shaders\material.vert" />
     <None Include="icarus3D\shaders\modelShader.frag" />
     <None Include="icarus3D\shaders\modelShader.vert" />
+    <None Include="icarus3D\shaders\particleSystem.frag" />
+    <None Include="icarus3D\shaders\particleSystem.vert" />
     <None Include="icarus3D\shaders\picking.frag" />
     <None Include="icarus3D\shaders\picking.vert" />
     <None Include="icarus3D\shaders\pointlight.frag" />
@@ -225,6 +229,8 @@
     <ClInclude Include="icarus3D\model\Model.h" />
     <ClInclude Include="icarus3D\model\referenceCounter.h" />
     <ClInclude Include="icarus3D\model\Scene.h" />
+    <ClInclude Include="icarus3D\particle_system\particle.h" />
+    <ClInclude Include="icarus3D\particle_system\particleSystem.h" />
     <ClInclude Include="icarus3D\Shader.h" />
     <ClInclude Include="icarus3D\user_interface\userInterface.h" />
   </ItemGroup>

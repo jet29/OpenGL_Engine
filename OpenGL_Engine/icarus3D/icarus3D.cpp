@@ -86,9 +86,7 @@ unsigned int icarus3D::loadTexture(const char* path, int &texWidth, int &texHeig
 
 void icarus3D::init() {
 	// Initialize window and glad components
-	if (!initWindow() || !initGlad() || !setFrameBuffer(framebuffer, fTexture) || !setFrameBufferDepth(depthTexture)
-	|| !setGeometryBuffer() || !setSSAOFramebuffer() || !setFrameBuffer(stereoscopic_left_eye_framebuffer, leftEyeTexture) ||
-		!setFrameBuffer(stereoscopic_right_eye_framebuffer, rightEyeTexture) || !setFrameBuffer(pingPongFramebuffer, pingPongTexture)) {
+	if (!initWindow() || !initGlad() || !initFramebuffers()) {
 		std::cout << "ERROR::Couldn't initialize window or GLAD components" << std::endl;
 		return;
 	}
@@ -127,14 +125,20 @@ void icarus3D::init() {
 	ssaoShader = new Shader("icarus3D/shaders/ssao/ssao.vert", "icarus3D/shaders/ssao/ssao.frag");
 	shaderSSAOBlur = new Shader("icarus3D/shaders/ssao/ssao_blur.vert", "icarus3D/shaders/ssao/ssao_blur.frag");
 	stereoscopicShader = new Shader("icarus3D/shaders/stereoscopic_shader.vert", "icarus3D/shaders/stereoscopic_shader.frag");
+	particleSystemShader = new Shader("icarus3D/shaders/particleSystem.vert", "icarus3D/shaders/particleSystem.frag");
+	
 	// Load default textures
 	whiteTexture = loadTexture("assets/textures/white_bg.png");
 	blackTexture = loadTexture("assets/textures/black_bg.png");
+	particleSystemTexture = loadTexture("assets/textures/rain2.png");
 
-	buildDeferredPlane();
+	buildQuad();
 
 	// Create Mandatory Dir Light
 	light = new DirectionalLight();
+
+	// Create Particle System
+	particleSystem = new ParticleSystem(VAO, VBO, particleSystemSeed);
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -145,6 +149,17 @@ void icarus3D::init() {
 	ui.terminate();
 	// Terminate GLFW, clearing any resources allocated by GLFW.s
 	glfwTerminate();
+}
+
+bool icarus3D::initFramebuffers() {
+	bool flag = setFrameBuffer(framebuffer, fTexture) &&
+				setGeometryBuffer() &&
+				setSSAOFramebuffer() &&
+				setFrameBuffer(stereoscopic_left_eye_framebuffer, leftEyeTexture) &&
+				setFrameBuffer(stereoscopic_right_eye_framebuffer, rightEyeTexture) &&
+				setFrameBuffer(pingPongFramebuffer, pingPongTexture);
+
+	return flag;
 }
 
 void icarus3D::initSkybox() {
@@ -268,52 +283,6 @@ void icarus3D::initGrid() {
 void icarus3D::initStereoscopicCameras() {
 	stereoscopic.left_eye = new Camera(windowWidth, windowHeight);
 	stereoscopic.right_eye = new Camera(windowWidth, windowHeight);
-	//glm::vec3 moveDirection;
-	//glm::vec3 left_eye_view_direction(0.258558f, 0.0f, -0.965920f);
-	//glm::vec3 right_eye_view_direction(-0.258558f, 0.0f, -0.965920f);
-
-	// intraocular distance
-	//float IOD = 2.0f;
-	//float aspect_ratio = (float)windowWidth / (float)windowHeight;
-	//float nearZ = 1.0f;
-	//float farZ = 100.0f;
-	//// Field of view
-	//float fov = glm::radians(45.0f);
-	//// Set left eye parameters
-	//float left_direction = -1.0f;
-	//double frustumshift = (IOD / 2) * nearZ / farZ;
-	//float top = glm::tan(fov / 2) * nearZ;
-	//float right = aspect_ratio * top + frustumshift * left_direction;
-	//// Half screen
-	//float left = -aspect_ratio * top + frustumshift* left_direction;
-	//float bottom = -top;
-
-	// R = ratio * tan(FoV / 2) * N;
-	
-	// Move and rotate left eye
-	//moveDirection = glm::cross(stereoscopic.left_eye->viewDirection, stereoscopic.left_eye->UP);
-	//stereoscopic.left_eye->position += -IOD * moveDirection;
-	//stereoscopic.left_eye->viewDirection = vec3(0, 0, -1);
-	//stereoscopic.left_eye->viewMatrix = glm::lookAt(stereoscopic.left_eye->position, stereoscopic.left_eye->position + stereoscopic.left_eye->viewDirection, stereoscopic.left_eye->UP);
-	////stereoscopic.left_eye->perspectiveMatrix = glm::perspective(glm::radians(60.0f), (float)windowWidth / (float)windowHeight, stereoscopic.left_eye->nearPlane, stereoscopic.left_eye->farPlane);
-	//stereoscopic.left_eye->perspectiveMatrix = glm::frustum(left,right,bottom,top,nearZ,farZ);
-
-	// Set right eye parameters
-	//float right_direction = 1.0f;
-	//top = glm::tan(fov / 2) * nearZ;
-	//right = - (aspect_ratio * top + frustumshift * right_direction);
-	//// Half screen
-	//left = - (-aspect_ratio * top + frustumshift * right_direction);
-	//bottom = -top;
-	
-	// Move and rotate right eye
-	//moveDirection = glm::cross(stereoscopic.right_eye->viewDirection, stereoscopic.right_eye->UP);
-	//stereoscopic.right_eye->position += IOD * moveDirection;
-	//stereoscopic.right_eye->viewDirection = vec3(0, 0, -1);
-	//stereoscopic.right_eye->viewMatrix = glm::lookAt(stereoscopic.right_eye->position, stereoscopic.right_eye->position + stereoscopic.right_eye->viewDirection, stereoscopic.right_eye->UP);
-	////stereoscopic.right_eye->perspectiveMatrix = glm::perspective(glm::radians(60.0f), (float)windowWidth / (float)windowHeight, stereoscopic.right_eye->nearPlane, stereoscopic.right_eye->farPlane);
-	//stereoscopic.right_eye->perspectiveMatrix = glm::frustum(left,right,bottom,top,nearZ,farZ);
-
 
 	// Attempt 2 - Code based on paper: https://cgvr.cs.uni-bremen.de/teaching/vr_literatur/Rendering%203D%20Anaglyph%20in%20OpenGL.pdf
 	// Left Eye
@@ -356,6 +325,36 @@ void icarus3D::initStereoscopicCameras() {
 	stereoscopic.right_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearClippingDistance, farClippingDistance);
 
 } 
+
+//void icarus3D::updateStereoPerspectiveMatrix() {
+//	// Update left eye
+//	float aspectRatio = (float)windowWidth / (float)windowHeight;
+//	float nearClippingDistance = 1.0f;
+//	float farClippingDistance = 100.0f;
+//	float fov = glm::radians(45.0f);
+//
+//	float top, bottom, left, right;
+//	top = nearClippingDistance * glm::tan(fov / 2);
+//	bottom = -top;
+//	float a = aspectRatio * tan(fov / 2) * convergence;
+//	float b = a - IOD / 2;
+//	float c = a + IOD / 2;
+//	left = -b * nearClippingDistance / convergence;
+//	right = c * nearClippingDistance / convergence;
+//
+//	stereoscopic.left_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearClippingDistance, farClippingDistance);
+//
+//	// Update right eye
+//	top = nearClippingDistance * glm::tan(fov / 2);
+//	bottom = -top;
+//	a = aspectRatio * tan(fov / 2) * convergence;
+//	b = a - IOD / 2;
+//	c = a + IOD / 2;
+//	left = -c * nearClippingDistance / convergence;
+//	right = b * nearClippingDistance / convergence;
+//	stereoscopic.right_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearClippingDistance, farClippingDistance);
+//
+//}
 
 // Private Functions
 bool icarus3D::initWindow(){
@@ -453,7 +452,6 @@ void icarus3D::processKeyboardInput(ICwindow* window)
 		// Tells glfw to close the window as soon as possible
 		glfwSetWindowShouldClose(window, true);
 
-	float deltaTime = currentTime - lastTime;
 	if (cameraMode) {
 		// Move Forward
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
@@ -483,15 +481,15 @@ void icarus3D::processKeyboardInput(ICwindow* window)
 		// Move Up
 		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			camera.moveUp(deltaTime);
-			stereoscopic.right_eye->moveUp(deltaTime);
 			stereoscopic.left_eye->moveUp(deltaTime);
+			stereoscopic.right_eye->moveUp(deltaTime);
 		}
 
 		// Move Down
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			camera.moveDown(deltaTime);
-			stereoscopic.right_eye->moveDown(deltaTime);
 			stereoscopic.left_eye->moveDown(deltaTime);
+			stereoscopic.right_eye->moveDown(deltaTime);
 		}
 	}
 
@@ -546,51 +544,6 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 			instance->stereoscopicShader = new Shader("icarus3D/shaders/stereoscopic_shader.vert", "icarus3D/shaders/stereoscopic_shader.frag");
 
 			break;
-		case GLFW_KEY_2: // incremental
-			//instance->incremental += 0.5f;
-			//cout << "IOD: " << instance->incremental << endl;
-			//// intraocular distance
-			//IOD = instance->incremental;
-			//aspect_ratio = (float)windowWidth / (float)windowHeight;
-			//nearZ = 1.0f;
-			//farZ = 100.0f;
-			//// Field of view
-			//fov = glm::radians(45.0f);
-			//// Set left eye parameters
-			//left_direction = -1.0f;
-			//frustumshift = (IOD / 2) * nearZ / farZ;
-			//top = glm::tan(fov / 2) * nearZ;
-			//right = aspect_ratio * top + frustumshift * left_direction;
-			//// Half screen
-			//left = -aspect_ratio * top + frustumshift * left_direction;
-			//bottom = -top;
-			//stereoscopic.left_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearZ, farZ);
-			//stereoscopic.right_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearZ, farZ);
-
-			//stereoscopic.right_eye->perspectiveMatrix = glm::perspective(glm::radians(instance->incremental), (float)windowWidth / (float)windowHeight, stereoscopic.right_eye->nearPlane, stereoscopic.right_eye->farPlane);
-			//stereoscopic.left_eye->perspectiveMatrix = glm::perspective(glm::radians(instance->incremental), (float)windowWidth / (float)windowHeight, stereoscopic.left_eye->nearPlane, stereoscopic.left_eye->farPlane);
-			break;
-		case GLFW_KEY_3: // decremental
-			//instance->incremental -= 0.5f;
-			//cout << "IOD: " << instance->incremental << endl;
-			//// intraocular distance
-			//IOD = instance->incremental;
-			//aspect_ratio = (float)windowWidth / (float)windowHeight;
-			//nearZ = 1.0f;
-			//farZ = 100.0f;
-			//// Field of view
-			//fov = glm::radians(45.0f);
-			//// Set left eye parameters
-			//left_direction = -1.0f;
-			//frustumshift = (IOD / 2) * nearZ / farZ;
-			//top = glm::tan(fov / 2) * nearZ;
-			//right = aspect_ratio * top + frustumshift * left_direction;
-			//// Half screen
-			//left = -aspect_ratio * top + frustumshift * left_direction;
-			//bottom = -top;
-			//stereoscopic.left_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearZ, farZ);
-			//stereoscopic.right_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearZ, farZ);
-			break;
 		}
 	}
 	// Actions when camera mode is activated
@@ -626,8 +579,7 @@ void icarus3D::onMouseMotion(ICwindow* window, double xpos, double ypos)
 }
 
 void icarus3D::onMouseButton(ICwindow* window, int button, int action, int mods){
-	//auto a = action == GLFW_PRESS ? GLFW_PRESS : GLFW_RELEASE;
-	//auto b = GLFW_MOUSE_BUTTON_LEFT;
+
 	if (action == GLFW_PRESS && instance->currentScene != -1 && instance->shiftBool)
 		instance->pick();
 }
@@ -640,7 +592,6 @@ void icarus3D::resize(ICwindow* window, int width, int height){
 
 	//camera.resize(windowWidth, windowHeight);
 	//instance->setFrameBuffer(instance->dsTexture);
-	instance->setFrameBufferDepth(instance->depthTexture);
 	instance->setSSAOFramebuffer();
 }
 
@@ -716,8 +667,6 @@ void icarus3D::renderSceneGeometryPass(Scene* scene, Shader* shader) {
 		shader->setMat4("projection", camera.getPerspectiveMatrix());
 		// Render model
 		model->mesh->Draw(shader);
-		//if (&model - &scene->models[0] == pickedIndex)
-		//	drawBoundingBox();
 	}
 	glBindVertexArray(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -760,47 +709,15 @@ void icarus3D::renderSceneLightingPass(Scene* scene){
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void icarus3D::renderSceneLightingPass(Scene* scene, Shader* shader) {
-	// Change to default framebuffer
-	glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//drawSkybox();
-	//drawGrid();
-	// Set gBuffer textures uniforms
-	shader->use();
-	shader->setInt("gPosition", 0);
-	shader->setInt("gNormal", 1);
-	shader->setInt("gAlbedoSpec", 2);
-	shader->setInt("ssao", 3);
-	shader->setVec3("viewPos", camera.position);
-	// Bind textures into GPU
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gPosition);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, gNormal);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
-	// Set lighting uniforms config
-	setLightingUniforms(scene, lightingPassShader);
-	//Binds the vertex array to be drawn
-	glBindVertexArray(VAO);
-	// Renders the triangle geometry
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
-}
-
 void icarus3D::renderStereoscopicViews() {
-	if (currentScene == -1 || scene[currentScene]->models.size() == 0) return;
+	if (currentScene == -1 || scene[currentScene]->models.size() == 0 || !stereoBool) return;
 
 	// Instance current scene
 	Scene* scene = this->scene[currentScene];
-	glEnable(GL_BLEND);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0); 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// Working with framebuffer 0 and modified viewport
+		drawGrid();
+		drawSkybox();
 		// Left Eye render
 		glColorMask(true, false, false, false);
 		// Iterate over scene models
@@ -915,213 +832,6 @@ void icarus3D::renderStereoscopicViews() {
 		glBindVertexArray(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glColorMask(true, true, true, true);
-
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//	glViewport(0, 0, windowWidth / 2, windowHeight);
-	//	stereoscopicShader->use();
-	//	stereoscopicShader->setInt("eyeTexture", 0);
-	//	stereoscopicShader->setVec3("colorFilter", glm::vec3(1.0f,0.0f,0.0f));
-	//	glActiveTexture(GL_TEXTURE0);
-	//	glBindTexture(GL_TEXTURE_2D, leftEyeTexture);
-	//	//Binds the vertex array to be drawn
-	//	glBindVertexArray(VAO);
-	//	// Renders the triangle geometry
-	//	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	//	glBindVertexArray(0);
-
-		//glViewport(windowWidth / 2, 0, windowWidth / 2, windowHeight);
-		//stereoscopicShader->setInt("eyeTexture", 0);
-		//stereoscopicShader->setVec3("colorFilter", glm::vec3(0.0f, 0.0f, 1.0f));
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, rightEyeTexture);
-		////Binds the vertex array to be drawn
-		//glBindVertexArray(VAO);
-		//// Renders the triangle geometry
-		//glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		//glBindVertexArray(0);
-
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	stereoscopicShader->use();
-//	stereoscopicShader->setInt("left_eye_texture", 0);
-//	stereoscopicShader->setInt("right_eye_texture", 1);
-//	stereoscopicShader->setInt("camera_view_texture",2);
-//	glActiveTexture(GL_TEXTURE0);
-//	glBindTexture(GL_TEXTURE_2D, leftEyeTexture);
-//	glActiveTexture(GL_TEXTURE1);
-//	glBindTexture(GL_TEXTURE_2D, rightEyeTexture);
-//	glActiveTexture(GL_TEXTURE2);
-//	glBindTexture(GL_TEXTURE_2D,dsTexture);
-//	//Binds the vertex array to be drawn
-//	glBindVertexArray(VAO);
-//	// Renders the triangle geometry
-//	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-//	glBindVertexArray(0);
-//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//// Render from left eye perspective and save into texture
-	//glBindFramebuffer(GL_FRAMEBUFFER, stereoscopic_left_eye_framebuffer); {
-	//	// Clears the color and depth buffers from the frame buffer
-	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-
-	//	// Render scene
-	//		// Iterate over scene models
-	//	for (auto& model : scene->models) {
-
-	//		// Use a single shader per model
-	//		model->shader->use();
-
-	//		if (model->type == MODEL) {
-	//			// Set Directional light shader uniforms
-	//			model->shader->setVec3("dirlight.direction", light->properties.direction);
-	//			model->shader->setVec3("dirlight.color.ambient", light->properties.color.ambient);
-	//			model->shader->setVec3("dirlight.color.diffuse", light->properties.color.diffuse);
-	//			model->shader->setVec3("dirlight.color.specular", light->properties.color.specular);
-	//			model->shader->setBool("dirlight.lightSwitch", light->lightSwitch);
-	//			// Set Point lights shader uniforms
-	//			model->shader->setInt("numOfPointLight", scene->pointlight_index.size());
-	//			for (ICuint i = 0; i < scene->pointlight_index.size(); i++) {
-	//				PointLight* pointlight = (PointLight*)scene->models[scene->pointlight_index[i]];
-	//				std::string index = std::to_string(i);
-	//				// Set pointlight position
-	//				model->shader->setVec3("pointlight[" + index + "].position", pointlight->position);
-	//				// Set pointlight color
-	//				model->shader->setVec3("pointlight[" + index + "].color.ambient", pointlight->properties.color.ambient);
-	//				model->shader->setVec3("pointlight[" + index + "].color.diffuse", pointlight->properties.color.diffuse);
-	//				model->shader->setVec3("pointlight[" + index + "].color.specular", pointlight->properties.color.specular);
-	//				// Set pointlight attenuationF
-	//				model->shader->setFloat("pointlight[" + index + "].attenuation.constant", pointlight->properties.attenuation.constant);
-	//				model->shader->setFloat("pointlight[" + index + "].attenuation.linear", pointlight->properties.attenuation.linear);
-	//				model->shader->setFloat("pointlight[" + index + "].attenuation.quadratic", pointlight->properties.attenuation.quadratic);
-	//				// Set pointlight switch bool
-	//				model->shader->setBool("pointlight[" + index + "].lightSwitch", pointlight->lightSwitch);
-	//				// Set directional light switch bool
-	//			}
-	//		}
-	//		else if (model->type == POINTLIGHT) {
-	//			PointLight* pointlight = (PointLight*)model;
-	//			model->shader->setVec3("ambient", pointlight->properties.color.ambient);
-	//			model->shader->setVec3("diffuse", pointlight->properties.color.diffuse);
-	//			model->shader->setVec3("specular", pointlight->properties.color.specular);
-	//			model->shader->setBool("lightSwitch", pointlight->lightSwitch);
-	//		}
-
-	//		// Set model shader uniforms
-	//		model->shader->setVec3("viewPos", stereoscopic.left_eye->position);
-	//		model->shader->setMat4("model", model->modelMatrix);
-	//		model->shader->setMat4("view", stereoscopic.left_eye->viewMatrix);
-	//		model->shader->setMat4("projection", stereoscopic.left_eye->perspectiveMatrix);
-
-	//		// Render model
-	//		model->mesh->Draw(model->shader);
-
-	//	}
-
-	//	glBindVertexArray(0);
-	//}
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	//// Render from right eye perspective and save into texture
-	//glBindFramebuffer(GL_FRAMEBUFFER, stereoscopic_right_eye_framebuffer); {
-	//	// Clears the color and depth buffers from the frame buffer
-	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//	// Render scene
-	//		// Iterate over scene models
-	//	for (auto& model : scene->models) {
-
-	//		// Use a single shader per model
-	//		model->shader->use();
-
-	//		if (model->type == MODEL) {
-	//			// Set Directional light shader uniforms
-	//			model->shader->setVec3("dirlight.direction", light->properties.direction);
-	//			model->shader->setVec3("dirlight.color.ambient", light->properties.color.ambient);
-	//			model->shader->setVec3("dirlight.color.diffuse", light->properties.color.diffuse);
-	//			model->shader->setVec3("dirlight.color.specular", light->properties.color.specular);
-	//			model->shader->setBool("dirlight.lightSwitch", light->lightSwitch);
-	//			// Set Point lights shader uniforms
-	//			model->shader->setInt("numOfPointLight", scene->pointlight_index.size());
-	//			for (ICuint i = 0; i < scene->pointlight_index.size(); i++) {
-	//				PointLight* pointlight = (PointLight*)scene->models[scene->pointlight_index[i]];
-	//				std::string index = std::to_string(i);
-	//				// Set pointlight position
-	//				model->shader->setVec3("pointlight[" + index + "].position", pointlight->position);
-	//				// Set pointlight color
-	//				model->shader->setVec3("pointlight[" + index + "].color.ambient", pointlight->properties.color.ambient);
-	//				model->shader->setVec3("pointlight[" + index + "].color.diffuse", pointlight->properties.color.diffuse);
-	//				model->shader->setVec3("pointlight[" + index + "].color.specular", pointlight->properties.color.specular);
-	//				// Set pointlight attenuationF
-	//				model->shader->setFloat("pointlight[" + index + "].attenuation.constant", pointlight->properties.attenuation.constant);
-	//				model->shader->setFloat("pointlight[" + index + "].attenuation.linear", pointlight->properties.attenuation.linear);
-	//				model->shader->setFloat("pointlight[" + index + "].attenuation.quadratic", pointlight->properties.attenuation.quadratic);
-	//				// Set pointlight switch bool
-	//				model->shader->setBool("pointlight[" + index + "].lightSwitch", pointlight->lightSwitch);
-	//				// Set directional light switch bool
-	//			}
-	//		}
-	//		else if (model->type == POINTLIGHT) {
-	//			PointLight* pointlight = (PointLight*)model;
-	//			model->shader->setVec3("ambient", pointlight->properties.color.ambient);
-	//			model->shader->setVec3("diffuse", pointlight->properties.color.diffuse);
-	//			model->shader->setVec3("specular", pointlight->properties.color.specular);
-	//			model->shader->setBool("lightSwitch", pointlight->lightSwitch);
-	//		}
-
-	//		// Set model shader uniforms
-	//		model->shader->setVec3("viewPos", stereoscopic.right_eye->position);
-	//		model->shader->setMat4("model", model->modelMatrix);
-	//		model->shader->setMat4("view", stereoscopic.right_eye->viewMatrix);
-	//		model->shader->setMat4("projection", stereoscopic.right_eye->perspectiveMatrix);
-
-	//		// Render model
-	//		model->mesh->Draw(model->shader);
-
-	//	}
-
-	//	glBindVertexArray(0);
-	//}
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	//
-
-	// //Combine both sights and original sight into single shader
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//	stereoscopicShader->use();
-	//	stereoscopicShader->setInt("left_eye_texture", 0);
-	//	stereoscopicShader->setInt("right_eye_texture", 1);
-	//	stereoscopicShader->setInt("camera_view_texture",2);
-	//	glActiveTexture(GL_TEXTURE0);
-	//	glBindTexture(GL_TEXTURE_2D, leftEyeTexture);
-	//	glActiveTexture(GL_TEXTURE1);
-	//	glBindTexture(GL_TEXTURE_2D, rightEyeTexture);
-	//	glActiveTexture(GL_TEXTURE2);
-	//	glBindTexture(GL_TEXTURE_2D,dsTexture);
-	//	//Binds the vertex array to be drawn
-	//	glBindVertexArray(VAO);
-	//	// Renders the triangle geometry
-	//	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	//	glBindVertexArray(0);
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-	// For DEBUG purposes
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);{
-	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//	debugTextureShader->use();
-	//	debugTextureShader->setInt("texImage", 0);
-	//	glActiveTexture(GL_TEXTURE0);
-	//	glBindTexture(GL_TEXTURE_2D, dsTexture);
-	//	//Binds the vertex array to be drawn
-	//	glBindVertexArray(VAO);
-	//	// Renders the triangle geometry
-	//	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	//	glBindVertexArray(0);
-	//}
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void icarus3D::setLightingUniforms(Scene* scene, Shader* shader) {
@@ -1222,39 +932,20 @@ void icarus3D::render() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// Check for collision
-			checkCollision();
+		checkCollision();
 
 		// Render all (Deferred shading)
-			deferredShading();
-
-		// Forward rendering (limited to certain techniques)
-			// Not done yet
-		// Skybox
-			//drawSkybox();
-
-		// Draw grid
-			//drawGrid();
-
-		// Depth of field
-			//renderDOF();
-		// Rendering to texture 
-			//renderToTexture();
-			//forwardRendering();
-
-
-		// 2-Pass deferred shading
-		//render2PassDeferredShading();
+		deferredShading();
 
 		// Stereoscopic view pass
-		//renderStereoscopicViews();
-			
-		// Render SSAO
-		//renderSSAO();
-
+		renderStereoscopicViews();
+	
 		// Render picked object bounding box
 		renderBoundingBox();
 		// Render light models
 		renderPointlightModels();
+		// Render particle system
+		renderParticleSystem();
 		// Draw interface
 		ui.draw();
 		// Swap the screen buffers
@@ -1267,7 +958,7 @@ void icarus3D::render() {
 
 void icarus3D::deferredShading() {
 	// If there's no scene picked then don't render anything
-	if (currentScene == -1 || scene[currentScene]->models.size() == 0) return;
+	if (currentScene == -1 || scene[currentScene]->models.size() == 0 || stereoBool) return;
 
 	// First pass: Geometry pass into g-buffer textures
 		// Render first pass (Geometry) -> into gBuffer's textures
@@ -1285,7 +976,7 @@ void icarus3D::deferredShading() {
 	if (depthOfFieldBool) depthOfField();
 
 
-	//// Render final pass
+	// Render final pass
 	renderTexture(fTexture);
 
 
@@ -1489,28 +1180,11 @@ unsigned int icarus3D::loadTexture(const char* path)
 	return id;
 }
 
-void icarus3D::renderToTexture() {
-
-	if (currentScene == -1 || scene[currentScene]->models.size() == 0) return;
-
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-	// Clears the color and depth buffers from the frame buffer
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Render scene
-	renderScene(scene[currentScene]);
-
-	glBindVertexArray(0);
-
-}
-
 void icarus3D::depthOfField() {
 
 	// Ping-pong textures to re-use framebuffer
 	duplicateTexture(fTexture);
 
-	// Forward rendering
-	//glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);{
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// Use the shader
@@ -1538,20 +1212,6 @@ void icarus3D::depthOfField() {
 		glBindVertexArray(0);
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);{
-	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//	debugTextureShader->use();
-	//	debugTextureShader->setInt("texImage", 0);
-	//	glActiveTexture(GL_TEXTURE0);
-	//	glBindTexture(GL_TEXTURE_2D, fTexture);
-	//	//Binds the vertex array to be drawn
-	//	glBindVertexArray(VAO);
-	//	// Renders the triangle geometry
-	//	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	//	glBindVertexArray(0);
-	//}
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 }
 
@@ -1598,15 +1258,6 @@ void icarus3D::renderBoundingBox() {
 	}
 }
 
-void icarus3D::render2PassDeferredShading() {
-	if (currentScene == -1 || scene[currentScene]->models.size() == 0) return;
-
-	// Render first pass (Geometry)
-		renderSceneGeometryPass(scene[currentScene], geometryPassShader);
-	// Render second pass (Lighting)
-		renderSceneLightingPass(scene[currentScene]);
-}
-
 void icarus3D::renderSSAO() {
 
 	// Use G-buffer to render SSAO Texture
@@ -1646,8 +1297,6 @@ void icarus3D::renderSSAO() {
 	glBindVertexArray(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	//// Render second pass (Lighting)
-	//renderSceneLightingPass(scene[currentScene], ssaoLightingPass);
 }
 
 void icarus3D::renderTexture(GLuint texture) {
@@ -1666,25 +1315,7 @@ void icarus3D::renderTexture(GLuint texture) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void icarus3D::forwardRendering() {
-
-	if (currentScene == -1 || scene[currentScene]->models.size() == 0) return;
-	// Forward rendering
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// Use the shader
-	deferredShader->use();
-	deferredShader->setInt("image", 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, fTexture);
-	//Binds the vertex array to be drawn
-	glBindVertexArray(VAO);
-	// Renders the triangle geometry
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
-}
-
-void icarus3D::buildDeferredPlane() {
+void icarus3D::buildQuad() {
 
 	// Quad for debug purposes:
 	float quadVertices[] = {
@@ -1751,34 +1382,6 @@ bool icarus3D::setFrameBuffer(GLuint &framebuffer, GLuint& texture) {
 	return true;
 }
 
-bool icarus3D::setFrameBufferDepth(GLuint &texture) {
-
-	glGenFramebuffers(1, &DOFframebuffer);
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowWidth, windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	float borderColor[] = { 0.78f, 0.78f, 0.78f, 1.0f };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	// attach depth texture as FBO's depth buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, DOFframebuffer);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// Always check that our framebuffer is ok
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		std::cout << "ERROR::Framebuffer configuration went wrong" << std::endl;
-		return false;
-	}
-
-	return true;
-}
-
 bool icarus3D::setSSAOFramebuffer() {
 	// Generate SSAO FBO 
 	glGenFramebuffers(1, &ssaoFBO);
@@ -1807,7 +1410,7 @@ bool icarus3D::setSSAOFramebuffer() {
 	return true;
 }
 
-bool icarus3D::setGeometryBuffer(IC_FLAG flag) {
+bool icarus3D::setGeometryBuffer() {
 	// Bind geometry buffer
 	glGenFramebuffers(1, &gBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
@@ -1968,5 +1571,18 @@ void icarus3D::duplicateTexture(GLuint target) {
 		glBindVertexArray(0);
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void icarus3D::renderParticleSystem() {
+	if (!particlesystemBool) return;
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+	glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	particleSystem->update(deltaTime);
+	particleSystem->draw(particleSystemShader, particleSystemTexture, camera.viewMatrix, camera.perspectiveMatrix);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
 }
 

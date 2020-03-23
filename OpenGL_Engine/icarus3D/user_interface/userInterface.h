@@ -31,6 +31,7 @@ private:
 	void showMenuFile();
 	void drawModals();
 	void settingsWindow();
+	void particleSystemWindow();
 	void directionalLightProperties();
 	void pointLightProperties();
 	void pickedModelWindow();
@@ -39,6 +40,9 @@ private:
 	void collisionAlertWindow();
 	// UI Control variables
 	int dirLight_dir_radioButtons_opt;
+	int particle_system_radioButtons_opt_dir;
+	int particle_system_radioButtons_opt_scale;
 	std::string activateModal = "";
 	bool settingFlag = false;
+	bool particleSystemFlag = false;
 };

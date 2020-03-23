@@ -42,6 +42,54 @@ bool UI::init(GLFWwindow* window) {
 	return true;
 }
 
+void UI::particleSystemWindow() {
+	if (particleSystemFlag) {
+		ImGui::Begin("Particle System");
+
+		ImGui::Text("Max Particles");
+		ImGui::DragInt("##Max_Particles", &instance->particleSystem->max_particles, 1, 1, 1000);
+		ImGui::Text("Particles per Spawn");
+		ImGui::DragInt("##Particles_per_Spawn", &instance->particleSystem->particles_per_spawn, 1, 1, 100);
+		ImGui::Text("Spawn Radius");
+		ImGui::DragFloat("##Spawn_Radius", &instance->particleSystem->spawn_radius, 0.1, 1, 1000);
+		ImGui::Text("Time Between Spawn");
+		ImGui::DragFloat("##Time_Between_Spawn", &instance->particleSystem->time_between_spawn, 0.01, 0.01, 10); 
+		ImGui::Text("Particle Speed");
+		ImGui::DragFloat("##Particle_Speed", &instance->particleSystem->particle_speed, 0.1, 1, 100);
+		ImGui::Text("Particle Scale");
+		//ImGui::Checkbox("##Particle_switch", &instance->particleSystem->particle_direction);
+		ImGui::RadioButton("Width", &particle_system_radioButtons_opt_scale, 0); ImGui::SameLine();
+		ImGui::RadioButton("height", &particle_system_radioButtons_opt_scale, 1); ImGui::SameLine();
+		switch (particle_system_radioButtons_opt_scale) {
+		case 0:
+			ImGui::DragFloat("##particle_scale_width", &instance->particleSystem->particle_scale.x, 0.005f, 0.0f, 1.0f, "%.3f");
+			break;
+		case 1:
+			ImGui::DragFloat("##particle_scale_height", &instance->particleSystem->particle_scale.y, 0.005f, 0.0f, 1.0f, "%.3f");
+			break;
+		}
+
+		ImGui::Text("Particle Direction");
+		//ImGui::Checkbox("##Particle_switch", &instance->particleSystem->particle_direction);
+		ImGui::RadioButton("X", &particle_system_radioButtons_opt_dir, 0); ImGui::SameLine();
+		ImGui::RadioButton("Y", &particle_system_radioButtons_opt_dir, 1); ImGui::SameLine();
+		ImGui::RadioButton("Z", &particle_system_radioButtons_opt_dir, 2);
+		switch (particle_system_radioButtons_opt_dir) {
+		case 0:
+			ImGui::DragFloat("##particle_dir_x", &instance->particleSystem->particle_direction.x, 0.005f, -1.0f, 1.0f, "%.3f");
+			break;
+		case 1:
+			ImGui::DragFloat("##particle_dir_y", &instance->particleSystem->particle_direction.y, 0.005f, -1.0f, 1.0f, "%.3f");
+			break;
+		case 2:
+			ImGui::DragFloat("##particle_dir_z", &instance->particleSystem->particle_direction.z, 0.005f, -1.0f, 1.0f, "%.3f");
+			break;
+		}
+
+		ImGui::End();
+	}
+}
+
 void UI::settingsWindow() {
 	if (settingFlag) {
 		ImGui::Begin("Settings");
@@ -60,6 +108,16 @@ void UI::settingsWindow() {
 		ImGui::Checkbox("##ssao_checkbox", &instance->ssaoBool);
 		ImGui::SameLine();
 		ImGui::Text("SSAO"); 
+
+		// SSAO  technique selector
+		ImGui::Checkbox("##particle_system", &instance->particlesystemBool);
+		ImGui::SameLine();
+		ImGui::Text("Particle system");
+
+		ImGui::Separator();
+		ImGui::Text("Anaglyph mode");
+		ImGui::Checkbox("##anaglyph_mode", &instance->stereoBool);
+		ImGui::Separator();
 
 		// Scene selector
 		if (instance->currentScene != -1) {
@@ -405,6 +463,27 @@ void UI::showMainMenuBar() {
 			ImGui::PopStyleColor(3);
 		}
 
+		// Particle system button
+		if (instance->particlesystemBool) {
+			if (particleSystemFlag) {
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+				if (ImGui::Button("Particle System")) {
+					particleSystemFlag = particleSystemFlag == true ? false : true;
+				}
+				ImGui::PopStyleColor(2);
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+				if (ImGui::Button("Particle System")) {
+					particleSystemFlag = particleSystemFlag == true ? false : true;
+				}
+				ImGui::PopStyleColor(3);
+			}
+		}
+
 		ImGui::EndMainMenuBar();
 	}
 }
@@ -459,6 +538,9 @@ void UI::draw() {
 
 	// Main configuration window
 	settingsWindow();
+
+	// Particle System configuration window
+	particleSystemWindow();
 
 	// Directional light information
 	//directionalLightWindow();

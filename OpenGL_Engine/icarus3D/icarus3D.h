@@ -19,12 +19,11 @@
 #include "light/PointLight.h"
 #include "light/SpotLight.h"
 #include <ImGuizmo.h>
-
-//#include ""
+// Particle System
+#include "particle_system/particleSystem.h"
+#include "particle_system/particle.h"
 
 //typedef sceneStruct icarusScene;
-typedef enum { REGULAR_DEFERRED, SSAO } IC_FLAG;
-
 typedef GLFWwindow ICwindow;
 typedef unsigned int ICuint;
 
@@ -40,6 +39,7 @@ class icarus3D {
 	public:
 	vector<Scene *> scene;
 	DirectionalLight *light;
+	ParticleSystem* particleSystem;
 	static Camera camera;
 	static Stereoscopic stereoscopic;
 	static bool cameraMode;
@@ -52,8 +52,12 @@ class icarus3D {
 	UI ui;
 	int currentScene = -1;
 	bool depthOfFieldBool = true;
+	int particleSystemSeed = 20;
+	bool DoFBool = false;
 	bool collisionBool;
 	bool ssaoBool = true;
+	bool particlesystemBool = false;
+	bool stereoBool = false;
 	float incremental = 1.0f;
 	// Private variables
 	private:
@@ -86,6 +90,7 @@ class icarus3D {
 		Shader* debugTextureShader;
 		Shader* shaderSSAOBlur;
 		Shader* stereoscopicShader;
+		Shader* particleSystemShader;
 
 		// Deferred Shading
 		GLuint framebuffer, depthBuffer, gBuffer, pingPongFramebuffer;
@@ -96,6 +101,7 @@ class icarus3D {
 		GLuint fTexture, noiseTexture;
 		GLuint leftEyeTexture, rightEyeTexture;
 		GLuint cubemapTexture;
+		GLuint particleSystemTexture;
 		GLuint kernel7, kernel11;
 		unsigned int VBO, gridVBO;
 		unsigned int VAO, gridVAO, skyboxVAO;
@@ -131,18 +137,15 @@ class icarus3D {
 		void render();
 		void deferredShading();
 		void drawBoundingBox();
-		void renderToTexture();
-		void forwardRendering();
 		void depthOfField();
-		void render2PassDeferredShading();
 		void renderSSAO();
 		void renderScene(Scene* scene);
 		void renderSceneGeometryPass(Scene* scene, Shader* shader);
 		void renderSceneLightingPass(Scene* scene);
-		void renderSceneLightingPass(Scene* scene, Shader* shader);
 		void renderPointlightModels();
 		void renderBoundingBox();
 		void renderStereoscopicViews();
+		void renderParticleSystem();
 		void drawGrid();
 		void drawSkybox();
 		bool initWindow();
@@ -152,6 +155,7 @@ class icarus3D {
 		void initSkybox();
 		bool initKernel();
 		bool initSSAO();
+		bool initFramebuffers();
 		void initStereoscopicCameras();
 		void duplicateTexture(GLuint target);
 		void renderTexture(GLuint texture);
@@ -159,11 +163,10 @@ class icarus3D {
 		void processKeyboardInput(ICwindow* window);
 		void updateFrames();
 		bool checkCollision();
-		void buildDeferredPlane();
+		void buildQuad();
 		bool setFrameBuffer(GLuint& framebuffer, GLuint& texture);
 		bool setSSAOFramebuffer();
-		bool setFrameBufferDepth(GLuint& texture);
-		bool setGeometryBuffer(IC_FLAG flag = REGULAR_DEFERRED);
+		bool setGeometryBuffer();
 		void pick();
 		float lerp(float a, float b, float f) { return a + f * (b - a); }
 };
