@@ -30,6 +30,18 @@ typedef unsigned int ICuint;
 struct Stereoscopic {
 	Camera* left_eye;
 	Camera* right_eye;
+	float convergence = 7.0f;
+	float IOD = 1.0f;
+	float fov = 45.0f;
+	glm::vec4 le_color = glm::vec4(1.0f,0.0f,0.0f,0.5f);
+	glm::vec4 re_color = glm::vec4(0.0f, 0.0f, 1.0f,0.5f);
+};
+
+struct SSAO {
+	int kernelSize = 64;
+	float radius = 0.5;
+	float bias = 0.025;
+	std::vector<glm::vec3> kernel;
 };
 
 
@@ -42,6 +54,7 @@ class icarus3D {
 	ParticleSystem* particleSystem;
 	static Camera camera;
 	static Stereoscopic stereoscopic;
+	static SSAO ssao;
 	static bool cameraMode;
 	static bool shiftBool;
 	// Window current width
@@ -107,7 +120,7 @@ class icarus3D {
 		unsigned int VAO, gridVAO, skyboxVAO;
 		unsigned int gridIBO;
 		glm::mat4 gridModelMatrix = glm::mat4(1.0f);
-		std::vector<glm::vec3> ssaoKernel;
+
 	// Public functions
 	public:
 		//Method to obtain the only instance of the calls
@@ -127,6 +140,8 @@ class icarus3D {
 		void setLightingUniforms(Scene* scene, Shader* shader);
 		void setDirectionalLightUniform(Scene* scene, Shader* shader);
 		void setPointlightsUniform(Scene* scene, Shader* shader);
+		void updateStereoPerspectiveMatrix();
+		void computeSSAOKernel();
 		// Private functions
 	private:
 		icarus3D();

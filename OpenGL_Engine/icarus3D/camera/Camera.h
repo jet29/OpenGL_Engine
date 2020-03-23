@@ -28,4 +28,6 @@ public:
 	void moveUp(float time);
 	void moveDown(float time);
 	void resize(int windowWidth, int windowHeight);
+	private:
+	void checkCameraRotation();
 };

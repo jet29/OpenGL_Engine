@@ -18,10 +18,14 @@ Camera::Camera(int windowWidth, int windowHeight) :
 void Camera::mouseUpdate(const glm::vec2& newMousePosition) {
 	yaw += newMousePosition.x;
 	pitch += newMousePosition.y;
+	// Avoid camera turning and invert controls
+	checkCameraRotation();
+
+	// Update camera rotation angle
 	glm::mat4 Rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), 0.0f);
 	viewDirection = glm::vec3(Rotation * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f));
 	UP = glm::vec3(Rotation * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
-	//printf("(%f,%f,%f)\n", viewDirection.x, viewDirection.y, viewDirection.z);
+	//printf("yaw,pitch(%f,%f)\n", yaw, pitch);
 	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
 }
 
@@ -80,6 +84,13 @@ void Camera::moveDown(float time) {
 	position -= speed * UP;
 	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
 
+}
+
+void Camera::checkCameraRotation() {
+	//if (yaw > 130.0f) yaw = 130.0f;
+	if (pitch > 90.0f) pitch = 90.0f;
+	//if (yaw < -130.0f) yaw = -130.0f;
+	if (pitch < -90.0f) pitch = -90.0f;
 }
 
 void Camera::resize(int windowWidth, int windowHeight) {

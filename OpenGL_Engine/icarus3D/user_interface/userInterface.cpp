@@ -22,6 +22,8 @@ static const char* current_item_light_selector = NULL;
 int radio_button_trans_type = 0;
 int radio_button_loc_w = 0;
 bool fps_bool_checkbox = true;
+bool closedModelWindowBool = true;
+int stereo_eye_opt = 0;
 
 vector<string> lights = { "Directional", "Pointlight" };
 
@@ -43,8 +45,8 @@ bool UI::init(GLFWwindow* window) {
 }
 
 void UI::particleSystemWindow() {
-	if (particleSystemFlag) {
-		ImGui::Begin("Particle System");
+	if (particleSystemFlag && instance->particlesystemBool) {
+		ImGui::Begin("Particle System",&particleSystemFlag);
 
 		ImGui::Text("Max Particles");
 		ImGui::DragInt("##Max_Particles", &instance->particleSystem->max_particles, 1, 1, 1000);
@@ -88,6 +90,7 @@ void UI::particleSystemWindow() {
 
 		ImGui::End();
 	}
+
 }
 
 void UI::settingsWindow() {
@@ -99,65 +102,139 @@ void UI::settingsWindow() {
 		ImGui::SameLine();
 		ImGui::Text("Show FPS");
 
-		// DoF technique selector
-		ImGui::Checkbox("##dof_checkbox", &instance->depthOfFieldBool);
-		ImGui::SameLine();
-		ImGui::Text("Depth of Field");
+		ImGui::Separator();
 
-		// SSAO  technique selector
-		ImGui::Checkbox("##ssao_checkbox", &instance->ssaoBool);
-		ImGui::SameLine();
-		ImGui::Text("SSAO"); 
-
-		// SSAO  technique selector
+		// Particle system checkbox
 		ImGui::Checkbox("##particle_system", &instance->particlesystemBool);
 		ImGui::SameLine();
 		ImGui::Text("Particle system");
 
+		
+
+		// Particle system button
+		if (instance->particlesystemBool) {
+			ImGui::SameLine();
+			if (particleSystemFlag) {
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+				if (ImGui::Button("Settings##particle_settings")) {
+					particleSystemFlag = particleSystemFlag == true ? false : true;
+				}
+				ImGui::PopStyleColor(2);
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+				if (ImGui::Button("Settings##particle_settings")) {
+					particleSystemFlag = particleSystemFlag == true ? false : true;
+				}
+				ImGui::PopStyleColor(3);
+			}
+		}
+
 		ImGui::Separator();
-		ImGui::Text("Anaglyph mode");
-		ImGui::Checkbox("##anaglyph_mode", &instance->stereoBool);
+
+		// Anaglyph stereoscopy checkbox and settings
+		ImGui::Checkbox("##anaglyph_mode", &instance->stereoBool); ImGui::SameLine();
+		ImGui::Text("Anaglyph stereoscopy");
+		if (instance->stereoBool) {
+			ImGui::Text("Convergence distance");
+			if (ImGui::DragFloat("##convergence", &instance->stereoscopic.convergence, 0.1f, 1.0f, 20.0f, "%.1f"))
+				instance->updateStereoPerspectiveMatrix();
+			ImGui::Text("Intraocular distance");
+			if (ImGui::DragFloat("##IOD", &instance->stereoscopic.IOD, 0.1f, 1.0f, 20.0f, "%.1f"))
+				instance->updateStereoPerspectiveMatrix();
+			ImGui::Text("Field of view");
+			if (ImGui::DragFloat("##fov", &instance->stereoscopic.fov, 0.1f, 1.0f, 360.0f, "%.1f°"))
+				instance->updateStereoPerspectiveMatrix();
+			//if (ImGui::CollapsingHeader("Anaglyph colors")) {
+			//	ImGui::RadioButton("Left eye", &stereo_eye_opt, 0); ImGui::SameLine();
+			//	ImGui::RadioButton("Right eye", &stereo_eye_opt, 1);
+			//	switch (stereo_eye_opt) {
+			//	case 0:
+			//		ImGui::ColorPicker4("Left eye", &instance->stereoscopic.le_color[0]);
+			//		break;
+			//	case 1:
+			//		ImGui::ColorPicker4("right eye", &instance->stereoscopic.re_color[0]);
+			//		break;
+			//	}
+			//}
+
+		}
+
+		ImGui::Separator();
+
+		// Techniques 
+		if (ImGui::CollapsingHeader("Techniques")) {
+			// DoF technique selector
+			ImGui::Checkbox("##dof_checkbox", &instance->depthOfFieldBool);
+			ImGui::SameLine();
+			ImGui::Text("Depth of Field");
+			//ImGui::DragFloat("DOF Threshold", &instance->scene[instance->currentScene]->DOFThreshold, 0.005f, 0, 100);
+
+			// SSAO  technique selector
+			ImGui::Checkbox("##ssao_checkbox", &instance->ssaoBool);
+			ImGui::SameLine();
+			ImGui::Text("SSAO");
+			if (instance->ssaoBool) {
+				ImGui::Text("Radius");
+				ImGui::DragFloat("##Radius", &instance->ssao.radius,0.1f,0.5f,15.0f);
+				ImGui::Text("Bias");
+				ImGui::DragFloat("##bias", &instance->ssao.bias,0.005f,0.0f,1.0f);
+				ImGui::Text("Kernel Size");
+				if (ImGui::DragInt("##kernel_size", &instance->ssao.kernelSize, 2,2,128))
+					instance->computeSSAOKernel();
+			}
+
+		}
+
 		ImGui::Separator();
 
 		// Scene selector
 		if (instance->currentScene != -1) {
-			current_item_scene = instance->scene.size() == 0 ? NULL : instance->scene[instance->currentScene]->name.c_str();
-			ImGui::Text("Current scene");
-			if (ImGui::BeginCombo("##combo_scenes", current_item_scene)) {
-				for (int n = 0; n < instance->scene.size(); n++)
-				{
-					bool is_selected = (current_item_scene == instance->scene[n]->name.c_str()); // You can store your selection however you want, outside or inside your objects
-					if (ImGui::Selectable(instance->scene[n]->name.c_str(), is_selected)) {
-						current_item_scene = instance->scene[n]->name.c_str();
-						instance->currentScene = n;
-						instance->setPickedIndex(-1);
+			if (ImGui::CollapsingHeader("Scene settings")) {
+				current_item_scene = instance->scene.size() == 0 ? NULL : instance->scene[instance->currentScene]->name.c_str();
+				ImGui::Text("Current scene");
+				if (ImGui::BeginCombo("##combo_scenes", current_item_scene)) {
+					for (int n = 0; n < instance->scene.size(); n++)
+					{
+						bool is_selected = (current_item_scene == instance->scene[n]->name.c_str()); // You can store your selection however you want, outside or inside your objects
+						if (ImGui::Selectable(instance->scene[n]->name.c_str(), is_selected)) {
+							current_item_scene = instance->scene[n]->name.c_str();
+							instance->currentScene = n;
+							instance->setPickedIndex(-1);
+						}
+						if (is_selected)
+							ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
 					}
-					if (is_selected)
-						ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+					ImGui::EndCombo();
 				}
-				ImGui::EndCombo();
+				if (ImGui::CollapsingHeader("Lighting")) {
+					// Light selector
+					if (ImGui::CollapsingHeader("Directional Light")) {
+						//if (ImGui::BeginCombo("##combo_lights", current_item_light)) {
+						//	for (int n = 0; n < 2; n++)
+						//	{
+						//		bool is_selected2 = (current_item_light == lights[n].c_str()); // You can store your selection however you want, outside or inside your objects
+						//		if (ImGui::Selectable(lights[n].c_str(), is_selected2)) {
+						//			current_item_light = lights[n].c_str();
+						//		}
+						//		if (is_selected2)
+						//			ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+						//	}
+						//	ImGui::EndCombo();
+						//}
+						directionalLightProperties();
+					}
+					if (ImGui::CollapsingHeader("Point Lights")) {
+						pointLightProperties();
+					}
+				}
 			}
-			ImGui::DragFloat("DOF Threshold", &instance->scene[instance->currentScene]->DOFThreshold, 0.005f, 0, 100);
 
 			ImGui::Separator();
 
-			// Light selector
-			string test;
-			ImGui::Text("Directional Light Properties");
-			if (ImGui::BeginCombo("##combo_lights", current_item_light)) {
-				for (int n = 0; n < 2; n++)
-				{
-					bool is_selected2 = (current_item_light == lights[n].c_str()); // You can store your selection however you want, outside or inside your objects
-					if (ImGui::Selectable(lights[n].c_str(), is_selected2)) {
-						current_item_light = lights[n].c_str();
-					}
-					if (is_selected2)
-						ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
-				}
-				ImGui::EndCombo();
-			}
-			directionalLightProperties();
-			pointLightProperties();
 			//if (current_item_light == "Pointlight")
 		}
 
@@ -166,8 +243,8 @@ void UI::settingsWindow() {
 }
 
 void UI::directionalLightProperties() {
+	ImGui::Checkbox("##light_switch", &instance->light->lightSwitch); ImGui::SameLine();
 	ImGui::Text("Light switch");
-	ImGui::Checkbox("##light_switch", &instance->light->lightSwitch);
 	ImGui::RadioButton("X", &dirLight_dir_radioButtons_opt, 0); ImGui::SameLine();
 	ImGui::RadioButton("Y", &dirLight_dir_radioButtons_opt, 1); ImGui::SameLine();
 	ImGui::RadioButton("Z", &dirLight_dir_radioButtons_opt, 2);
@@ -183,7 +260,8 @@ void UI::directionalLightProperties() {
 		break;
 	}
 
-	if (ImGui::CollapsingHeader("Light Color")) {
+	if (ImGui::CollapsingHeader("Light Color")) 
+{
 		// Ambient color
 		if (ImGui::CollapsingHeader("Ambient")) {
 			ImGui::ColorPicker3("Ka", &instance->light->properties.color.ambient.x);
@@ -228,94 +306,101 @@ void UI::pickedModelWindow() {
 		Model* model = instance->scene[instance->currentScene]->models[instance->getPickedIndex()];
 		bool flag = false;
 		string frameTitle = "Picked: " + instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->name;
-		ImGui::Begin(frameTitle.c_str(), (bool*)true);
+		if (closedModelWindowBool) {
+			ImGui::Begin(frameTitle.c_str(), &closedModelWindowBool);
 
-		ImGui::RadioButton("Rotate", &radio_button_trans_type, 0); ImGui::SameLine();
-		ImGui::RadioButton("Translate", &radio_button_trans_type, 1); ImGui::SameLine();
-		ImGui::RadioButton("Scale", &radio_button_trans_type, 2);
-		
-		// Set euler angles from quaternion
-		ImGuizmo::DecomposeMatrixToComponents(&model->modelMatrix[0][0], &model->position[0], &model->rotationAngles[0], &model->scale[0]);		
-		if (ImGui::InputFloat3("Rt", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles.x,2)) {
-			flag = true;
-			glm::quat q(glm::radians(instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles));
-			instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationMatrix = glm::toMat4(q);
-		}
+			ImGui::RadioButton("Rotate", &radio_button_trans_type, 0); ImGui::SameLine();
+			ImGui::RadioButton("Translate", &radio_button_trans_type, 1); ImGui::SameLine();
+			ImGui::RadioButton("Scale", &radio_button_trans_type, 2);
 
-		// Set translation matrix
-		if (ImGui::InputFloat3("Tr", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->position.x, 2)) {
-			flag = true;
-			instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->setTranslationMatrix();
-		}
-	
-		if (ImGui::InputFloat3("Sc", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->scale.x, 2)) {
-			flag = true;
-			instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->setScaleMatrix();
-		}
-
-
-		// Update model Matrix if any change has been made
-		if (flag)
-			instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->computeModelMatrix();
-
-		if (instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->type == POINTLIGHT) {
-			PointLight* pointlight = (PointLight *) instance->scene[instance->currentScene]->models[instance->getPickedIndex()];
-			ImGui::Text("Light switch");
-			ImGui::Checkbox("##pointlight_light_switch", &pointlight->lightSwitch);
-			if (ImGui::CollapsingHeader("Pointlight Color")) {
-				// Ambient color
-				if (ImGui::CollapsingHeader("Ambient")) {
-					ImGui::ColorPicker3("Ka", &pointlight->properties.color.ambient[0]);
-				}
-
-				// Diffuse color
-				if (ImGui::CollapsingHeader("Diffuse")) {
-					ImGui::ColorPicker3("Kd", &pointlight->properties.color.diffuse[0]);
-				}
-
-				// Specular color
-				if (ImGui::CollapsingHeader("Specular")) {
-					ImGui::ColorPicker3("Ks", &pointlight->properties.color.specular[0]);
-				}
-
-				ImGui::DragFloat("Constant", &pointlight->properties.attenuation.constant, 0.005f, 0.0f, 3.0f);
-				ImGui::DragFloat("Linear", &pointlight->properties.attenuation.linear, 0.005f, 0.0f, 3.0f);
-				ImGui::DragFloat("Quadratic", &pointlight->properties.attenuation.quadratic, 0.005f, 0.0f, 3.0f);
+			// Set euler angles from quaternion
+			ImGuizmo::DecomposeMatrixToComponents(&model->modelMatrix[0][0], &model->position[0], &model->rotationAngles[0], &model->scale[0]);
+			if (ImGui::InputFloat3("Rt", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles.x, 2)) {
+				flag = true;
+				glm::quat q(glm::radians(instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles));
+				instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationMatrix = glm::toMat4(q);
 			}
+
+			// Set translation matrix
+			if (ImGui::InputFloat3("Tr", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->position.x, 2)) {
+				flag = true;
+				instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->setTranslationMatrix();
+			}
+
+			if (ImGui::InputFloat3("Sc", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->scale.x, 2)) {
+				flag = true;
+				instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->setScaleMatrix();
+			}
+
+
+			// Update model Matrix if any change has been made
+			if (flag)
+				instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->computeModelMatrix();
+
+			if (instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->type == POINTLIGHT) {
+				PointLight* pointlight = (PointLight*)instance->scene[instance->currentScene]->models[instance->getPickedIndex()];
+				ImGui::Text("Light switch");
+				ImGui::Checkbox("##pointlight_light_switch", &pointlight->lightSwitch);
+				if (ImGui::CollapsingHeader("Pointlight Color")) {
+					// Ambient color
+					if (ImGui::CollapsingHeader("Ambient")) {
+						ImGui::ColorPicker3("Ka", &pointlight->properties.color.ambient[0]);
+					}
+
+					// Diffuse color
+					if (ImGui::CollapsingHeader("Diffuse")) {
+						ImGui::ColorPicker3("Kd", &pointlight->properties.color.diffuse[0]);
+					}
+
+					// Specular color
+					if (ImGui::CollapsingHeader("Specular")) {
+						ImGui::ColorPicker3("Ks", &pointlight->properties.color.specular[0]);
+					}
+
+					ImGui::DragFloat("Constant", &pointlight->properties.attenuation.constant, 0.005f, 0.0f, 3.0f);
+					ImGui::DragFloat("Linear", &pointlight->properties.attenuation.linear, 0.005f, 0.0f, 3.0f);
+					ImGui::DragFloat("Quadratic", &pointlight->properties.attenuation.quadratic, 0.005f, 0.0f, 3.0f);
+				}
+			}
+
+			//if (ImGui::IsKeyPressed(GLFW_KEY_T)) {
+			//	cout << "hola" << endl;
+			//}
+
+			ImGui::Text("Transformation space");
+			ImGui::RadioButton("Local", &radio_button_loc_w, 0); ImGui::SameLine();
+			ImGui::RadioButton("World", &radio_button_loc_w, 1); ImGui::SameLine();
+			ImGuizmo::MODE space = radio_button_loc_w == 0 ? ImGuizmo::LOCAL : ImGuizmo::WORLD;
+
+			vector<float> bound = vector<float>(6);
+			vector<float> boundSnap = vector<float>(3, 0.1);
+			vector<float> snap = vector<float>(3, 1);
+
+			bound[0] = model->mesh->min.x;
+			bound[1] = model->mesh->min.y;
+			bound[2] = model->mesh->min.z;
+			bound[3] = model->mesh->max.x;
+			bound[4] = model->mesh->max.y;
+			bound[5] = model->mesh->max.z;
+
+			ImGui::GetIO().WantCaptureMouse = true;
+
+			ImGuizmo::RecomposeMatrixFromComponents(&model->position[0], &model->rotationAngles[0], &model->scale[0], &model->modelMatrix[0][0]);
+			if (radio_button_trans_type == 0)
+				ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::ROTATE, space, &model->modelMatrix[0][0], NULL, NULL);
+			else if (radio_button_trans_type == 1)
+				ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::TRANSLATE, space, &model->modelMatrix[0][0], NULL, NULL);
+			else if (radio_button_trans_type == 2)
+				ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::SCALE, space, &model->modelMatrix[0][0], NULL, &snap[0], &bound[0], &boundSnap[0]);
+
+			ImGui::End();
 		}
-
-		if (ImGui::IsKeyPressed(GLFW_KEY_T)) {
-			cout << "hola" << endl;
+		else {
+			instance->setPickedIndex(-1);
+			closedModelWindowBool = true;
 		}
-
-		ImGui::Text("Transformation space");
-		ImGui::RadioButton("Local", &radio_button_loc_w, 0); ImGui::SameLine();
-		ImGui::RadioButton("World", &radio_button_loc_w, 1); ImGui::SameLine();
-		ImGuizmo::MODE space = radio_button_loc_w == 0 ? ImGuizmo::LOCAL : ImGuizmo::WORLD;
-
-		vector<float> bound = vector<float>(6);
-		vector<float> boundSnap = vector<float>(3,0.1);
-		vector<float> snap = vector<float>(3,1);
-
-		bound[0] = model->mesh->min.x;
-		bound[1] = model->mesh->min.y;
-		bound[2] = model->mesh->min.z;
-		bound[3] = model->mesh->max.x;
-		bound[4] = model->mesh->max.y;
-		bound[5] = model->mesh->max.z;
-
-		ImGui::GetIO().WantCaptureMouse = true;
-
-		ImGuizmo::RecomposeMatrixFromComponents(&model->position[0], &model->rotationAngles[0], &model->scale[0], &model->modelMatrix[0][0]);
-		if (radio_button_trans_type == 0)
-			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::ROTATE, space, &model->modelMatrix[0][0], NULL,NULL);
-		else if (radio_button_trans_type == 1)
-			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::TRANSLATE, space, &model->modelMatrix[0][0], NULL, NULL);
-		else if (radio_button_trans_type == 2)
-			ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::SCALE, space, &model->modelMatrix[0][0], NULL, &snap[0], &bound[0], &boundSnap[0]);
-
-		ImGui::End();
 	}
+	
 }
 
 void UI::directionalLightWindow() {
@@ -462,28 +547,6 @@ void UI::showMainMenuBar() {
 			}
 			ImGui::PopStyleColor(3);
 		}
-
-		// Particle system button
-		if (instance->particlesystemBool) {
-			if (particleSystemFlag) {
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
-				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
-				if (ImGui::Button("Particle System")) {
-					particleSystemFlag = particleSystemFlag == true ? false : true;
-				}
-				ImGui::PopStyleColor(2);
-			}
-			else {
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
-				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
-				if (ImGui::Button("Particle System")) {
-					particleSystemFlag = particleSystemFlag == true ? false : true;
-				}
-				ImGui::PopStyleColor(3);
-			}
-		}
-
 		ImGui::EndMainMenuBar();
 	}
 }

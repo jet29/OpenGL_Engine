@@ -49,7 +49,8 @@ uniform int numOfPointLight;
 uniform PointLight pointlight[MAX_LIGHTS];
 uniform vec3 viewPos;
 uniform sampler2D albedo; // Diffuse map
-uniform vec3 colorFilter;
+uniform vec4 colorFilter;
+uniform bool anaglyph = false;
 
 // Light casters functions
 vec3 calcDirLight(DirectionalLight light,vec3 normal, vec3 viewDir);
@@ -58,11 +59,11 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir);
 float calcDiffLighting(vec3 normal,vec3 lightDir);
 float calcSpecLighting(vec3 normal,vec3 lightDir, vec3 viewDir);
 
-vec3 colorize(vec3 targetTexture,vec3 color){
+vec4 colorize(vec3 fragColor,vec4 filterColor){
 	// turn color into grayscale
-	float grayScale = dot(targetTexture, vec3(0.2989,0.5870,0.1140));
+	float grayScale = dot(fragColor, vec3(0.2989,0.5870,0.1140));
 	// Now colorize frag color
-	return (vec3(grayScale) * color);
+	return vec4(vec3(grayScale) * filterColor.rgb,filterColor.a);
 }
 
 
@@ -77,7 +78,12 @@ void main()
     for(int i=0;i<numOfPointLight;i++){
         result += calcPointLight(pointlight[i], normal, viewDir) * vec3(pointlight[i].lightSwitch);
     }
-    fragColor=vec4(result, 1.0f);
+    
+    //anaglyph == true ? fragColor=vec4(vec3(result.r*colorFilter.r,result.g*colorFilter.g,result.b*colorFilter.b),colorFilter.a) : fragColor=vec4(result, 1.0f) ;
+    //anaglyph == true ? fragColor= colorize(result,colorFilter) : fragColor=vec4(result, 1.0f) ;
+    fragColor = vec4(result,1.0f);
+    // fragColor = vec4(vec3(colorFilter),0.5f);
+    //fragColor=vec4(vec3(result.r,0.0f,0.0f),colorFilter.a);
 }
 
 vec3 calcDirLight(DirectionalLight light,vec3 normal, vec3 viewDir){

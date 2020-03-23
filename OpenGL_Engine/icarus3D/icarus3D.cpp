@@ -10,6 +10,7 @@ ICuint icarus3D::windowHeight = 600;
 icarus3D* icarus3D::instance = NULL;
 Camera icarus3D::camera(windowWidth, windowHeight);
 Stereoscopic icarus3D::stereoscopic;
+SSAO icarus3D::ssao;
 bool icarus3D::cameraMode = false;
 bool icarus3D::shiftBool = false;
 
@@ -326,35 +327,35 @@ void icarus3D::initStereoscopicCameras() {
 
 } 
 
-//void icarus3D::updateStereoPerspectiveMatrix() {
-//	// Update left eye
-//	float aspectRatio = (float)windowWidth / (float)windowHeight;
-//	float nearClippingDistance = 1.0f;
-//	float farClippingDistance = 100.0f;
-//	float fov = glm::radians(45.0f);
-//
-//	float top, bottom, left, right;
-//	top = nearClippingDistance * glm::tan(fov / 2);
-//	bottom = -top;
-//	float a = aspectRatio * tan(fov / 2) * convergence;
-//	float b = a - IOD / 2;
-//	float c = a + IOD / 2;
-//	left = -b * nearClippingDistance / convergence;
-//	right = c * nearClippingDistance / convergence;
-//
-//	stereoscopic.left_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearClippingDistance, farClippingDistance);
-//
-//	// Update right eye
-//	top = nearClippingDistance * glm::tan(fov / 2);
-//	bottom = -top;
-//	a = aspectRatio * tan(fov / 2) * convergence;
-//	b = a - IOD / 2;
-//	c = a + IOD / 2;
-//	left = -c * nearClippingDistance / convergence;
-//	right = b * nearClippingDistance / convergence;
-//	stereoscopic.right_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearClippingDistance, farClippingDistance);
-//
-//}
+void icarus3D::updateStereoPerspectiveMatrix() {
+	float aspectRatio = (float)windowWidth / (float)windowHeight;
+	float nearClippingDistance = 1.0f;
+	float farClippingDistance = 100.0f;
+	float fov = glm::radians(stereoscopic.fov);
+
+	// Update left eye
+	float top, bottom, left, right;
+	top = nearClippingDistance * glm::tan(fov / 2);
+	bottom = -top;
+	float a = aspectRatio * tan(fov / 2) * stereoscopic.convergence;
+	float b = a - stereoscopic.IOD / 2;
+	float c = a + stereoscopic.IOD / 2;
+	left = -b * nearClippingDistance / stereoscopic.convergence;
+	right = c * nearClippingDistance / stereoscopic.convergence;
+
+	stereoscopic.left_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearClippingDistance, farClippingDistance);
+
+	// Update right eye
+	top = nearClippingDistance * glm::tan(fov / 2);
+	bottom = -top;
+	a = aspectRatio * tan(fov / 2) * stereoscopic.convergence;
+	b = a - stereoscopic.IOD / 2;
+	c = a + stereoscopic.IOD / 2;
+	left = -c * nearClippingDistance / stereoscopic.convergence;
+	right = b * nearClippingDistance / stereoscopic.convergence;
+	stereoscopic.right_eye->perspectiveMatrix = glm::frustum(left, right, bottom, top, nearClippingDistance, farClippingDistance);
+
+}
 
 // Private Functions
 bool icarus3D::initWindow(){
@@ -513,7 +514,7 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 			}
 			break;
 		case GLFW_KEY_R:
-			if (instance->getPickedIndex() != -1)
+			if (instance->currentScene != -1 && instance->scene[instance->currentScene]->models.size() != 0)
 				for (auto &model : instance->scene[instance->currentScene]->models)
 					model->setShader(model->shaderPath[0], model->shaderPath[1]);
 
@@ -712,6 +713,8 @@ void icarus3D::renderSceneLightingPass(Scene* scene){
 void icarus3D::renderStereoscopicViews() {
 	if (currentScene == -1 || scene[currentScene]->models.size() == 0 || !stereoBool) return;
 
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Instance current scene
 	Scene* scene = this->scene[currentScene];
 	glBindFramebuffer(GL_FRAMEBUFFER, 0); 
@@ -766,7 +769,9 @@ void icarus3D::renderStereoscopicViews() {
 			model->shader->setMat4("model", model->modelMatrix);
 			model->shader->setMat4("view", stereoscopic.left_eye->viewMatrix);
 			model->shader->setMat4("projection", stereoscopic.left_eye->perspectiveMatrix);
-			model->shader->setVec3("colorFilter", vec3(1.0f, 0.0f, 0.0f));
+			model->shader->setVec4("colorFilter", stereoscopic.le_color);
+			model->shader->setBool("anaglyph", true);
+
 			// Render model
 			model->mesh->Draw(model->shader);
 
@@ -822,7 +827,8 @@ void icarus3D::renderStereoscopicViews() {
 			model->shader->setMat4("model", model->modelMatrix);
 			model->shader->setMat4("view", stereoscopic.right_eye->viewMatrix);
 			model->shader->setMat4("projection", stereoscopic.right_eye->perspectiveMatrix);
-			model->shader->setVec3("colorFilter", vec3(0.0f, 0.0f, 1.0f));
+			model->shader->setVec4("colorFilter", stereoscopic.re_color);
+			model->shader->setBool("anaglyph", true);
 
 			// Render model
 			model->mesh->Draw(model->shader);
@@ -933,6 +939,12 @@ void icarus3D::render() {
 
 		// Check for collision
 		checkCollision();
+
+		// Render grid and skybox when a new scene is selected
+		if (currentScene != -1) {
+			drawSkybox();
+			drawGrid();
+		}
 
 		// Render all (Deferred shading)
 		deferredShading();
@@ -1267,11 +1279,14 @@ void icarus3D::renderSSAO() {
 		ssaoShader->use();
 		// Send kernel + rotation
 		for (unsigned int i = 0; i < 64; ++i)
-			ssaoShader->setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
+			ssaoShader->setVec3("samples[" + std::to_string(i) + "]", ssao.kernel[i]);
 		ssaoShader->setMat4("projection", camera.perspectiveMatrix);
 		ssaoShader->setInt("gPosition", 0);
 		ssaoShader->setInt("gNormal", 1);
 		ssaoShader->setInt("noiseTexture", 2);
+		ssaoShader->setFloat("radius",ssao.radius);
+		ssaoShader->setFloat("bias",ssao.bias);
+		ssaoShader->setInt("kernelSize",ssao.kernelSize);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, gPosition);
 		glActiveTexture(GL_TEXTURE1);
@@ -1509,29 +1524,13 @@ bool icarus3D::initKernel() {
 }
 
 bool icarus3D::initSSAO() {
-	// Compute SSAO kernel
-	std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between 0.0 - 1.0
-	std::default_random_engine generator;
-	for (unsigned int i = 0; i < 64; i++) {
-		glm::vec3 sample(
-			// Vary x and y direction between -1.0 and 1.0
-			randomFloats(generator) * 2.0 - 1.0,
-			randomFloats(generator) * 2.0 - 1.0,
-			// Vary z between 0.0 - 1.0f 
-			// If we vary between -1.0 and 1.0 we'd have a sphere sample instead of hemisphere
-			randomFloats(generator)
-		);
-		sample = glm::normalize(sample);
-		sample *= randomFloats(generator);
-		float scale = float(i) / 64.0;
 
-		// scale samples so they're more aligned to center of kernel
-		scale = lerp(0.1f, 1.0f, scale * scale);
-		sample *= scale;
-		ssaoKernel.push_back(sample);
-	}
+	// Compute SSAO kernel
+	computeSSAOKernel();
 
 	// 4x4 array of random rotation vectors oriented around tangent-space surface normal
+	std::default_random_engine generator;
+	std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between 0.0 - 1.0
 	std::vector<glm::vec3> ssaoNoise;
 	for (unsigned int i = 0; i < 16; i++){
 		// rotate around z-axis (in tangent space)
@@ -1555,6 +1554,31 @@ bool icarus3D::initSSAO() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	return true;
+}
+
+void icarus3D::computeSSAOKernel() {
+	ssao.kernel.clear();
+	// Compute SSAO kernel
+	std::default_random_engine generator;
+	std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between 0.0 - 1.0
+	for (unsigned int i = 0; i < ssao.kernelSize; i++) {
+		glm::vec3 sample(
+			// Vary x and y direction between -1.0 and 1.0
+			randomFloats(generator) * 2.0 - 1.0,
+			randomFloats(generator) * 2.0 - 1.0,
+			// Vary z between 0.0 - 1.0f 
+			// If we vary between -1.0 and 1.0 we'd have a sphere sample instead of hemisphere
+			randomFloats(generator)
+		);
+		sample = glm::normalize(sample);
+		sample *= randomFloats(generator);
+		float scale = float(i) / ssao.kernelSize;
+
+		// scale samples so they're more aligned to center of kernel
+		scale = lerp(0.1f, 1.0f, scale * scale);
+		sample *= scale;
+		ssao.kernel.push_back(sample);
+	}
 }
 
 void icarus3D::duplicateTexture(GLuint target) {
