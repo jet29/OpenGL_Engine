@@ -3,7 +3,7 @@
 	[
 		{
 			"name" : "Model 0",
-			"path" : "assets/models/house.mtl",
+			"path" : "assets/models/texturedcube/texturedcube.mtl",
 			"pickingColor" : 
 			{
 				"b" : 0.0,
@@ -19,14 +19,14 @@
 			"rotation" : 
 			{
 				"x" : 0.0,
-				"y" : -0.0,
+				"y" : 0.0,
 				"z" : 0.0
 			},
 			"scale" : 
 			{
-				"x" : 33.0,
-				"y" : 33.0,
-				"z" : 33.0
+				"x" : 1.0,
+				"y" : 1.0,
+				"z" : 1.0
 			}
 		}
 	],

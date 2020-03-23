@@ -95,7 +95,7 @@ void UI::particleSystemWindow() {
 
 void UI::settingsWindow() {
 	if (settingFlag) {
-		ImGui::Begin("Settings");
+		ImGui::Begin("Settings", &settingFlag);
 
 		// Show fps settings
 		ImGui::Checkbox("##fps_checkbox", &fps_bool_checkbox);
@@ -416,11 +416,11 @@ void UI::showMenuFile() {
 		activateModal = "Create Scene##modal";
 	}
 	if (ImGui::MenuItem("Open Scene")) {
-		instance->loadScene("scene.json");
+		activateModal = "Open scene##open_scene_modal";
 	}
 
-	if (ImGui::MenuItem("Save Scene",NULL,false, instance->currentScene != -1)) {
-		instance->saveScene();
+	if (ImGui::MenuItem("Save Scene",NULL,false,instance->currentScene != -1 ? true :false)) {
+		activateModal = "Save scene##save_scene_modal";
 	}
 
 }
@@ -496,6 +496,53 @@ void UI::drawModals() {
 			ImGui::CloseCurrentPopup();
 			activateModal = "";
 		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel", ImVec2(80, 30)))
+		{
+			ImGui::CloseCurrentPopup();
+			activateModal = "";
+		}
+		ImGui::EndPopup();
+	}
+
+	// Save new scene
+	ImGui::SetNextWindowSize(ImVec2(300, 150));
+	if (ImGui::BeginPopupModal("Save scene##save_scene_modal"))
+	{
+		ImGui::Text("Please name your scene");
+		static char buffer[1024] = "Scene";
+		ImGui::InputText("##save_scene_path", buffer, IM_ARRAYSIZE(buffer));
+		char scenePath[1024] = "./";
+		strcat_s(scenePath, sizeof(scenePath), buffer);
+		strcat_s(scenePath, sizeof(scenePath), ".json");
+		if (ImGui::Button("Save", ImVec2(80, 30))) {
+			// Save scene code HERE
+			ImGui::CloseCurrentPopup();
+			activateModal = "";
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel", ImVec2(80, 30)))
+		{
+			ImGui::CloseCurrentPopup();
+			activateModal = "";
+		}
+		ImGui::EndPopup();
+	}
+
+	ImGui::SetNextWindowSize(ImVec2(300, 150));
+	if (ImGui::BeginPopupModal("Open scene##open_scene_modal"))
+	{
+		ImGui::Text("Write your scene's path");
+		static char buffer[1024] = "./Scene.json";
+		ImGui::InputText("##load_scene_path", buffer, IM_ARRAYSIZE(buffer));
+
+		if (ImGui::Button("Open", ImVec2(80, 30))) {
+			// ---- Open scene code HERE
+			ImGui::CloseCurrentPopup();
+			activateModal = "";
+		}
+
 		ImGui::SameLine();
 		if (ImGui::Button("Cancel", ImVec2(80, 30)))
 		{
