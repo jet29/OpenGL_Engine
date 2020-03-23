@@ -1,5 +1,10 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "particleSystem.h"
+#include "../json/json.h"
 #include <iostream>
+#include <fstream>
+
 
 using namespace std;
 
@@ -80,6 +85,15 @@ void ParticleSystem::draw(Shader* shader, GLuint texture, glm::mat4 view, glm::m
 
 void ParticleSystem::update(float deltaTime){
 
+	//check if max number of particles has change
+	if (particles.size() != max_particles) {
+		particles.clear();
+		active_particles = 0;
+		last_particle_index = -1;
+		particles.resize(max_particles);
+		max_particles = particles.size();
+	}
+
 	spawnParticles(deltaTime);
 
 	for (int i = 0; i < active_particles; i++) {
@@ -91,7 +105,6 @@ void ParticleSystem::update(float deltaTime){
 	}
 		
 }
-
 
 void ParticleSystem::spawnParticles(float deltaTime) {
 
@@ -105,3 +118,66 @@ void ParticleSystem::spawnParticles(float deltaTime) {
 		time_left_to_spawn = time_between_spawn; //reset spawn counter
 	}
 }
+
+
+bool ParticleSystem::load(const char* path) {
+
+	Json::Value root;
+	Json::CharReaderBuilder builder;
+	std::ifstream file(path, std::ifstream::binary);
+	std::string errs;
+
+	if (!Json::parseFromStream(builder, file, &root, &errs))
+	{
+		std::cout << errs << "\n";
+		return false;
+	}
+
+	std::cout << root << endl;
+
+	max_particles = root["max_particles"].asInt();
+	particles_per_spawn = root["particles_per_spawn"].asInt();
+	spawn_radius = root["spawn_radius"].asFloat();
+	time_between_spawn = root["time_between_spawn"].asFloat();
+	particle_speed = root["particle_speed"].asFloat();
+	particle_scale[0] = root["particle_scale"]["width"].asFloat();
+	particle_scale[1] = root["particle_scale"]["height"].asFloat();
+	particle_direction[0] = root["particle_direction"]["x"].asFloat();
+	particle_direction[1] = root["particle_direction"]["y"].asFloat();
+	particle_direction[2] = root["particle_direction"]["z"].asFloat();
+
+	return true;
+}
+
+bool ParticleSystem::save(char* name) {
+
+	Json::Value root;
+
+	root["max_particles"] = max_particles;
+	root["particles_per_spawn"] = particles_per_spawn;
+	root["spawn_radius"] = spawn_radius;
+	root["time_between_spawn"] = time_between_spawn;
+	root["particle_speed"] = particle_speed;
+	root["particle_scale"]["width"] = particle_scale[0];
+	root["particle_scale"]["height"] = particle_scale[1];
+	root["particle_direction"]["x"] = particle_direction[0];
+	root["particle_direction"]["y"] = particle_direction[1];
+	root["particle_direction"]["z"] = particle_direction[2];
+
+	Json::StreamWriterBuilder builder;
+	std::ofstream file_id;
+
+	char* full_path = strcat(name,".json");
+
+	file_id.open(full_path);
+
+	if (!file_id.is_open()) return false;
+
+	file_id << Json::writeString(builder, root);
+
+	file_id.close();
+
+	return true;
+}
+
+

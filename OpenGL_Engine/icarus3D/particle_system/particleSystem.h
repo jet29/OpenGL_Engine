@@ -29,6 +29,8 @@ public:
 
 	void draw(Shader* shader, GLuint texture, glm::mat4 view, glm::mat4 projection);
 
+	bool load(const char* path);
+	bool save(char* name);
 
 	//CONFIGURABLE PARAMETERS PARTICLE SYSTEM
 	int max_particles = 1000;

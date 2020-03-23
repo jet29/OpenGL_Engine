@@ -8,10 +8,6 @@
 				"assets/models/texturedcube/texturedcube.mtl"
 			],
 			"name" : "Model 0",
-<<<<<<< HEAD
-=======
-			"path" : "assets/models/texturedcube/texturedcube.mtl",
->>>>>>> FP-dev
 			"pickingColor" : 
 			{
 				"b" : 0.0,
@@ -100,7 +96,6 @@
 				"x" : 1.0,
 				"y" : 1.0,
 				"z" : 1.0
-<<<<<<< HEAD
 			},
 			"shaderPath" : 
 			[
@@ -108,9 +103,6 @@
 				"icarus3D/shaders/pointlight.frag"
 			],
 			"type" : 1
-=======
-			}
->>>>>>> FP-dev
 		}
 	],
 	"name" : "la mejor escena del mundo"

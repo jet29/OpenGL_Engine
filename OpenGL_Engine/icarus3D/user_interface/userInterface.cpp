@@ -48,6 +48,30 @@ void UI::particleSystemWindow() {
 	if (particleSystemFlag && instance->particlesystemBool) {
 		ImGui::Begin("Particle System",&particleSystemFlag);
 
+		ImGui::Text("Load Particle System");
+		static char buffer_load[1024] = "./rain.json";
+		ImGui::InputText("##load_particle_system", buffer_load, IM_ARRAYSIZE(buffer_load));
+		ImGui::SameLine();
+		if (ImGui::Button("Load##particle_system", ImVec2(60, 20))) {
+			instance->particleSystem->load(buffer_load);
+		}
+
+		ImGui::Text("Save Particle System");
+		static char buffer_save[1024] = "clouds";
+		ImGui::InputText("##save_particle_system", buffer_save, IM_ARRAYSIZE(buffer_save));
+		ImGui::SameLine();
+		if (ImGui::Button("Save", ImVec2(60, 20))) {
+			instance->particleSystem->save(buffer_save);
+		}
+
+		ImGui::Text("Change Texture");
+		static char buffer_texture[1024] = "rain.png";
+		ImGui::InputText("##texture_particle_system", buffer_texture, IM_ARRAYSIZE(buffer_texture));
+		ImGui::SameLine();
+		if (ImGui::Button("Load##texture", ImVec2(60, 20))) {
+			instance->setParticleSystemTexture(buffer_texture);
+		}
+
 		ImGui::Text("Max Particles");
 		ImGui::DragInt("##Max_Particles", &instance->particleSystem->max_particles, 1, 1, 1000);
 		ImGui::Text("Particles per Spawn");

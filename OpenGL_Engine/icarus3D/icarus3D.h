@@ -136,7 +136,7 @@ class icarus3D {
 		bool saveScene();
 		bool loadScene(string path);
 		unsigned int loadTexture(const char* path);
-
+		bool setParticleSystemTexture(char* path);
 		void setLightingUniforms(Scene* scene, Shader* shader);
 		void setDirectionalLightUniform(Scene* scene, Shader* shader);
 		void setPointlightsUniform(Scene* scene, Shader* shader);

@@ -1,4 +1,6 @@
-﻿#include "icarus3D.h"
+﻿#define _CRT_SECURE_NO_WARNINGS
+
+#include "icarus3D.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -1612,5 +1614,12 @@ void icarus3D::renderParticleSystem() {
 	particleSystem->draw(particleSystemShader, particleSystemTexture, camera.viewMatrix, camera.perspectiveMatrix);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
+}
+
+bool icarus3D::setParticleSystemTexture(char* path) {
+	char dir_path[100] = "assets/textures/";
+	strcat(dir_path, path);
+	particleSystemTexture = loadTexture(dir_path);
+	return true;
 }
 
