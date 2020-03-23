@@ -317,8 +317,8 @@ void UI::pickedModelWindow() {
 			ImGuizmo::DecomposeMatrixToComponents(&model->modelMatrix[0][0], &model->position[0], &model->rotationAngles[0], &model->scale[0]);
 			if (ImGui::InputFloat3("Rt", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles.x, 2)) {
 				flag = true;
-				glm::quat q(glm::radians(instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles));
-				instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationMatrix = glm::toMat4(q);
+				instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->
+					setRotationQuaternion(instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles);
 			}
 
 			// Set translation matrix

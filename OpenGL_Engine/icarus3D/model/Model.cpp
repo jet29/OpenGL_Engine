@@ -76,7 +76,7 @@ void Model::DrawBoundingBox() {
 }
 
 void Model::setRotationQuaternion(glm::vec3 eulerAngles) {
-	rotationMatrix = glm::mat4(glm::quat(eulerAngles));
+	rotationMatrix = glm::mat4(glm::quat(glm::radians(eulerAngles)));
 }
 
 glm::vec3 Model::getEulerAnglesFromQuat() {
@@ -96,6 +96,5 @@ void Model::computeModelMatrix() {
 	modelMatrix *= translationMatrix;
 	modelMatrix *= scalingMatrix;
 	modelMatrix *= rotationMatrix;
-
 }
 

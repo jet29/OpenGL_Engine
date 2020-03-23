@@ -5,7 +5,7 @@ C:\Users\AlchenTheCat\Downloads\Jetlandia\UNIVERSIDAD\Semestre VIII\Topicos de c
               _Ty=int
           ]
 C:\Users\AlchenTheCat\Downloads\Jetlandia\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Scene.cpp(163,20): warning C4018: '<': signed/unsigned mismatch
-C:\Users\AlchenTheCat\Downloads\Jetlandia\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Scene.cpp(220,44): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
+C:\Users\AlchenTheCat\Downloads\Jetlandia\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Scene.cpp(219,44): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
           with
           [
               _Ty=int

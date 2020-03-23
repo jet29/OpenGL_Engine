@@ -81,10 +81,6 @@ bool Scene::saveScene() {
 
 	for (int i = 0; i < models.size(); i++) {
 
-		glm::vec3 pos = models[i]->position;
-		glm::vec3 scale = models[i]->scale;
-		glm::vec3 rot = models[i]->rotationAngles;
-		
 		root["models"][i]["name"] = models[i]->name;
 		root["models"][i]["type"] = models[i]->type;
 
@@ -98,32 +94,32 @@ bool Scene::saveScene() {
 		root["models"][i]["pickingColor"]["g"] = models[i]->pickingColor.g;
 		root["models"][i]["pickingColor"]["b"] = models[i]->pickingColor.b;
 
-		root["models"][i]["position"]["x"] = pos.x;
-		root["models"][i]["position"]["y"] = pos.y;
-		root["models"][i]["position"]["z"] = pos.z;
+		root["models"][i]["position"]["x"] = models[i]->position.x;
+		root["models"][i]["position"]["y"] = models[i]->position.y;
+		root["models"][i]["position"]["z"] = models[i]->position.z;
 
-		root["models"][i]["scale"]["x"] = scale.x;
-		root["models"][i]["scale"]["y"] = scale.y;
-		root["models"][i]["scale"]["z"] = scale.z;
+		root["models"][i]["scale"]["x"] = models[i]->scale.x;
+		root["models"][i]["scale"]["y"] = models[i]->scale.y;
+		root["models"][i]["scale"]["z"] = models[i]->scale.z;
 
-		root["models"][i]["rotation"]["x"] = rot.x;
-		root["models"][i]["rotation"]["y"] = rot.y;
-		root["models"][i]["rotation"]["z"] = rot.z;
+		root["models"][i]["rotation"]["x"] = models[i]->rotationAngles.x;
+		root["models"][i]["rotation"]["y"] = models[i]->rotationAngles.y;
+		root["models"][i]["rotation"]["z"] = models[i]->rotationAngles.z;
 
 		if (models[i]->type == POINTLIGHT) {
 			PointLight* pointlight = (PointLight*)models[i];
 
 			root["models"][i]["color"]["ambient"]["r"] = pointlight->properties.color.ambient.r;
-			root["models"][i]["color"]["ambient"]["g"] = pointlight->properties.color.ambient.r;
-			root["models"][i]["color"]["ambient"]["b"] = pointlight->properties.color.ambient.r;
+			root["models"][i]["color"]["ambient"]["g"] = pointlight->properties.color.ambient.g;
+			root["models"][i]["color"]["ambient"]["b"] = pointlight->properties.color.ambient.b;
 
 			root["models"][i]["color"]["diffuse"]["r"] = pointlight->properties.color.diffuse.r;
-			root["models"][i]["color"]["diffuse"]["g"] = pointlight->properties.color.diffuse.r;
-			root["models"][i]["color"]["diffuse"]["b"] = pointlight->properties.color.diffuse.r;
+			root["models"][i]["color"]["diffuse"]["g"] = pointlight->properties.color.diffuse.g;
+			root["models"][i]["color"]["diffuse"]["b"] = pointlight->properties.color.diffuse.b;
 
 			root["models"][i]["color"]["specular"]["r"] = pointlight->properties.color.specular.r;
-			root["models"][i]["color"]["specular"]["g"] = pointlight->properties.color.specular.r;
-			root["models"][i]["color"]["specular"]["b"] = pointlight->properties.color.specular.r;
+			root["models"][i]["color"]["specular"]["g"] = pointlight->properties.color.specular.g;
+			root["models"][i]["color"]["specular"]["b"] = pointlight->properties.color.specular.b;
 
 			root["models"][i]["attenuation"]["constant"] = pointlight->properties.attenuation.constant;
 			root["models"][i]["attenuation"]["linear"] = pointlight->properties.attenuation.linear;
@@ -162,44 +158,43 @@ bool Scene::loadScene(string path) {
 
 	for (int i = 0; i < root["models"].size(); i++) {
 		
-		Model* model = new Model();
+		if ((MODEL_TYPE)root["models"][i]["type"].asInt() == POINTLIGHT) {
+			PointLight* pointlight = new PointLight();
 
-		model->shaderPath[0] = root["models"][i]["shaderPath"][0].asString();
-		model->shaderPath[1] = root["models"][i]["shaderPath"][1].asString();
+			pointlight->shaderPath[0] = root["models"][i]["shaderPath"][0].asString();
+			pointlight->shaderPath[1] = root["models"][i]["shaderPath"][1].asString();
 
-		model->meshPath[0] = root["models"][i]["meshPath"][0].asString();
-		model->meshPath[1] = root["models"][i]["meshPath"][1].asString();
+			pointlight->meshPath[0] = root["models"][i]["meshPath"][0].asString();
+			pointlight->meshPath[1] = root["models"][i]["meshPath"][1].asString();
 
-		model->setShader(model->shaderPath[0].c_str(), model->shaderPath[1].c_str());
-		model->loadMesh(model->meshPath[0].c_str(), model->meshPath[1].c_str());
-		
-		model->name = root["models"][i]["name"].asCString();
+			pointlight->setShader(pointlight->shaderPath[0].c_str(), pointlight->shaderPath[1].c_str());
+			pointlight->loadMesh(pointlight->meshPath[0].c_str(), pointlight->meshPath[1].c_str());
 
-		model->type = (MODEL_TYPE)root["models"][i]["type"].asInt();
+			pointlight->name = root["models"][i]["name"].asCString();
 
-		model->pickingColor = glm::vec3(root["models"][i]["pickingColor"]["r"].asFloat(),
-										root["models"][i]["pickingColor"]["g"].asFloat(),
-										root["models"][i]["pickingColor"]["b"].asFloat());
-							
+			pointlight->type = (MODEL_TYPE)root["models"][i]["type"].asInt();
 
-		model->position = glm::vec3(root["models"][i]["position"]["x"].asFloat(),
-									root["models"][i]["position"]["y"].asFloat(),
-									root["models"][i]["position"]["z"].asFloat());
-
-		model->rotationAngles = glm::vec3(root["models"][i]["rotation"]["x"].asFloat(),
-										  root["models"][i]["rotation"]["y"].asFloat(),
-										  root["models"][i]["rotation"]["z"].asFloat());
-
-		model->scale = glm::vec3(root["models"][i]["scale"]["x"].asFloat(),
-								 root["models"][i]["scale"]["y"].asFloat(),
-								 root["models"][i]["scale"]["z"].asFloat());
-
-		model->setTranslationMatrix();
-		model->setScaleMatrix();
+			pointlight->pickingColor = glm::vec3(root["models"][i]["pickingColor"]["r"].asFloat(),
+												root["models"][i]["pickingColor"]["g"].asFloat(),
+												root["models"][i]["pickingColor"]["b"].asFloat());
 
 
-		if (model->type == POINTLIGHT) {
-			PointLight* pointlight = (PointLight*)model;
+			pointlight->position = glm::vec3(root["models"][i]["position"]["x"].asFloat(),
+											root["models"][i]["position"]["y"].asFloat(),
+											root["models"][i]["position"]["z"].asFloat());
+
+			pointlight->rotationAngles = glm::vec3(root["models"][i]["rotation"]["x"].asFloat(),
+													root["models"][i]["rotation"]["y"].asFloat(),
+													root["models"][i]["rotation"]["z"].asFloat());
+
+			pointlight->scale = glm::vec3(root["models"][i]["scale"]["x"].asFloat(),
+										root["models"][i]["scale"]["y"].asFloat(),
+										root["models"][i]["scale"]["z"].asFloat());
+
+			pointlight->setTranslationMatrix();
+			pointlight->setScaleMatrix();
+			pointlight->setRotationQuaternion(pointlight->rotationAngles);
+			pointlight->computeModelMatrix();
 
 			pointlight->properties.color.ambient.r = root["models"][i]["color"]["ambient"]["r"].asFloat();
 			pointlight->properties.color.ambient.g = root["models"][i]["color"]["ambient"]["g"].asFloat();
@@ -221,7 +216,44 @@ bool Scene::loadScene(string path) {
 
 			models.push_back(pointlight);
 		}
-		else {
+		else if((MODEL_TYPE)root["models"][i]["type"].asInt() == MODEL) {
+			Model* model = new Model();
+
+			model->shaderPath[0] = root["models"][i]["shaderPath"][0].asString();
+			model->shaderPath[1] = root["models"][i]["shaderPath"][1].asString();
+
+			model->meshPath[0] = root["models"][i]["meshPath"][0].asString();
+			model->meshPath[1] = root["models"][i]["meshPath"][1].asString();
+
+			model->setShader(model->shaderPath[0].c_str(), model->shaderPath[1].c_str());
+			model->loadMesh(model->meshPath[0].c_str(), model->meshPath[1].c_str());
+
+			model->name = root["models"][i]["name"].asCString();
+
+			model->type = (MODEL_TYPE)root["models"][i]["type"].asInt();
+
+			model->pickingColor = glm::vec3(root["models"][i]["pickingColor"]["r"].asFloat(),
+											root["models"][i]["pickingColor"]["g"].asFloat(),
+											root["models"][i]["pickingColor"]["b"].asFloat());
+
+
+			model->position = glm::vec3(root["models"][i]["position"]["x"].asFloat(),
+										root["models"][i]["position"]["y"].asFloat(),
+										root["models"][i]["position"]["z"].asFloat());
+
+			model->rotationAngles = glm::vec3(root["models"][i]["rotation"]["x"].asFloat(),
+											root["models"][i]["rotation"]["y"].asFloat(),
+											root["models"][i]["rotation"]["z"].asFloat());
+
+			model->scale = glm::vec3(root["models"][i]["scale"]["x"].asFloat(),
+									root["models"][i]["scale"]["y"].asFloat(),
+									root["models"][i]["scale"]["z"].asFloat());
+
+			model->setTranslationMatrix();
+			model->setScaleMatrix();
+			model->setRotationQuaternion(model->rotationAngles);
+			model->computeModelMatrix();
+
 			models.push_back(model);
 		}
 		
