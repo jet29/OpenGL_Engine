@@ -68,7 +68,7 @@ void ParticleSystem::draw(Shader* shader, GLuint texture, glm::mat4 view, glm::m
 
 		shader->setVec3("CameraRight_worldspace", CameraRight_worldspace);
 		shader->setVec3("CameraUp_worldspace", CameraUp_worldspace);
-		shader->setVec3("particleCenter_wordspace", particleCenter_wordspace);
+		shader->setVec3("particleCenter_worldspace", particleCenter_wordspace);
 		shader->setVec2("BillboardSize", billboardSize);
 
 		//shader->setMat4("model", model); //is not used

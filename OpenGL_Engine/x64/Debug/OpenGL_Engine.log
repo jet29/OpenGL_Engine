@@ -1,17 +1,17 @@
 ﻿  userInterface.cpp
 C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.h(43,20): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(57,91): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(59,105): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(61,94): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(366,50): warning C4305: 'argument': truncation from 'double' to 'const _Ty'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(58,91): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(60,105): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(62,94): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(370,50): warning C4305: 'argument': truncation from 'double' to 'const _Ty'
           with
           [
               _Ty=float
           ]
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(595,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(606,62): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(626,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(626,36): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(630,96): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(627,12): warning C4101: 'matrix': unreferenced local variable
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(598,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(609,62): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(629,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(629,36): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(633,96): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(630,12): warning C4101: 'matrix': unreferenced local variable
   OpenGL_Engine.vcxproj -> C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe

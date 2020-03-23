@@ -48,7 +48,8 @@ bool UI::init(GLFWwindow* window) {
 void UI::particleSystemWindow() {
 	if (particleSystemFlag && instance->particlesystemBool) {
 		ImGui::Begin("Particle System",&particleSystemFlag);
-
+		ImGui::Text("Position");
+		ImGui::DragFloat3("##particle_system_position", &instance->particleSystem->position[0]);
 		ImGui::Text("Max Particles");
 		ImGui::DragInt("##Max_Particles", &instance->particleSystem->max_particles, 1, 1, 1000);
 		ImGui::Text("Particles per Spawn");
@@ -60,7 +61,6 @@ void UI::particleSystemWindow() {
 		ImGui::Text("Particle Speed");
 		ImGui::DragFloat("##Particle_Speed", &instance->particleSystem->particle_speed, 0.1, 1, 100);
 		ImGui::Text("Particle Scale");
-		//ImGui::Checkbox("##Particle_switch", &instance->particleSystem->particle_direction);
 		ImGui::RadioButton("Width", &particle_system_radioButtons_opt_scale, 0); ImGui::SameLine();
 		ImGui::RadioButton("Height", &particle_system_radioButtons_opt_scale, 1);
 		switch (particle_system_radioButtons_opt_scale) {
@@ -383,7 +383,6 @@ void UI::pickedModelWindow() {
 			else if (radio_button_trans_type == 2)
 				ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::SCALE, space, &model->modelMatrix[0][0], NULL, &snap[0], &bound[0], &boundSnap[0]);
 
-			ImGui::End();
 		}
 		else {
 			instance->setPickedIndex(-1);

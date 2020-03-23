@@ -14,7 +14,7 @@ uniform mat4 projection;
 uniform vec3 CameraRight_worldspace;
 uniform vec3 CameraUp_worldspace;
 
-uniform vec3 particleCenter_wordspace;
+uniform vec3 particleCenter_worldspace;
 uniform vec2 BillboardSize;
 
 // Vertex data out data
@@ -25,7 +25,7 @@ out vec2 vTexPos;
 void main()
 {
     vec3 vertexPosition_worldspace =
-        particleCenter_wordspace
+        particleCenter_worldspace
         + CameraRight_worldspace * vertexPosition.x * BillboardSize.x
         + CameraUp_worldspace * vertexPosition.y * BillboardSize.y;
 

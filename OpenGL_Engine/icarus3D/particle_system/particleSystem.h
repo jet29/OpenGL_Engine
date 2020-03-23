@@ -35,6 +35,7 @@ public:
 	int particles_per_spawn = 10;
 	float spawn_radius = 10;
 	float time_between_spawn = 1;
+	glm::vec3 position;
 
 	//CONFIGURABLE PARAMETERS FOR PARTICLES
 	float particle_speed = 1;
@@ -48,7 +49,6 @@ private:
 	vector<Particle*> particles;
 
 
-	glm::vec3 position;
 	glm::vec3 initial_position = glm::vec3(0.0f);
 
 	unsigned int VBO;
