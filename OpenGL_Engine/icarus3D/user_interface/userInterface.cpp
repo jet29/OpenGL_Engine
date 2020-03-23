@@ -20,6 +20,7 @@ static const char* current_item_scene = NULL;
 static const char* current_item_light = NULL;
 static const char* current_item_light_selector = NULL;
 int radio_button_trans_type = 0;
+int radio_button_color_type = 0;
 int radio_button_loc_w = 0;
 bool fps_bool_checkbox = true;
 bool closedModelWindowBool = true;
@@ -61,7 +62,7 @@ void UI::particleSystemWindow() {
 		ImGui::Text("Particle Scale");
 		//ImGui::Checkbox("##Particle_switch", &instance->particleSystem->particle_direction);
 		ImGui::RadioButton("Width", &particle_system_radioButtons_opt_scale, 0); ImGui::SameLine();
-		ImGui::RadioButton("height", &particle_system_radioButtons_opt_scale, 1); ImGui::SameLine();
+		ImGui::RadioButton("Height", &particle_system_radioButtons_opt_scale, 1);
 		switch (particle_system_radioButtons_opt_scale) {
 		case 0:
 			ImGui::DragFloat("##particle_scale_width", &instance->particleSystem->particle_scale.x, 0.005f, 0.0f, 1.0f, "%.3f");
@@ -213,18 +214,6 @@ void UI::settingsWindow() {
 				if (ImGui::CollapsingHeader("Lighting")) {
 					// Light selector
 					if (ImGui::CollapsingHeader("Directional Light")) {
-						//if (ImGui::BeginCombo("##combo_lights", current_item_light)) {
-						//	for (int n = 0; n < 2; n++)
-						//	{
-						//		bool is_selected2 = (current_item_light == lights[n].c_str()); // You can store your selection however you want, outside or inside your objects
-						//		if (ImGui::Selectable(lights[n].c_str(), is_selected2)) {
-						//			current_item_light = lights[n].c_str();
-						//		}
-						//		if (is_selected2)
-						//			ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
-						//	}
-						//	ImGui::EndCombo();
-						//}
 						directionalLightProperties();
 					}
 					if (ImGui::CollapsingHeader("Point Lights")) {
@@ -282,17 +271,18 @@ void UI::directionalLightProperties() {
 void UI::pointLightProperties() {
 	// Scene selector
 	ImGui::Text("Light selector");
+	Scene* scene = instance->scene[instance->currentScene];
 	if (ImGui::BeginCombo("##combo_light_selector", current_item_light_selector)) {
-		for (int n = 0; n < instance->scene.size(); n++)
+		for (int n = 0; n < scene->pointlight_index.size(); n++)
 		{
-			//bool is_selected = (current_item_light_selector == instance->scene[n]->name.c_str()); // You can store your selection however you want, outside or inside your objects
-/*			if (ImGui::Selectable(instance->scene[n]->name.c_str(), is_selected)) {
-				current_item_light_selector = instance->scene[n]->name.c_str();
-				instance->currentScene = n;
-				instance->setPickedIndex(-1);
+			cout << "hola" << endl;
+			bool is_selected = (current_item_light_selector == scene->models[scene->pointlight_index[n]]->name.c_str()); // You can store your selection however you want, outside or inside your objects
+			if (ImGui::Selectable(scene->models[scene->pointlight_index[n]]->name.c_str(), is_selected)) {
+				current_item_light_selector = scene->models[scene->pointlight_index[n]]->name.c_str();
+				instance->setPickedIndex(n);
 			}
 			if (is_selected)
-				ImGui::SetItemDefaultFocus();*/   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+				ImGui::SetItemDefaultFocus();  // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
 		}
 		ImGui::EndCombo();
 	}
@@ -315,23 +305,23 @@ void UI::pickedModelWindow() {
 
 			// Set euler angles from quaternion
 			ImGuizmo::DecomposeMatrixToComponents(&model->modelMatrix[0][0], &model->position[0], &model->rotationAngles[0], &model->scale[0]);
-			if (ImGui::InputFloat3("Rt", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles.x, 2)) {
+			if (ImGui::DragFloat3("Rt", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles.x, 2)) {
 				flag = true;
 				glm::quat q(glm::radians(instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles));
 				instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationMatrix = glm::toMat4(q);
 			}
 
 			// Set translation matrix
-			if (ImGui::InputFloat3("Tr", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->position.x, 2)) {
+			if (ImGui::DragFloat3("Tr", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->position.x, 2)) {
 				flag = true;
 				instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->setTranslationMatrix();
 			}
 
-			if (ImGui::InputFloat3("Sc", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->scale.x, 2)) {
+
+			if (ImGui::DragFloat3("Sc", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->scale.x, 2)) {
 				flag = true;
 				instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->setScaleMatrix();
 			}
-
 
 			// Update model Matrix if any change has been made
 			if (flag)
@@ -341,22 +331,22 @@ void UI::pickedModelWindow() {
 				PointLight* pointlight = (PointLight*)instance->scene[instance->currentScene]->models[instance->getPickedIndex()];
 				ImGui::Text("Light switch");
 				ImGui::Checkbox("##pointlight_light_switch", &pointlight->lightSwitch);
-				if (ImGui::CollapsingHeader("Pointlight Color")) {
-					// Ambient color
-					if (ImGui::CollapsingHeader("Ambient")) {
-						ImGui::ColorPicker3("Ka", &pointlight->properties.color.ambient[0]);
-					}
-
-					// Diffuse color
-					if (ImGui::CollapsingHeader("Diffuse")) {
-						ImGui::ColorPicker3("Kd", &pointlight->properties.color.diffuse[0]);
-					}
-
-					// Specular color
-					if (ImGui::CollapsingHeader("Specular")) {
-						ImGui::ColorPicker3("Ks", &pointlight->properties.color.specular[0]);
-					}
-
+				ImGui::RadioButton("Ambient", &radio_button_color_type, 0); ImGui::SameLine();
+				ImGui::RadioButton("Diffuse", &radio_button_color_type, 1); ImGui::SameLine();
+				ImGui::RadioButton("Specular", &radio_button_color_type, 2);
+				// Light material color
+				switch (radio_button_color_type) {
+				case 0:
+					ImGui::ColorPicker3("Ka", &pointlight->properties.color.ambient[0]);
+					break;
+				case 1:
+					ImGui::ColorPicker3("Kd", &pointlight->properties.color.diffuse[0]);
+					break;
+				case 2:
+					ImGui::ColorPicker3("Ks", &pointlight->properties.color.specular[0]);
+					break;
+				}
+				if (ImGui::CollapsingHeader("Attenuation")) {
 					ImGui::DragFloat("Constant", &pointlight->properties.attenuation.constant, 0.005f, 0.0f, 3.0f);
 					ImGui::DragFloat("Linear", &pointlight->properties.attenuation.linear, 0.005f, 0.0f, 3.0f);
 					ImGui::DragFloat("Quadratic", &pointlight->properties.attenuation.quadratic, 0.005f, 0.0f, 3.0f);
@@ -398,6 +388,7 @@ void UI::pickedModelWindow() {
 		else {
 			instance->setPickedIndex(-1);
 			closedModelWindowBool = true;
+			current_item_light_selector = NULL;
 		}
 	}
 	
