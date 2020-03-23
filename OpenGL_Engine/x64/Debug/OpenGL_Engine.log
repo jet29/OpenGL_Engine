@@ -1,9 +1,19 @@
+<<<<<<< HEAD
 ﻿  Scene.cpp
 C:\Users\AlchenTheCat\Downloads\Jetlandia\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Scene.cpp(63,42): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
+=======
+﻿  userInterface.cpp
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.h(43,20): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(56,91): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(58,105): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(60,94): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(376,50): warning C4305: 'argument': truncation from 'double' to 'const _Ty'
+>>>>>>> FP-dev
           with
           [
               _Ty=int
           ]
+<<<<<<< HEAD
 C:\Users\AlchenTheCat\Downloads\Jetlandia\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Scene.cpp(163,20): warning C4018: '<': signed/unsigned mismatch
 C:\Users\AlchenTheCat\Downloads\Jetlandia\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Scene.cpp(219,44): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
           with
@@ -11,3 +21,12 @@ C:\Users\AlchenTheCat\Downloads\Jetlandia\UNIVERSIDAD\Semestre VIII\Topicos de c
               _Ty=int
           ]
   OpenGL_Engine.vcxproj -> C:\Users\AlchenTheCat\Downloads\Jetlandia\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe
+=======
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(604,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(615,62): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(635,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(635,36): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(639,96): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(636,12): warning C4101: 'matrix': unreferenced local variable
+  OpenGL_Engine.vcxproj -> C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe
+>>>>>>> FP-dev

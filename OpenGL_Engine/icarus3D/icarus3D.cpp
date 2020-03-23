@@ -1282,7 +1282,7 @@ void icarus3D::renderSSAO() {
 	glClear(GL_COLOR_BUFFER_BIT);
 		ssaoShader->use();
 		// Send kernel + rotation
-		for (unsigned int i = 0; i < 64; ++i)
+		for (unsigned int i = 0; i < ssao.kernelSize; ++i)
 			ssaoShader->setVec3("samples[" + std::to_string(i) + "]", ssao.kernel[i]);
 		ssaoShader->setMat4("projection", camera.perspectiveMatrix);
 		ssaoShader->setInt("gPosition", 0);
