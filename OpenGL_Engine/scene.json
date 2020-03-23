@@ -2,8 +2,12 @@
 	"models" : 
 	[
 		{
+			"meshPath" : 
+			[
+				"assets/models/texturedcube/texturedcube.obj",
+				"assets/models/texturedcube/texturedcube.mtl"
+			],
 			"name" : "Model 0",
-			"path" : "assets/models/house.mtl",
 			"pickingColor" : 
 			{
 				"b" : 0.0,
@@ -14,7 +18,7 @@
 			{
 				"x" : 0.0,
 				"y" : 0.0,
-				"z" : 0.0
+				"z" : -5.8152098655700684
 			},
 			"rotation" : 
 			{
@@ -24,10 +28,82 @@
 			},
 			"scale" : 
 			{
-				"x" : 33.0,
-				"y" : 33.0,
-				"z" : 33.0
-			}
+				"x" : 1.0,
+				"y" : 1.0,
+				"z" : 1.0
+			},
+			"shaderPath" : 
+			[
+				"icarus3D/shaders/modelShader.vert",
+				"icarus3D/shaders/modelShader.frag"
+			],
+			"type" : 0
+		},
+		{
+			"attenuation" : 
+			{
+				"constant" : 0.95599997043609619,
+				"linear" : 0.11800000071525574,
+				"quadratic" : 0.0
+			},
+			"color" : 
+			{
+				"ambient" : 
+				{
+					"b" : 1.0,
+					"g" : 1.0,
+					"r" : 1.0
+				},
+				"diffuse" : 
+				{
+					"b" : 0.0,
+					"g" : 0.0,
+					"r" : 0.0
+				},
+				"specular" : 
+				{
+					"b" : 0.0,
+					"g" : 0.0,
+					"r" : 0.0
+				}
+			},
+			"meshPath" : 
+			[
+				"assets/models/light_sphere.obj",
+				"assets/models/light_sphere.mtl"
+			],
+			"name" : "Light 0",
+			"pickingColor" : 
+			{
+				"b" : 0.0,
+				"g" : 0.0,
+				"r" : 0.99000000953674316
+			},
+			"pointLightIndex" : 1,
+			"position" : 
+			{
+				"x" : 0.0,
+				"y" : 0.0,
+				"z" : 0.0
+			},
+			"rotation" : 
+			{
+				"x" : 0.0,
+				"y" : 0.0,
+				"z" : 0.0
+			},
+			"scale" : 
+			{
+				"x" : 1.0,
+				"y" : 1.0,
+				"z" : 1.0
+			},
+			"shaderPath" : 
+			[
+				"icarus3D/shaders/pointlight.vert",
+				"icarus3D/shaders/pointlight.frag"
+			],
+			"type" : 1
 		}
 	],
 	"name" : "la mejor escena del mundo"

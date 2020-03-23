@@ -33,7 +33,8 @@ class Model{
 		mat4 rotationMatrix = glm::mat4(1.0f);
 		mat4 translationMatrix = glm::mat4(1.0f);
 		mat4 scalingMatrix = glm::mat4(1.0f);
-		const char* shaderPath[2];
+		string shaderPath[2];
+		string meshPath[2];
 		mat4 modelMatrix = glm::mat4(1.0f);
 	// Private variables
 	private:

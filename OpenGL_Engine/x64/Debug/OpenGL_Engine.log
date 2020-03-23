@@ -1,30 +1,13 @@
-﻿  icarus3D.cpp
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.h(43,20): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(614,75): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(740,76): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(798,76): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(856,66): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(1022,53): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(1037,25): warning C4806: '==': unsafe operation: no value of type 'bool' promoted to type 'int' can equal the given constant
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(1049,27): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(1055,9): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(1134,26): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(1564,29): warning C4018: '<': signed/unsigned mismatch
-  userInterface.cpp
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.h(43,20): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(56,91): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(58,105): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(60,94): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(376,50): warning C4305: 'argument': truncation from 'double' to 'const _Ty'
+﻿  Scene.cpp
+C:\Users\AlchenTheCat\Downloads\Jetlandia\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Scene.cpp(63,42): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
           with
           [
-              _Ty=float
+              _Ty=int
           ]
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(557,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(568,62): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(588,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(588,36): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(592,96): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(589,12): warning C4101: 'matrix': unreferenced local variable
-  Generating Code...
-  OpenGL_Engine.vcxproj -> C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe
+C:\Users\AlchenTheCat\Downloads\Jetlandia\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Scene.cpp(163,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\AlchenTheCat\Downloads\Jetlandia\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\icarus3D\model\Scene.cpp(220,44): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
+          with
+          [
+              _Ty=int
+          ]
+  OpenGL_Engine.vcxproj -> C:\Users\AlchenTheCat\Downloads\Jetlandia\UNIVERSIDAD\Semestre VIII\Topicos de computacion grafica\Proyecto2_todo\Proyecto2\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe

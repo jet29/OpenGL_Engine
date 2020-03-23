@@ -516,7 +516,7 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 		case GLFW_KEY_R:
 			if (instance->currentScene != -1 && instance->scene[instance->currentScene]->models.size() != 0)
 				for (auto &model : instance->scene[instance->currentScene]->models)
-					model->setShader(model->shaderPath[0], model->shaderPath[1]);
+					model->setShader(model->shaderPath[0].c_str(), model->shaderPath[1].c_str());
 
 			delete instance->pickingShader;
 			delete instance->boundingBoxShader;
@@ -1029,6 +1029,10 @@ bool icarus3D::loadScene(string path) {
 	Scene* newScene = new Scene();
 	newScene->loadScene(path);
 	scene.push_back(newScene);
+
+	// Choose, by default, freshly new scene
+	instance->currentScene = instance->scene.size() - 1;
+	instance->setPickedIndex(-1);
 
 	return true;
 }
