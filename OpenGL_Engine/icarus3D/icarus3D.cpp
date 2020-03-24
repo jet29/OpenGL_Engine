@@ -1078,12 +1078,34 @@ bool icarus3D::checkCollision() {
 	// Iterate over scene models
 	for (int i = 0; i < scene->models.size(); i++) {
 
-		if (camera.position.x + camera.nearPlane > scene->models[i]->position.x + scene->models[i]->mesh->min.x
-			&& camera.position.y + camera.nearPlane  > scene->models[i]->position.y + scene->models[i]->mesh->min.y
-			&& camera.position.z + camera.nearPlane  > scene->models[i]->position.z + scene->models[i]->mesh->min.z
-			&& camera.position.x - camera.nearPlane  < scene->models[i]->position.x + scene->models[i]->mesh->max.x
-			&& camera.position.y - camera.nearPlane  < scene->models[i]->position.y + scene->models[i]->mesh->max.y
-			&& camera.position.z - camera.nearPlane  < scene->models[i]->position.z + scene->models[i]->mesh->max.z){
+
+		//scene->models[i]->setRotationQuaternion(scene->models[i]->rotationAngles);
+		scene->models[i]->setScaleMatrix();
+		glm::mat4 scale = scene->models[i]->scalingMatrix;
+
+		glm::vec4 minScaled = glm::vec4(scene->models[i]->mesh->min.x,
+										scene->models[i]->mesh->min.y,
+										scene->models[i]->mesh->min.z,
+										0);
+
+
+		glm::vec4 maxScaled = glm::vec4(scene->models[i]->mesh->max.x,
+										scene->models[i]->mesh->max.y,
+										scene->models[i]->mesh->max.z,
+										0);
+
+		maxScaled = scale * maxScaled;
+		minScaled = scale * minScaled;
+
+		//cout << "MIN SCALED" << endl;
+		//cout << minScaled.x << ", " << minScaled.y << ", " << minScaled.z << endl;
+
+		if (camera.position.x + camera.nearPlane > scene->models[i]->position.x + minScaled.x
+			&& camera.position.y + camera.nearPlane  > scene->models[i]->position.y + minScaled.y
+			&& camera.position.z + camera.nearPlane  > scene->models[i]->position.z + minScaled.z
+			&& camera.position.x - camera.nearPlane  < scene->models[i]->position.x + maxScaled.x
+			&& camera.position.y - camera.nearPlane  < scene->models[i]->position.y + maxScaled.y
+			&& camera.position.z - camera.nearPlane  < scene->models[i]->position.z + maxScaled.z){
 			collisionBool = true;
 			return true;
 		}
