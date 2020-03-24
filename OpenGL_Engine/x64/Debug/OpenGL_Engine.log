@@ -1,14 +1,21 @@
-﻿  icarus3D.cpp
+﻿  particleSystem.cpp
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\particle_system\particleSystem.cpp(95,35): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  userInterface.cpp
 C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.h(43,20): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(617,75): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(742,76): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(800,76): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(858,66): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(1052,53): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(1064,53): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(1079,27): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(1085,9): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(1164,26): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(1311,30): warning C4018: '<': signed/unsigned mismatch
-C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\icarus3D.cpp(1594,29): warning C4018: '<': signed/unsigned mismatch
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(84,91): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(86,93): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(88,105): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(90,94): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(410,50): warning C4305: 'argument': truncation from 'double' to 'const _Ty'
+          with
+          [
+              _Ty=float
+          ]
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(664,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(675,62): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(695,59): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(695,36): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(699,96): warning C4244: 'argument': conversion from 'ICuint' to 'float', possible loss of data
+C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\icarus3D\user_interface\userInterface.cpp(696,12): warning C4101: 'matrix': unreferenced local variable
+  Generating Code...
   OpenGL_Engine.vcxproj -> C:\Users\frank\Desktop\icarus3D\OpenGL_Engine\x64\Debug\OpenGL_Engine.exe

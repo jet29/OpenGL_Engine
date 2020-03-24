@@ -1,0 +1,19 @@
+{
+	"max_particles" : 1000,
+	"particle_direction" : 
+	{
+		"x" : 0.0,
+		"y" : -1.0,
+		"z" : 0.0
+	},
+	"particle_scale" : 
+	{
+		"height" : 0.075000002980232239,
+		"width" : 0.0099999997764825821
+	},
+	"particle_speed" : 8.3999996185302734,
+	"particle_ttl" : 0.40000000596046448,
+	"particles_per_spawn" : 98,
+	"spawn_radius" : 36.099998474121094,
+	"time_between_spawn" : 1.0
+}

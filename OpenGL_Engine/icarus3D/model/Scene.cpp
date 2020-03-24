@@ -77,7 +77,7 @@ bool Scene::saveScene(string path) {
 
     Json::Value root;
 
-    root["name"] = "la mejor escena del mundo";
+    root["name"] = "Scene";
 
 	for (int i = 0; i < models.size(); i++) {
 
@@ -147,6 +147,8 @@ bool Scene::loadScene(string path, string name) {
 	Json::CharReaderBuilder builder;
 	std::ifstream file(path.c_str(), std::ifstream::binary);
 	std::string errs;
+
+	this->name = name;
 	
 	if (!Json::parseFromStream(builder, file, &root, &errs))
 	{

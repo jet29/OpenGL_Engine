@@ -11,7 +11,7 @@ public:
 
 	Particle(glm::vec3 pos, glm::vec3 dir, float spd, float ttl);
 
-	void reset(glm::vec3 new_position = glm::vec3(0), glm::vec3 new_direction = glm::vec3(0), float new_speed = NULL);
+	void reset(glm::vec3 new_position = glm::vec3(0), glm::vec3 new_direction = glm::vec3(0), float new_speed = NULL, float ttl = NULL);
 
 	void update(float deltaTime);
 	void draw();
@@ -20,6 +20,7 @@ public:
 
 	//time to live
 	float time_to_live;
+	float time_to_live_left;
 
 	glm::vec3 position;
 	glm::vec2 scale = glm::vec2(1.0f);

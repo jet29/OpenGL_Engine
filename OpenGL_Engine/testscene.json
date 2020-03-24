@@ -1,0 +1,288 @@
+{
+	"models" : 
+	[
+		{
+			"meshPath" : 
+			[
+				"assets/models/texturedcube/texturedcube.obj",
+				"assets/models/texturedcube/texturedcube.mtl"
+			],
+			"name" : "Model 0",
+			"pickingColor" : 
+			{
+				"b" : 0.0,
+				"g" : 0.0,
+				"r" : 1.0
+			},
+			"position" : 
+			{
+				"x" : -4.8499999046325684,
+				"y" : 0.0,
+				"z" : 4.1500000953674316
+			},
+			"rotation" : 
+			{
+				"x" : 0.0,
+				"y" : -0.0,
+				"z" : 0.0
+			},
+			"scale" : 
+			{
+				"x" : 1.0,
+				"y" : 1.0,
+				"z" : 1.0
+			},
+			"shaderPath" : 
+			[
+				"icarus3D/shaders/modelShader.vert",
+				"icarus3D/shaders/modelShader.frag"
+			],
+			"type" : 0
+		},
+		{
+			"meshPath" : 
+			[
+				"assets/models/texturedcube/texturedcube.obj",
+				"assets/models/texturedcube/texturedcube.mtl"
+			],
+			"name" : "Model 1",
+			"pickingColor" : 
+			{
+				"b" : 0.0,
+				"g" : 0.0,
+				"r" : 0.99000000953674316
+			},
+			"position" : 
+			{
+				"x" : 4.8499999046325684,
+				"y" : 1.4901161193847656e-08,
+				"z" : 4.1500000953674316
+			},
+			"rotation" : 
+			{
+				"x" : 0.0,
+				"y" : -0.0,
+				"z" : 0.0
+			},
+			"scale" : 
+			{
+				"x" : 1.0,
+				"y" : 1.0,
+				"z" : 1.0
+			},
+			"shaderPath" : 
+			[
+				"icarus3D/shaders/modelShader.vert",
+				"icarus3D/shaders/modelShader.frag"
+			],
+			"type" : 0
+		},
+		{
+			"meshPath" : 
+			[
+				"assets/models/forsketchfab.fbx",
+				"assets/models/forsketchfab.mtl"
+			],
+			"name" : "Model 2",
+			"pickingColor" : 
+			{
+				"b" : 0.0,
+				"g" : 0.0,
+				"r" : 0.98000001907348633
+			},
+			"position" : 
+			{
+				"x" : -6.9000000953674316,
+				"y" : -3.2999999523162842,
+				"z" : -13.5
+			},
+			"rotation" : 
+			{
+				"x" : 0.0011817836202681065,
+				"y" : -89.286361694335938,
+				"z" : -0.00053980218945071101
+			},
+			"scale" : 
+			{
+				"x" : 90.000801086425781,
+				"y" : 89.999755859375,
+				"z" : 90.000801086425781
+			},
+			"shaderPath" : 
+			[
+				"icarus3D/shaders/modelShader.vert",
+				"icarus3D/shaders/modelShader.frag"
+			],
+			"type" : 0
+		},
+		{
+			"meshPath" : 
+			[
+				"assets/models/forsketchfab.fbx",
+				"assets/models/forsketchfab.mtl"
+			],
+			"name" : "Model 3",
+			"pickingColor" : 
+			{
+				"b" : 0.0,
+				"g" : 0.0,
+				"r" : 0.97000002861022949
+			},
+			"position" : 
+			{
+				"x" : 7.6999998092651367,
+				"y" : -3.2836928367614746,
+				"z" : -13.949999809265137
+			},
+			"rotation" : 
+			{
+				"x" : 0.0,
+				"y" : -89.0,
+				"z" : 0.0
+			},
+			"scale" : 
+			{
+				"x" : 90.000785827636719,
+				"y" : 90.0,
+				"z" : 90.000785827636719
+			},
+			"shaderPath" : 
+			[
+				"icarus3D/shaders/modelShader.vert",
+				"icarus3D/shaders/modelShader.frag"
+			],
+			"type" : 0
+		},
+		{
+			"attenuation" : 
+			{
+				"constant" : 0.95599997043609619,
+				"linear" : 0.11800000071525574,
+				"quadratic" : 0.0
+			},
+			"color" : 
+			{
+				"ambient" : 
+				{
+					"b" : 0.0,
+					"g" : 0.0,
+					"r" : 1.0
+				},
+				"diffuse" : 
+				{
+					"b" : 0.0,
+					"g" : 1.0,
+					"r" : 0.0
+				},
+				"specular" : 
+				{
+					"b" : 1.0,
+					"g" : 0.0,
+					"r" : 0.0
+				}
+			},
+			"meshPath" : 
+			[
+				"assets/models/light_sphere.obj",
+				"assets/models/light_sphere.mtl"
+			],
+			"name" : "Light 0",
+			"pickingColor" : 
+			{
+				"b" : 0.0,
+				"g" : 0.0,
+				"r" : 0.96000003814697266
+			},
+			"position" : 
+			{
+				"x" : 0.0,
+				"y" : 1.4901161193847656e-08,
+				"z" : -16.579570770263672
+			},
+			"rotation" : 
+			{
+				"x" : 0.0,
+				"y" : -0.0,
+				"z" : 0.0
+			},
+			"scale" : 
+			{
+				"x" : 1.0,
+				"y" : 1.0,
+				"z" : 1.0
+			},
+			"shaderPath" : 
+			[
+				"icarus3D/shaders/pointlight.vert",
+				"icarus3D/shaders/pointlight.frag"
+			],
+			"type" : 1
+		},
+		{
+			"attenuation" : 
+			{
+				"constant" : 0.95599997043609619,
+				"linear" : 0.11800000071525574,
+				"quadratic" : 0.0
+			},
+			"color" : 
+			{
+				"ambient" : 
+				{
+					"b" : 0.069518744945526123,
+					"g" : 0.069518744945526123,
+					"r" : 1.0
+				},
+				"diffuse" : 
+				{
+					"b" : 0.6042780876159668,
+					"g" : 0.16276222467422485,
+					"r" : 0.064628683030605316
+				},
+				"specular" : 
+				{
+					"b" : 0.36996352672576904,
+					"g" : 0.099087759852409363,
+					"r" : 0.41176468133926392
+				}
+			},
+			"meshPath" : 
+			[
+				"assets/models/light_sphere.obj",
+				"assets/models/light_sphere.mtl"
+			],
+			"name" : "Light 1",
+			"pickingColor" : 
+			{
+				"b" : 0.0,
+				"g" : 0.0,
+				"r" : 0.95000004768371582
+			},
+			"position" : 
+			{
+				"x" : 0.0,
+				"y" : 1.4901161193847656e-08,
+				"z" : 7.7749509811401367
+			},
+			"rotation" : 
+			{
+				"x" : 0.0,
+				"y" : -0.0,
+				"z" : 0.0
+			},
+			"scale" : 
+			{
+				"x" : 1.0,
+				"y" : 1.0,
+				"z" : 1.0
+			},
+			"shaderPath" : 
+			[
+				"icarus3D/shaders/pointlight.vert",
+				"icarus3D/shaders/pointlight.frag"
+			],
+			"type" : 1
+		}
+	],
+	"name" : "Scene"
+}

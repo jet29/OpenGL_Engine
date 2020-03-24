@@ -1,4 +1,6 @@
-﻿#include "icarus3D.h"
+﻿#define _CRT_SECURE_NO_WARNINGS
+
+#include "icarus3D.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -962,8 +964,7 @@ void icarus3D::render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		// Check for collision
-		checkCollision();
+
 
 		// Render grid and skybox when a new scene is selected
 		if (currentScene != -1) {
@@ -985,6 +986,8 @@ void icarus3D::render() {
 		renderParticleSystem();
 		// Draw interface
 		ui.draw();
+		// Check for collision
+		checkCollision();
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
 		// Check if any events have been activated (key pressed, mouse moved etc.) and call corresponding response functions
@@ -1102,15 +1105,60 @@ bool icarus3D::checkCollision() {
 	// Iterate over scene models
 	for (int i = 0; i < scene->models.size(); i++) {
 
-		if (camera.position.x + camera.nearPlane > scene->models[i]->position.x + scene->models[i]->mesh->min.x
-			&& camera.position.y + camera.nearPlane  > scene->models[i]->position.y + scene->models[i]->mesh->min.y
-			&& camera.position.z + camera.nearPlane  > scene->models[i]->position.z + scene->models[i]->mesh->min.z
-			&& camera.position.x - camera.nearPlane  < scene->models[i]->position.x + scene->models[i]->mesh->max.x
-			&& camera.position.y - camera.nearPlane  < scene->models[i]->position.y + scene->models[i]->mesh->max.y
-			&& camera.position.z - camera.nearPlane  < scene->models[i]->position.z + scene->models[i]->mesh->max.z){
+		glm::mat4 scale = scene->models[i]->scalingMatrix;
+
+		glm::vec4 minScaled = glm::vec4(scene->models[i]->mesh->min.x,
+										scene->models[i]->mesh->min.y,
+										scene->models[i]->mesh->min.z,
+										0);
+
+
+		glm::vec4 maxScaled = glm::vec4(scene->models[i]->mesh->max.x,
+										scene->models[i]->mesh->max.y,
+										scene->models[i]->mesh->max.z,
+										0);
+
+
+		maxScaled = scale * maxScaled;
+		minScaled = scale * minScaled;
+
+		//cout << "MIN SCALED" << endl;
+		//cout << minScaled.x << ", " << minScaled.y << ", " << minScaled.z << endl;
+
+		if (camera.position.x + camera.nearPlane > scene->models[i]->position.x + minScaled.x
+			&& camera.position.y + camera.nearPlane  > scene->models[i]->position.y + minScaled.y
+			&& camera.position.z + camera.nearPlane  > scene->models[i]->position.z + minScaled.z
+			&& camera.position.x - camera.nearPlane  < scene->models[i]->position.x + maxScaled.x
+			&& camera.position.y - camera.nearPlane  < scene->models[i]->position.y + maxScaled.y
+			&& camera.position.z - camera.nearPlane  < scene->models[i]->position.z + maxScaled.z){
 			collisionBool = true;
 			return true;
 		}
+	//	
+	//	glm::vec4 minBB = glm::vec4(    scene->models[i]->mesh->min.x,
+	//									scene->models[i]->mesh->min.y,
+	//									scene->models[i]->mesh->min.z,
+	//									0);
+
+
+
+	//	glm::vec4 maxBB = glm::vec4(    scene->models[i]->mesh->max.x,
+	//									scene->models[i]->mesh->max.y,
+	//									scene->models[i]->mesh->max.z,
+	//									0);
+	//	
+	//	minBB = scene->models[i]->modelMatrix * minBB;
+	//	maxBB = scene->models[i]->modelMatrix * maxBB;
+
+	//	if (   camera.position.x + camera.nearPlane >  minBB.x
+	//		&& camera.position.y + camera.nearPlane >  minBB.y
+	//		&& camera.position.z + camera.nearPlane >  minBB.z
+	//		&& camera.position.x - camera.nearPlane <  maxBB.x
+	//		&& camera.position.y - camera.nearPlane <  maxBB.y
+	//		&& camera.position.z - camera.nearPlane <  maxBB.z){
+	//		collisionBool = true;
+	//		return true;
+	//	}
 	}
 	return false;
 }
@@ -1638,5 +1686,12 @@ void icarus3D::renderParticleSystem() {
 	particleSystem->draw(particleSystemShader, particleSystemTexture, camera.viewMatrix, camera.perspectiveMatrix);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
+}
+
+bool icarus3D::setParticleSystemTexture(char* path) {
+	char dir_path[100] = "assets/textures/";
+	strcat(dir_path, path);
+	particleSystemTexture = loadTexture(dir_path);
+	return true;
 }
 

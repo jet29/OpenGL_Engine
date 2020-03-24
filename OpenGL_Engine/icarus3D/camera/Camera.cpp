@@ -6,11 +6,13 @@ const float MOVEMENT_SPEED = 10.0f;
 Camera::Camera(int windowWidth, int windowHeight) :
 	viewDirection(0, 0, -1),
 	UP(0.0f, 1.0f, 0.0f),
-	position(0, 0, 10.82f)
+	position(0, 5, 15.82f)
 {
 	mouseSpeed = 70.0f;
 	yaw = 0.0f;
-	pitch = 0.0f;
+	pitch = -20.0f;
+	glm::mat4 Rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), 0.0f);
+	viewDirection = glm::vec3(Rotation * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f));
 	viewMatrix = glm::lookAt(position, position + viewDirection, UP);
 	perspectiveMatrix = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, nearPlane, farPlane);
 }

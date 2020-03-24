@@ -51,12 +51,39 @@ void UI::particleSystemWindow() {
 		ImGui::Begin("Particle System",&particleSystemFlag);
 		ImGui::Text("Position");
 		ImGui::DragFloat3("##particle_system_position", &instance->particleSystem->position[0]);
+
+		ImGui::Text("Load Particle System");
+		static char buffer_load[1024] = "./rain.json";
+		ImGui::InputText("##load_particle_system", buffer_load, IM_ARRAYSIZE(buffer_load));
+		ImGui::SameLine();
+		if (ImGui::Button("Load##particle_system", ImVec2(60, 20))) {
+			instance->particleSystem->load(buffer_load);
+		}
+
+		ImGui::Text("Save Particle System");
+		static char buffer_save[1024] = "clouds";
+		ImGui::InputText("##save_particle_system", buffer_save, IM_ARRAYSIZE(buffer_save));
+		ImGui::SameLine();
+		if (ImGui::Button("Save", ImVec2(60, 20))) {
+			instance->particleSystem->save(buffer_save);
+		}
+
+		ImGui::Text("Change Texture");
+		static char buffer_texture[1024] = "rain.png";
+		ImGui::InputText("##texture_particle_system", buffer_texture, IM_ARRAYSIZE(buffer_texture));
+		ImGui::SameLine();
+		if (ImGui::Button("Load##texture", ImVec2(60, 20))) {
+			instance->setParticleSystemTexture(buffer_texture);
+		}
+
 		ImGui::Text("Max Particles");
 		ImGui::DragInt("##Max_Particles", &instance->particleSystem->max_particles, 1, 1, 1000);
 		ImGui::Text("Particles per Spawn");
 		ImGui::DragInt("##Particles_per_Spawn", &instance->particleSystem->particles_per_spawn, 1, 1, 100);
 		ImGui::Text("Spawn Radius");
 		ImGui::DragFloat("##Spawn_Radius", &instance->particleSystem->spawn_radius, 0.1, 1, 1000);
+		ImGui::Text("Time to Live");
+		ImGui::DragFloat("##Time_to_live", &instance->particleSystem->particle_ttl, 0.01, 0.01, 10);
 		ImGui::Text("Time Between Spawn");
 		ImGui::DragFloat("##Time_Between_Spawn", &instance->particleSystem->time_between_spawn, 0.01, 0.01, 10); 
 		ImGui::Text("Particle Speed");
@@ -148,7 +175,7 @@ void UI::settingsWindow() {
 			if (ImGui::DragFloat("##IOD", &instance->stereoscopic.IOD, 0.1f, 1.0f, 20.0f, "%.1f"))
 				instance->updateStereoPerspectiveMatrix();
 			ImGui::Text("Field of view");
-			if (ImGui::DragFloat("##fov", &instance->stereoscopic.fov, 0.1f, 1.0f, 360.0f, "%.1f°"))
+			if (ImGui::DragFloat("##fov", &instance->stereoscopic.fov, 0.1f, 1.0f, 360.0f, "%.1fï¿½"))
 				instance->updateStereoPerspectiveMatrix();
 			//if (ImGui::CollapsingHeader("Anaglyph colors")) {
 			//	ImGui::RadioButton("Left eye", &stereo_eye_opt, 0); ImGui::SameLine();
@@ -341,7 +368,7 @@ void UI::pickedModelWindow() {
 			}
 
 			// Update model Matrix if any change has been made
-			if (flag)
+			//if (flag)
 				//instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->computeModelMatrix();
 
 			if (instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->type == POINTLIGHT) {
@@ -610,23 +637,23 @@ void UI::showMainMenuBar() {
 		}
 
 		// Help button
-		if (helpFlag) {
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
-			if (ImGui::Button("Help & Shorcuts")) {
-				helpFlag = helpFlag == true ? false : true;
-			}
-			ImGui::PopStyleColor(2);
-		}
-		else {
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
-			if (ImGui::Button("Help & Shorcuts")) {
-				helpFlag = helpFlag == true ? false : true;
-			}
-			ImGui::PopStyleColor(3);
-		}
+		//if (helpFlag) {
+		//	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+		//	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+		//	if (ImGui::Button("Help & Shorcuts")) {
+		//		helpFlag = helpFlag == true ? false : true;
+		//	}
+		//	ImGui::PopStyleColor(2);
+		//}
+		//else {
+		//	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+		//	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+		//	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+		//	if (ImGui::Button("Help & Shorcuts")) {
+		//		helpFlag = helpFlag == true ? false : true;
+		//	}
+		//	ImGui::PopStyleColor(3);
+		//}
 		ImGui::EndMainMenuBar();
 	}
 }
