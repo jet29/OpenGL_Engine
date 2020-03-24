@@ -1,4 +1,7 @@
 {
+	"anaglyph" : false,
+	"depth_of_field" : true,
+	"dir_light" : false,
 	"models" : 
 	[
 		{
@@ -229,9 +232,9 @@
 			{
 				"ambient" : 
 				{
-					"b" : 0.069518744945526123,
-					"g" : 0.069518744945526123,
-					"r" : 1.0
+					"b" : 0.038119487464427948,
+					"g" : 0.038119487464427948,
+					"r" : 0.2299465537071228
 				},
 				"diffuse" : 
 				{
@@ -284,5 +287,7 @@
 			"type" : 1
 		}
 	],
-	"name" : "Scene"
+	"name" : "Scene",
+	"particle_system" : true,
+	"ssao" : true
 }

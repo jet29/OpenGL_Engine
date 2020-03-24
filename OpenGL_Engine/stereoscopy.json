@@ -1,4 +1,7 @@
 {
+	"anaglyph" : true,
+	"depth_of_field" : false,
+	"dir_light" : true,
 	"models" : 
 	[
 		{
@@ -116,5 +119,7 @@
 			"type" : 0
 		}
 	],
-	"name" : "la mejor escena del mundo"
+	"name" : "Scene",
+	"particle_system" : false,
+	"ssao" : false
 }

@@ -19,12 +19,6 @@ void Particle::draw() {
 void Particle::update(float deltaTime) {
 
 	position += deltaTime * direction * speed;
-	time_to_live_left -= deltaTime;
-	
-	if (time_to_live_left < 0) {
-		reset();
-		time_to_live_left = time_to_live;
-	}
 	
 	model = glm::translate(model, position);
 }

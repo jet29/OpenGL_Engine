@@ -14,6 +14,12 @@
 	"particle_speed" : 8.3999996185302734,
 	"particle_ttl" : 0.40000000596046448,
 	"particles_per_spawn" : 98,
+	"position" : 
+	{
+		"x" : -10.0,
+		"y" : 6.0,
+		"z" : -25.0
+	},
 	"spawn_radius" : 36.099998474121094,
 	"time_between_spawn" : 1.0
 }

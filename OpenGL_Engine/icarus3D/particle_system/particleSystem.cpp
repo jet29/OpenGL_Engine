@@ -102,6 +102,19 @@ void ParticleSystem::update(float deltaTime){
 		particles[i]->speed = particle_speed;
 		particles[i]->direction = particle_direction;
 		particles[i]->scale = particle_scale;
+
+		particles[i]->time_to_live_left -= deltaTime;
+
+		if (particles[i]->time_to_live_left < 0) {
+
+			//randomize position start for particle
+			float deltaPos_x = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / spawn_radius * 2) - spawn_radius);
+			float deltaPos_y = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / spawn_radius * 2) - spawn_radius);
+			float deltaPos_z = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / spawn_radius * 2) - spawn_radius);
+			glm::vec3 deltaPos = glm::vec3(deltaPos_x, deltaPos_y, deltaPos_z);
+			particles[i]->reset(position + deltaPos, particle_direction, particle_speed, particle_ttl);
+		}
+
 		particles[i]->update(deltaTime);
 	}
 		
@@ -136,6 +149,11 @@ bool ParticleSystem::load(const char* path) {
 
 	std::cout << root << endl;
 
+
+	position.x = root["position"]["x"].asFloat();
+	position.y = root["position"]["y"].asFloat();
+	position.z = root["position"]["z"].asFloat();
+
 	particle_ttl = root["particle_ttl"].asFloat();
 	max_particles = root["max_particles"].asInt();
 	particles_per_spawn = root["particles_per_spawn"].asInt();
@@ -154,6 +172,11 @@ bool ParticleSystem::load(const char* path) {
 bool ParticleSystem::save(char* name) {
 
 	Json::Value root;
+
+
+	root["position"]["x"] = position.x;
+	root["position"]["y"] = position.y;
+	root["position"]["z"] = position.z;
 
 	root["particle_ttl"] = particle_ttl;
 	root["max_particles"] = max_particles;

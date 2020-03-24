@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "../json/json.h"
+#include "../icarus3D.h"
 
 
 Scene::Scene() {
@@ -75,9 +76,17 @@ void Scene::removeModel(int index) {
 
 bool Scene::saveScene(string path) {
 
+	icarus3D *instance = icarus3D::Instance();
+
     Json::Value root;
 
     root["name"] = "Scene";
+
+	root["anaglyph"] = instance->stereoBool;
+	root["depth_of_field"] = instance->depthOfFieldBool;
+	root["ssao"] = instance->ssaoBool;
+	root["particle_system"] = instance->particlesystemBool;
+	root["dir_light"] = instance->light->lightSwitch;
 
 	for (int i = 0; i < models.size(); i++) {
 
@@ -149,6 +158,9 @@ bool Scene::loadScene(string path, string name) {
 	std::string errs;
 
 	this->name = name;
+
+	icarus3D* instance = icarus3D::Instance();
+
 	
 	if (!Json::parseFromStream(builder, file, &root, &errs))
 	{
@@ -266,6 +278,13 @@ bool Scene::loadScene(string path, string name) {
 	pickingColor = glm::vec3(root["models"][root["models"].size() - 1]["pickingColor"]["r"].asFloat()-0.01f,
 							 root["models"][root["models"].size() - 1]["pickingColor"]["g"].asFloat(),
 							 root["models"][root["models"].size() - 1]["pickingColor"]["b"].asFloat());
+
+
+	instance->stereoBool = root["anaglyph"].asBool();
+	instance->depthOfFieldBool = root["depth_of_field"].asBool();
+	instance->ssaoBool = root["ssao"].asBool();
+	instance->particlesystemBool = root["particle_system"].asBool();
+	instance->light->lightSwitch = root["dir_light"].asBool();
 
 
 	return true;
