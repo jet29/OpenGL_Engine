@@ -1,0 +1,44 @@
+{
+	"models" : 
+	[
+		{
+			"meshPath" : 
+			[
+				"assets/models/texturedcube/texturedcube.obj",
+				"assets/models/texturedcube/texturedcube.mtl"
+			],
+			"name" : "Model 0",
+			"pickingColor" : 
+			{
+				"b" : 0.0,
+				"g" : 0.0,
+				"r" : 1.0
+			},
+			"position" : 
+			{
+				"x" : 0.0,
+				"y" : 0.0,
+				"z" : 0.0
+			},
+			"rotation" : 
+			{
+				"x" : -7.6953292591497302e-05,
+				"y" : -21.999996185302734,
+				"z" : -73.999969482421875
+			},
+			"scale" : 
+			{
+				"x" : 0.99999946355819702,
+				"y" : 0.99999922513961792,
+				"z" : 9.0
+			},
+			"shaderPath" : 
+			[
+				"icarus3D/shaders/modelShader.vert",
+				"icarus3D/shaders/modelShader.frag"
+			],
+			"type" : 0
+		}
+	],
+	"name" : "la mejor escena del mundo"
+}

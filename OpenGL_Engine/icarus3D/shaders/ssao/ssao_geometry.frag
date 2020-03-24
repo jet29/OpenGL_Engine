@@ -1,7 +1,7 @@
 #version 330 core
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;
-layout (location = 2) out vec3 gAlbedo;
+layout (location = 2) out vec4 gAlbedoSpec;
 
 in Data{
     vec3 fragPos;
@@ -18,5 +18,5 @@ void main()
     // also store the per-fragment normals into the gbuffer
     gNormal = normalize(dataIn.normal);
     // and the diffuse per-fragment color
-    gAlbedo.rgb = texture(albedo,dataIn.uv).rgb;
+    gAlbedoSpec = texture(albedo,dataIn.uv);
 }

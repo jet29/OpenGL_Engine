@@ -98,7 +98,7 @@ class icarus3D {
 		Shader* lightingPassShader;
 		Shader* gBufferDebug;
 		Shader* ssaoGeometryShader;
-		Shader* ssaoLightingPass;
+		Shader* ssaoLightingPassShader;
 		Shader* ssaoShader;
 		Shader* debugTextureShader;
 		Shader* shaderSSAOBlur;
@@ -133,8 +133,8 @@ class icarus3D {
 		int inline getPickedIndex(){ return pickedIndex; }
 		void inline setPickedIndex(int index) { pickedIndex = index; }
 		bool createScene(string name = "");
-		bool saveScene();
-		bool loadScene(string path);
+		bool saveScene(string path);
+		bool loadScene(string path, string name);
 		unsigned int loadTexture(const char* path);
 
 		void setLightingUniforms(Scene* scene, Shader* shader);
@@ -156,7 +156,7 @@ class icarus3D {
 		void renderSSAO();
 		void renderScene(Scene* scene);
 		void renderSceneGeometryPass(Scene* scene, Shader* shader);
-		void renderSceneLightingPass(Scene* scene);
+		void renderSceneLightingPass(Scene* scene, Shader* shader);
 		void renderPointlightModels();
 		void renderBoundingBox();
 		void renderStereoscopicViews();

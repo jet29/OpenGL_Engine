@@ -75,9 +75,57 @@ void Model::DrawBoundingBox() {
 	glBindVertexArray(0);
 }
 
-void Model::setRotationQuaternion(glm::vec3 eulerAngles) {
-	rotationMatrix = glm::mat4(glm::quat(eulerAngles));
+float LengthSq(glm::vec3 a){ return (a.x * a.x + a.y * a.y + a.z * a.z); };
+
+void rotationAxis(glm::vec3 axis,glm::mat4& rot, float angle) {
+
+
+	glm::vec3 n = axis * (1.f / sqrtf(1));
+	float s = sinf(angle);
+	float c = cosf(angle);
+	float k = 1.f - c;
+
+	float xx = n.x * n.x * k + c;
+	float yy = n.y * n.y * k + c;
+	float zz = n.z * n.z * k + c;
+	float xy = n.x * n.y * k;
+	float yz = n.y * n.z * k;
+	float zx = n.z * n.x * k;
+	float xs = n.x * s;
+	float ys = n.y * s;
+	float zs = n.z * s;
+
+	rot[0][0] = xx;
+	rot[0][1] = xy + zs;
+	rot[0][2] = zx - ys;
+	rot[0][3] = 0.f;
+	rot[1][0] = xy - zs;
+	rot[1][1] = yy;
+	rot[1][2] = yz + xs;
+	rot[1][3] = 0.f;
+	rot[2][0] = zx + ys;
+	rot[2][1] = yz - xs;
+	rot[2][2] = zz;
+	rot[2][3] = 0.f;
+	rot[3][0] = 0.f;
+	rot[3][1] = 0.f;
+	rot[3][2] = 0.f;
+	rot[3][3] = 1.f;
 }
+
+void Model::setRotationQuaternion(glm::vec3 eulerAngles) {
+	vec3 angles = glm::radians(eulerAngles);
+	//rotationMatrix = glm::mat4(glm::quat(glm::radians(eulerAngles)));
+	glm::mat4 rot[3];
+	vector<glm::vec3> axis;
+	axis.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+	axis.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+	axis.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+	for (int i = 0; i < 3; i++)
+		rotationAxis(axis[i], rot[i], angles[i]);
+	rotationMatrix  = rot[0] * rot[1] * rot[2];
+}
+
 
 glm::vec3 Model::getEulerAnglesFromQuat() {
 	return glm::eulerAngles(glm::toQuat(rotationMatrix));
@@ -96,6 +144,5 @@ void Model::computeModelMatrix() {
 	modelMatrix *= translationMatrix;
 	modelMatrix *= scalingMatrix;
 	modelMatrix *= rotationMatrix;
-
 }
 

@@ -9,6 +9,8 @@
 #include "../light/Light.h"
 #include "../light/Pointlight.h"
 #include "../light/Spotlight.h"
+#include <imgui.hpp>
+#include <ImGuizmo.h>
 
 using std::vector;
 using namespace glm;
@@ -26,8 +28,8 @@ public:
 	std::vector<int> pointlight_index;
 	string name;
 	float DOFThreshold = 0.5f;
-	bool saveScene();
-	bool loadScene(string path);
+	bool saveScene(string path);
+	bool loadScene(string path, string name);
 
 	bool addModel(Model *model);
 	bool addModel(string pathObj, string pathMtl, string name = "Model");

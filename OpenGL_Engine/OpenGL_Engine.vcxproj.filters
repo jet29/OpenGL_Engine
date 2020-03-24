@@ -124,6 +124,8 @@
     <None Include="icarus3D\shaders\stereoscopic_shader.vert" />
     <None Include="icarus3D\shaders\particleSystem.frag" />
     <None Include="icarus3D\shaders\particleSystem.vert" />
+    <None Include="icarus3D\shaders\ssao\ssaoLightingPassShader.frag" />
+    <None Include="icarus3D\shaders\ssao\ssaoLightingPassShader.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icarus3D\icarus3D.h">

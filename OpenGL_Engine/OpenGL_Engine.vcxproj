@@ -197,6 +197,8 @@
     <None Include="icarus3D\shaders\pointlight.vert" />
     <None Include="icarus3D\shaders\skyboxShader.frag" />
     <None Include="icarus3D\shaders\skyboxShader.vert" />
+    <None Include="icarus3D\shaders\ssao\ssaoLightingPassShader.frag" />
+    <None Include="icarus3D\shaders\ssao\ssaoLightingPassShader.vert" />
     <None Include="icarus3D\shaders\ssao\ssao.frag" />
     <None Include="icarus3D\shaders\ssao\ssao.vert" />
     <None Include="icarus3D\shaders\ssao\ssao_blur.frag" />

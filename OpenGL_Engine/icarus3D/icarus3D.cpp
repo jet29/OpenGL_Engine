@@ -121,6 +121,7 @@ void icarus3D::init() {
 	skyboxShader = new	Shader("icarus3D/shaders/skyboxShader.vert","icarus3D/shaders/skyboxShader.frag");
 	geometryPassShader = new Shader("icarus3D/shaders/geometryPassShader.vert", "icarus3D/shaders/geometryPassShader.frag");
 	lightingPassShader = new Shader("icarus3D/shaders/lightingPassShader.vert", "icarus3D/shaders/lightingPassShader.frag");
+	ssaoLightingPassShader = new Shader("icarus3D/shaders/ssao/ssaoLightingPassShader.vert", "icarus3D/shaders/ssao/ssaoLightingPassShader.frag");
 	debugTextureShader = new Shader("icarus3D/shaders/texture_debug.vert", "icarus3D/shaders/texture_debug.frag");
 	ssaoGeometryShader = new Shader("icarus3D/shaders/ssao/ssao_geometry.vert", "icarus3D/shaders/ssao/ssao_geometry.frag");
 	ssaoShader = new Shader("icarus3D/shaders/ssao/ssao.vert", "icarus3D/shaders/ssao/ssao.frag");
@@ -516,7 +517,7 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 		case GLFW_KEY_R:
 			if (instance->currentScene != -1 && instance->scene[instance->currentScene]->models.size() != 0)
 				for (auto &model : instance->scene[instance->currentScene]->models)
-					model->setShader(model->shaderPath[0], model->shaderPath[1]);
+					model->setShader(model->shaderPath[0].c_str(), model->shaderPath[1].c_str());
 
 			delete instance->pickingShader;
 			delete instance->boundingBoxShader;
@@ -525,6 +526,7 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 			delete instance->gridShader;
 			delete instance->geometryPassShader;
 			delete instance->lightingPassShader;
+			delete instance->ssaoLightingPassShader;
 			delete instance->ssaoGeometryShader;
 			delete instance->ssaoShader;
 			delete instance->debugTextureShader;
@@ -538,6 +540,7 @@ void icarus3D::onKeyPress(ICwindow* window, int key, int scancode, int action, i
 			instance->deferredDepthShader = new Shader("icarus3D/shaders/deferredDepth.vert", "icarus3D/shaders/deferredDepth.frag");
 			instance->geometryPassShader = new Shader("icarus3D/shaders/geometryPassShader.vert", "icarus3D/shaders/geometryPassShader.frag");
 			instance->lightingPassShader = new Shader("icarus3D/shaders/lightingPassShader.vert", "icarus3D/shaders/lightingPassShader.frag");
+			instance->ssaoLightingPassShader = new Shader("icarus3D/shaders/ssao/ssaoLightingPassShader.vert", "icarus3D/shaders/ssao/ssaoLightingPassShader.frag");
 			instance->debugTextureShader = new Shader("icarus3D/shaders/texture_debug.vert", "icarus3D/shaders/texture_debug.frag");
 			instance->ssaoGeometryShader = new Shader("icarus3D/shaders/ssao/ssao_geometry.vert", "icarus3D/shaders/ssao/ssao_geometry.frag");
 			instance->ssaoShader = new Shader("icarus3D/shaders/ssao/ssao.vert", "icarus3D/shaders/ssao/ssao.frag");
@@ -662,7 +665,6 @@ void icarus3D::renderSceneGeometryPass(Scene* scene, Shader* shader) {
 		// Ignore pointlight models
 		if (model->type == POINTLIGHT ) continue;
 
-		// Set model shader general uniform
 		shader->setMat4("model", model->modelMatrix);
 		shader->setMat4("view", camera.viewMatrix);
 		shader->setMat4("projection", camera.getPerspectiveMatrix());
@@ -673,7 +675,7 @@ void icarus3D::renderSceneGeometryPass(Scene* scene, Shader* shader) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void icarus3D::renderSceneLightingPass(Scene* scene){
+void icarus3D::renderSceneLightingPass(Scene* scene, Shader* shader){
 
 	// Change to default framebuffer
 	glClearColor(0.78f, 0.78f, 0.78f, 1.0f);
@@ -684,12 +686,12 @@ void icarus3D::renderSceneLightingPass(Scene* scene){
 		// Draw grid
 		drawGrid();
 		// Set gBuffer textures uniforms
-		lightingPassShader->use();
-		lightingPassShader->setInt("gPosition", 0);
-		lightingPassShader->setInt("gNormal", 1);
-		lightingPassShader->setInt("gAlbedoSpec", 2);
-		lightingPassShader->setVec3("viewPos", camera.position);
-		lightingPassShader->setInt("ssao", 3);
+		shader->use();
+		shader->setInt("gPosition", 0);
+		shader->setInt("gNormal", 1);
+		shader->setInt("gAlbedoSpec", 2);
+		shader->setVec3("viewPos", camera.position);
+		shader->setInt("ssao", 3);
 		// Bind textures into GPU
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, gPosition);
@@ -698,9 +700,9 @@ void icarus3D::renderSceneLightingPass(Scene* scene){
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
 		glActiveTexture(GL_TEXTURE3);
-		ssaoBool == true ? glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur) : glBindTexture(GL_TEXTURE_2D, whiteTexture);
+		glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
 		// Set lighting uniforms config
-		setLightingUniforms(scene, lightingPassShader);
+		setLightingUniforms(scene, shader);
 		//Binds the vertex array to be drawn
 		glBindVertexArray(VAO);
 		// Renders the triangle geometry
@@ -857,22 +859,45 @@ void icarus3D::setDirectionalLightUniform(Scene* scene, Shader* shader) {
 }
 
 void icarus3D::setPointlightsUniform(Scene* scene, Shader* shader) {
-	for (ICuint i = 0; i < scene->pointlight_index.size(); i++) {
-		PointLight* pointlight = (PointLight*)scene->models[scene->pointlight_index[i]];
-		std::string index = std::to_string(i);
-		// Set pointlight position
-		shader->setVec3("pointlight[" + index + "].position", pointlight->position);
-		// Set pointlight color
-		shader->setVec3("pointlight[" + index + "].color.ambient", pointlight->properties.color.ambient);
-		shader->setVec3("pointlight[" + index + "].color.diffuse", pointlight->properties.color.diffuse);
-		shader->setVec3("pointlight[" + index + "].color.specular", pointlight->properties.color.specular);
-		// Set pointlight attenuationF
-		shader->setFloat("pointlight[" + index + "].attenuation.constant", pointlight->properties.attenuation.constant);
-		shader->setFloat("pointlight[" + index + "].attenuation.linear", pointlight->properties.attenuation.linear);
-		shader->setFloat("pointlight[" + index + "].attenuation.quadratic", pointlight->properties.attenuation.quadratic);
-		// Set pointlight switch bool
-		shader->setBool("pointlight[" + index + "].lightSwitch", pointlight->lightSwitch);
+	// If we are in SSAO mode transform all pointlight position into view space
+	if (ssaoBool) {
+		for (ICuint i = 0; i < scene->pointlight_index.size(); i++) {
+			PointLight* pointlight = (PointLight*)scene->models[scene->pointlight_index[i]];
+			std::string index = std::to_string(i);
+			// Set pointlight position
+			shader->setVec3("pointlight[" + index + "].position", glm::vec3(camera.viewMatrix * glm::vec4(pointlight->position,1.0f)));
+			// Set pointlight color
+			shader->setVec3("pointlight[" + index + "].color.ambient", pointlight->properties.color.ambient);
+			shader->setVec3("pointlight[" + index + "].color.diffuse", pointlight->properties.color.diffuse);
+			shader->setVec3("pointlight[" + index + "].color.specular", pointlight->properties.color.specular);
+			// Set pointlight attenuationF
+			shader->setFloat("pointlight[" + index + "].attenuation.constant", pointlight->properties.attenuation.constant);
+			shader->setFloat("pointlight[" + index + "].attenuation.linear", pointlight->properties.attenuation.linear);
+			shader->setFloat("pointlight[" + index + "].attenuation.quadratic", pointlight->properties.attenuation.quadratic);
+			// Set pointlight switch bool
+			shader->setBool("pointlight[" + index + "].lightSwitch", pointlight->lightSwitch);
+		}
 	}
+	// Keep working in clipping space
+	else {
+		for (ICuint i = 0; i < scene->pointlight_index.size(); i++) {
+			PointLight* pointlight = (PointLight*)scene->models[scene->pointlight_index[i]];
+			std::string index = std::to_string(i);
+			// Set pointlight position
+			shader->setVec3("pointlight[" + index + "].position", pointlight->position);
+			// Set pointlight color
+			shader->setVec3("pointlight[" + index + "].color.ambient", pointlight->properties.color.ambient);
+			shader->setVec3("pointlight[" + index + "].color.diffuse", pointlight->properties.color.diffuse);
+			shader->setVec3("pointlight[" + index + "].color.specular", pointlight->properties.color.specular);
+			// Set pointlight attenuationF
+			shader->setFloat("pointlight[" + index + "].attenuation.constant", pointlight->properties.attenuation.constant);
+			shader->setFloat("pointlight[" + index + "].attenuation.linear", pointlight->properties.attenuation.linear);
+			shader->setFloat("pointlight[" + index + "].attenuation.quadratic", pointlight->properties.attenuation.quadratic);
+			// Set pointlight switch bool
+			shader->setBool("pointlight[" + index + "].lightSwitch", pointlight->lightSwitch);
+		}
+	}
+
 }
 
 void icarus3D::drawBoundingBox() {
@@ -972,17 +997,22 @@ void icarus3D::deferredShading() {
 	// If there's no scene picked then don't render anything
 	if (currentScene == -1 || scene[currentScene]->models.size() == 0 || stereoBool) return;
 
-	// First pass: Geometry pass into g-buffer textures
-		// Render first pass (Geometry) -> into gBuffer's textures
+	
 		if (ssaoBool) {
+			// First pass: Geometry pass into g-buffer textures
 			renderSceneGeometryPass(scene[currentScene], ssaoGeometryShader);
+			// SSAO pass and blur pass
 			renderSSAO();
+			// Lighting Pass (in view space)
+			renderSceneLightingPass(scene[currentScene],ssaoLightingPassShader);
 		}
 		else {
+			// First pass: Geometry pass into g-buffer textures
 			renderSceneGeometryPass(scene[currentScene], geometryPassShader);
+			// Render second pass (Lighting) -> into framebuffer's texture (which is fTexture)
+			renderSceneLightingPass(scene[currentScene], lightingPassShader);
 		}
-	// Render second pass (Lighting) -> into framebuffer's texture (which is fTexture)
-		renderSceneLightingPass(scene[currentScene]);
+		
 
 	// Apply DoF technique (if it's turned ON)
 	if (depthOfFieldBool) depthOfField();
@@ -1024,22 +1054,22 @@ bool icarus3D::createScene(string name) {
 	return true;
 }
 
-bool icarus3D::loadScene(string path) {
+bool icarus3D::loadScene(string path, string name) {
 
 	Scene* newScene = new Scene();
-	newScene->loadScene(path);
+	newScene->loadScene(path, name);
 	scene.push_back(newScene);
+
+	// Choose, by default, freshly new scene
+	instance->currentScene = instance->scene.size() - 1;
+	instance->setPickedIndex(-1);
 
 	return true;
 }
 
-bool icarus3D::saveScene() {
-	if (!currentScene == -1) {
-		cout << "there is no scene loaded " << endl;
-		return false;
-	}
+bool icarus3D::saveScene(string path) {
 
-	scene[currentScene]->saveScene();
+	scene[currentScene]->saveScene(path);
 	return true;
 }
 

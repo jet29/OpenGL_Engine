@@ -7,4 +7,5 @@ DirectionalLight::DirectionalLight(){
 	properties.color.ambient = Light::setColor(237, 249, 6);
 	properties.color.diffuse = Light::setColor(255, 255, 255);
 	properties.color.specular = Light::setColor(255, 255, 255);
+
 }

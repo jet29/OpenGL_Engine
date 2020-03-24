@@ -251,6 +251,8 @@ void UI::directionalLightProperties() {
 
 	if (ImGui::CollapsingHeader("Light Color")) 
 {
+		printf("(%f,%f,%f)\n", instance->light->properties.color.ambient.x, instance->light->properties.color.ambient.y, instance->light->properties.color.ambient.z);
+
 		// Ambient color
 		if (ImGui::CollapsingHeader("Ambient")) {
 			ImGui::ColorPicker3("Ka", &instance->light->properties.color.ambient.x);
@@ -303,29 +305,35 @@ void UI::pickedModelWindow() {
 			ImGui::RadioButton("Translate", &radio_button_trans_type, 1); ImGui::SameLine();
 			ImGui::RadioButton("Scale", &radio_button_trans_type, 2);
 
-			// Set euler angles from quaternion
 			ImGuizmo::DecomposeMatrixToComponents(&model->modelMatrix[0][0], &model->position[0], &model->rotationAngles[0], &model->scale[0]);
-			if (ImGui::DragFloat3("Rt", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles.x, 2)) {
-				flag = true;
-				glm::quat q(glm::radians(instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles));
-				instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationMatrix = glm::toMat4(q);
-			}
-
-			// Set translation matrix
-			if (ImGui::DragFloat3("Tr", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->position.x, 2)) {
-				flag = true;
-				instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->setTranslationMatrix();
-			}
-
-
-			if (ImGui::DragFloat3("Sc", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->scale.x, 2)) {
-				flag = true;
-				instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->setScaleMatrix();
+			switch (radio_button_trans_type) {
+			case 0:
+				// Set Rotation Matrix
+				if (ImGui::DragFloat3("Rt", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles.x, 0.5f)) {
+					flag = true;
+					/*instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->
+						setRotationQuaternion(instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->rotationAngles);*/
+				}
+				break;
+			case 1:
+				// Set translation matrix
+				if (ImGui::DragFloat3("Tr", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->position.x, 0.05f)) {
+					flag = true;
+					//instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->setTranslationMatrix();
+				}
+				break;
+			case 2:
+				// Set scaling matrix
+				if (ImGui::DragFloat3("Sc", &instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->scale.x, 0.1f)) {
+					flag = true;
+					//instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->setScaleMatrix();
+				}
+				break;
 			}
 
 			// Update model Matrix if any change has been made
 			if (flag)
-				instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->computeModelMatrix();
+				//instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->computeModelMatrix();
 
 			if (instance->scene[instance->currentScene]->models[instance->getPickedIndex()]->type == POINTLIGHT) {
 				PointLight* pointlight = (PointLight*)instance->scene[instance->currentScene]->models[instance->getPickedIndex()];
@@ -382,7 +390,7 @@ void UI::pickedModelWindow() {
 				ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::TRANSLATE, space, &model->modelMatrix[0][0], NULL, NULL);
 			else if (radio_button_trans_type == 2)
 				ImGuizmo::Manipulate(&instance->camera.viewMatrix[0][0], &instance->camera.perspectiveMatrix[0][0], ImGuizmo::SCALE, space, &model->modelMatrix[0][0], NULL, &snap[0], &bound[0], &boundSnap[0]);
-
+			ImGui::End();
 		}
 		else {
 			instance->setPickedIndex(-1);
@@ -506,7 +514,7 @@ void UI::drawModals() {
 		strcat_s(scenePath, sizeof(scenePath), buffer);
 		strcat_s(scenePath, sizeof(scenePath), ".json");
 		if (ImGui::Button("Save", ImVec2(80, 30))) {
-			// Save scene code HERE
+			instance->saveScene(string(scenePath));
 			ImGui::CloseCurrentPopup();
 			activateModal = "";
 		}
@@ -520,6 +528,7 @@ void UI::drawModals() {
 		ImGui::EndPopup();
 	}
 
+	// Open a scene
 	ImGui::SetNextWindowSize(ImVec2(300, 150));
 	if (ImGui::BeginPopupModal("Open scene##open_scene_modal"))
 	{
@@ -527,8 +536,14 @@ void UI::drawModals() {
 		static char buffer[1024] = "./Scene.json";
 		ImGui::InputText("##load_scene_path", buffer, IM_ARRAYSIZE(buffer));
 
+		ImGui::Text("Name your scene");
+		string defaultSceneName = "Scene " + to_string(instance->scene.size());
+		char nameBuffer[1024];
+		strcpy_s(nameBuffer, defaultSceneName.c_str());
+		ImGui::InputText("##load_scene_name", nameBuffer, IM_ARRAYSIZE(nameBuffer));
+
 		if (ImGui::Button("Open", ImVec2(80, 30))) {
-			// ---- Open scene code HERE
+			instance->loadScene(string(buffer), string(nameBuffer));
 			ImGui::CloseCurrentPopup();
 			activateModal = "";
 		}

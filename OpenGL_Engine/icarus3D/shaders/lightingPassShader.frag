@@ -9,8 +9,6 @@ in vec2 TexCoords;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
-uniform sampler2D ssao;
-
 
 // Light color contribution properties
 struct LightColor{
@@ -56,8 +54,8 @@ uniform PointLight pointlight[MAX_LIGHTS];
 uniform vec3 viewPos;
 
 // Light casters functions
-vec3 calcDirLight(DirectionalLight light,vec3 normal, vec3 viewDir, vec3 albedo, float ambientOcclusion);
-vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec3 albedo, vec3 fragPos, float ambientOcclusion);
+vec3 calcDirLight(DirectionalLight light,vec3 normal, vec3 viewDir, vec3 albedo);
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec3 albedo, vec3 fragPos);
 // Illumination  Techniques functions
 float calcDiffLighting(vec3 normal,vec3 lightDir);
 float calcSpecLighting(vec3 normal,vec3 lightDir, vec3 viewDir);
@@ -77,17 +75,16 @@ void main(){
 //    vec3 normal = normalize(dataIn.normal);
     vec3 viewDir = normalize(viewPos - fragPos);
     vec3 result = vec3(0.0f);
-    float ambientOcclusion = texture(ssao, TexCoords).r;
     // Directional color contribution
-    result += calcDirLight(dirlight, normal, viewDir, albedo, ambientOcclusion) * vec3(dirlight.lightSwitch);
+    result += calcDirLight(dirlight, normal, viewDir, albedo) * vec3(dirlight.lightSwitch);
     // Pointlights color contribution
     for(int i=0;i<numOfPointLight;i++){
-        result += calcPointLight(pointlight[i], normal, viewDir, albedo, fragPos, ambientOcclusion) * vec3(pointlight[i].lightSwitch);
+        result += calcPointLight(pointlight[i], normal, viewDir, albedo, fragPos) * vec3(pointlight[i].lightSwitch);
     }
     fragColor=vec4(result, 1.0f);
 }
 
-vec3 calcDirLight(DirectionalLight light,vec3 normal, vec3 viewDir, vec3 albedo, float ambientOcclusion){
+vec3 calcDirLight(DirectionalLight light,vec3 normal, vec3 viewDir, vec3 albedo){
     // Getting light direction vector (Only direction since this is a directional only light)
     vec3 lightDir = normalize(-light.direction);
 	// Diffuse lighting technique
@@ -95,7 +92,7 @@ vec3 calcDirLight(DirectionalLight light,vec3 normal, vec3 viewDir, vec3 albedo,
 	// Specular lighting technique
     float spec = calcSpecLighting(normal,lightDir,viewDir);
     // Ambient lighting (only 20% of contribution in final fragment color)
-	vec3 ambient  = light.color.ambient  * ambientOcclusion;
+	vec3 ambient  = light.color.ambient;
 	// Diffuse lighting
 	vec3 diffuse  = light.color.diffuse * diff  ; 
     // Specular lighting
@@ -104,7 +101,7 @@ vec3 calcDirLight(DirectionalLight light,vec3 normal, vec3 viewDir, vec3 albedo,
 	return (ambient + diffuse + specular) * albedo;
 }
 
-vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec3 albedo, vec3 fragPos, float ambientOcclusion){
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec3 albedo, vec3 fragPos){
     // Compute light direction vector
     vec3 lightDir = normalize(light.position - fragPos);
     // Attenuation
@@ -116,7 +113,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec3 albedo, ve
     // Specular lighting technique 
     float spec = calcSpecLighting(normal,lightDir,viewDir);
     // Ambient color
-    vec3 ambient = light.color.ambient * attenuation * ambientOcclusion;
+    vec3 ambient = light.color.ambient * attenuation;
     // Diffuse color
     vec3 diffuse = light.color.diffuse * diff * attenuation;
     // Specular color
