@@ -14,6 +14,7 @@ int   UI::bpp = 0;
 int   UI::dpi = 0;
 long  UI::uniqueColors = 0;
 bool  UI::hardwareAcceleration = 0;
+bool helpFlag = false;
 float UI::f_threshold = 0.5f;
 int   UI::i_threshold = 122;
 static const char* current_item_scene = NULL;
@@ -227,6 +228,14 @@ void UI::settingsWindow() {
 			//if (current_item_light == "Pointlight")
 		}
 
+		ImGui::End();
+	}
+}
+
+void UI::helpWindow() {
+	if (helpFlag) {
+		ImGui::Begin("Help & Shortcuts", &helpFlag);
+		ImGui::Text("Shorcuts");
 		ImGui::End();
 	}
 }
@@ -596,6 +605,25 @@ void UI::showMainMenuBar() {
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
 			if (ImGui::Button("Settings")) {
 				settingFlag = settingFlag == true ? false : true;
+			}
+			ImGui::PopStyleColor(3);
+		}
+
+		// Help button
+		if (helpFlag) {
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+			if (ImGui::Button("Help & Shorcuts")) {
+				helpFlag = helpFlag == true ? false : true;
+			}
+			ImGui::PopStyleColor(2);
+		}
+		else {
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(247 / 255.0f, 202 / 255.0f, 22 / 255.0f, 1.0f));
+			if (ImGui::Button("Help & Shorcuts")) {
+				helpFlag = helpFlag == true ? false : true;
 			}
 			ImGui::PopStyleColor(3);
 		}

@@ -35,6 +35,7 @@ private:
 	void directionalLightProperties();
 	void pointLightProperties();
 	void pickedModelWindow();
+	void helpWindow();
 	void directionalLightWindow();
 	void fpsWindow();
 	void collisionAlertWindow();
