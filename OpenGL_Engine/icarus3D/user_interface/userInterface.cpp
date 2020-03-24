@@ -78,6 +78,8 @@ void UI::particleSystemWindow() {
 		ImGui::DragInt("##Particles_per_Spawn", &instance->particleSystem->particles_per_spawn, 1, 1, 100);
 		ImGui::Text("Spawn Radius");
 		ImGui::DragFloat("##Spawn_Radius", &instance->particleSystem->spawn_radius, 0.1, 1, 1000);
+		ImGui::Text("Time to Live");
+		ImGui::DragFloat("##Time_to_live", &instance->particleSystem->particle_ttl, 0.01, 0.01, 10);
 		ImGui::Text("Time Between Spawn");
 		ImGui::DragFloat("##Time_Between_Spawn", &instance->particleSystem->time_between_spawn, 0.01, 0.01, 10); 
 		ImGui::Text("Particle Speed");

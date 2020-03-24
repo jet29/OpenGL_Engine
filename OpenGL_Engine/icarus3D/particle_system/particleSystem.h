@@ -40,8 +40,10 @@ public:
 
 	//CONFIGURABLE PARAMETERS FOR PARTICLES
 	float particle_speed = 1;
+	float particle_ttl = 3.0;
 	glm::vec3 particle_direction = glm::vec3(0, 1, 0);
 	glm::vec2 particle_scale = glm::vec2(1, 1);
+
 	
 private:
 	float time_left_to_spawn;

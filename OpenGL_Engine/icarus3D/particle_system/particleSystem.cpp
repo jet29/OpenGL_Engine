@@ -34,12 +34,12 @@ void ParticleSystem::createParticle() {
 	
 	if (active_particles < max_particles) {
 		Particle* particle;
-		particle = new Particle(position + deltaPos, particle_direction, particle_speed, 3.0f);
+		particle = new Particle(position + deltaPos, particle_direction, particle_speed, particle_ttl);
 		particles[index] = particle;
 		active_particles++;
 	}
 	else {
-		particles[index]->reset(position + deltaPos, particle_direction, particle_speed);
+		particles[index]->reset(position + deltaPos, particle_direction, particle_speed, particle_ttl);
 	}
 
 	last_particle_index = index;
@@ -135,6 +135,7 @@ bool ParticleSystem::load(const char* path) {
 
 	std::cout << root << endl;
 
+	particle_ttl = root["particle_ttl"].asFloat();
 	max_particles = root["max_particles"].asInt();
 	particles_per_spawn = root["particles_per_spawn"].asInt();
 	spawn_radius = root["spawn_radius"].asFloat();
@@ -153,6 +154,7 @@ bool ParticleSystem::save(char* name) {
 
 	Json::Value root;
 
+	root["particle_ttl"] = particle_ttl;
 	root["max_particles"] = max_particles;
 	root["particles_per_spawn"] = particles_per_spawn;
 	root["spawn_radius"] = spawn_radius;
